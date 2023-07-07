@@ -1,4 +1,4 @@
-package macro;
+package macro.threading;
 
 import java.util.ArrayList;
 import java.util.List;

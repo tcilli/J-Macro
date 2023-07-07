@@ -2,7 +2,6 @@ package macro.threading;
 
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import macro.Main;
-import macro.Synchronization;
 import macro.event.InputEvent;
 import macro.instruction.InstructionSet;
 import macro.instruction.InstructionSetContainer;

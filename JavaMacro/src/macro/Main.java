@@ -3,9 +3,11 @@ package macro;
 import com.github.kwhat.jnativehook.NativeHookException;
 import macro.io.KeyMap;
 import macro.io.MacroFileReader;
-import macro.jnative.PeripheralHook;
+import macro.threading.PeripheralHook;
 import macro.threading.InputThread;
 import macro.threading.ScriptExecutor;
+import macro.threading.Synchronization;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

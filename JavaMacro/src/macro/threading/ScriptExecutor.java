@@ -2,7 +2,6 @@ package macro.threading;
 
 import macro.Main;
 import macro.MemoryUtil;
-import macro.Synchronization;
 import macro.instruction.Data;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
