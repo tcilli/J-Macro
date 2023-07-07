@@ -22,24 +22,20 @@ public class InputThread implements Runnable {
         synchronized (synchronization) {
             while (true)
             {
-               if (synchronization.getKeyPresses() > 0) {
-                   String key = NativeKeyEvent.getKeyText(synchronization.getNextKeyPress());
-                   if (key.equals(ESC) && !synchronization.getKeyLock().isEmpty()) {
-                       synchronization.stopScript.set(true);
-                       continue;
-                   }
-                   for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
-                       if (instructionSet.getInstruction(0).getData().get(0).getValue().toString().equalsIgnoreCase(key)) {
-                           if (synchronization.getKeyLock().equalsIgnoreCase(key)) {
-                               continue;
-                           }
-                           synchronization.setKeyLock(key);
-                           Main.getScriptExecutor().executeScript(instructionSet);
-                       }
-                   }
-               } else if (synchronization.getMouseClicks() > 0) {
+                if (synchronization.getKeyPresses() > 0) {
+                    String key = NativeKeyEvent.getKeyText(synchronization.getNextKeyPress());
+                    if (key.equals(ESC)) {
+                        Main.getScriptExecutor().stopAllScripts();
+                        continue;
+                    }
+                    for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
+                        if (instructionSet.getInstruction(0).getData().get(0).getValue().toString().equalsIgnoreCase(key)) {
+                            Main.getScriptExecutor().executeScript(instructionSet);
+                        }
+                    }
+                } else if (synchronization.getMouseClicks() > 0) {
                     InputEvent.handleMouse(synchronization.getNextMouseClicked());
-               } else {
+                } else {
                     try {
                         synchronization.wait();
                     } catch (InterruptedException e) {

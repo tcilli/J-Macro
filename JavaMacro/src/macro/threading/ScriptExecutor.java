@@ -13,8 +13,7 @@ import macro.jnative.Window;
 
 import java.io.IOException;
 import java.lang.management.MemoryUsage;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class ScriptExecutor {
 
@@ -27,27 +26,14 @@ public class ScriptExecutor {
 
     public void executeScript(final InstructionSet instructionSet) {
 
-        executor.execute(() -> {
+        Future<?> future = executor.submit(() ->
+        {
             while(true)
             {
-
-                long sinceLast = System.currentTimeMillis() - synchronization.lastrun;
-                synchronization.lastrun = System.currentTimeMillis();
-                if (sinceLast < 100 && instructionSet.loop) {
-                    Main.console.append("Script detected as running too quickly with looping enabled, min run time is 100ms. \n")
-                                .append("Consider adding a wait time EG wait 500 or remove the loop command. \n")
-                                .append("File: ").append(instructionSet.scriptPath);
-                    Main.pushConsoleMessage();
-                    return;
-                }
+                long start = System.currentTimeMillis();
                 try {
                     for (Instruction instruction : instructionSet.getInstructions())
                     {
-                        if (synchronization.stopScript.get()) {
-                            synchronization.releaseKeyLock();
-                            synchronization.stopScript.set(false);
-                            return;
-                        }
                         if (instructionSet.windowTitle.length() > 0) {
                             if (!instructionSet.windowTitle.equalsIgnoreCase(Window.getActive())) {
                                 return;
@@ -60,7 +46,7 @@ public class ScriptExecutor {
                                 for (Data<?> d : instruction.getData()) {
                                     NativeInput.pressKey((int) d.getValue());
                                 }
-                               break;
+                                break;
                             case 3:  NativeInput.pressKeyDown((Integer) instruction.get(0).getValue()); break;
                             case 4:  NativeInput.pressKeyUp((Integer) instruction.get(0).getValue()); break;
 
@@ -83,7 +69,7 @@ public class ScriptExecutor {
                                 int count = 0;
                                 for (InstructionSet sets : InstructionSetContainer.getInstance().getInstructionSets()) {
                                     Main.console.append(count).append("-> bind: ").append(sets.getInstruction(0).get(0).getValue().toString()).append("\n")
-                                                .append(count++).append("-> path: ").append(sets.scriptPath).append("\n");
+                                            .append(count++).append("-> path: ").append(sets.scriptPath).append("\n");
                                 }
                                 MemoryUsage heapMemoryUsage = MemoryUtil.getHeapMemoryUsage();
                                 Main.console.append("Total of ").append(count).append(" scripts, Memory Heap: ").append(heapMemoryUsage).append("\n");
@@ -96,14 +82,43 @@ public class ScriptExecutor {
                                 break;
                         }
                     }
-                } catch (InterruptedException | IOException e) {
-                    throw new RuntimeException(e);
+                } catch (InterruptedException expectedException) {
+                    break;
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
                 if (!instructionSet.loop) {
-                    synchronization.releaseKeyLock();
+                    return;
+                }
+                if (System.currentTimeMillis() - start < 100) {
+                    Main.console.append("Script detected as running too quickly with looping enabled, min run time is 100ms. \n")
+                            .append("Consider adding a wait time EG wait 500 or remove the loop command. \n")
+                            .append("File: ").append(instructionSet.scriptPath);
+                    Main.pushConsoleMessage();
                     return;
                 }
             }
         });
+        synchronization.addScriptFuture(future);
+
+        executor.execute(() -> {
+            try {
+                future.get(); //TODO work on something more elegant than this.
+                synchronization.removeScriptFuture(future);
+            } catch (InterruptedException | CancellationException expectedExceptions) {
+                synchronization.removeScriptFuture(future);
+            } catch (ExecutionException unexpectedException) {
+                unexpectedException.printStackTrace();
+            }
+        });
+    }
+
+    public void stopAllScripts()
+    {
+        for (Future<?> future : synchronization.getScriptFutures()) {
+            future.cancel(true);
+        }
+        synchronization.clearScriptFutures();
     }
 }

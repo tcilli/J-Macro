@@ -1,35 +1,35 @@
 package macro;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Synchronization {
 
-    private String lock = "";
-    public AtomicBoolean stopScript = new AtomicBoolean(false);
-    public long lastrun = System.currentTimeMillis();
-
-    private Queue<Integer> keyPressed;
-    private Queue<Integer> mouseClicked;
+    private final List<Future<?>> scriptFutures;
+    private final Queue<Integer> keyPressed;
+    private final Queue<Integer> mouseClicked;
 
     public Synchronization() {
         keyPressed = new LinkedBlockingQueue<>();
         mouseClicked = new LinkedBlockingQueue<>();
+        scriptFutures = new ArrayList<>();
     }
 
-    public int getKeyPresses() { 
-        return keyPressed.size(); 
+    public int getKeyPresses() {
+        return keyPressed.size();
     }
-    
+
     public int getMouseClicks() {
         return mouseClicked.size();
     }
-    
+
     public Integer getNextKeyPress() {
         return keyPressed.poll();
     }
-    
+
     public Integer getNextMouseClicked() {
         return mouseClicked.poll();
     }
@@ -40,23 +40,27 @@ public class Synchronization {
             this.notify();
         }
     }
-    
+
     public void addMouseClicked(Integer value) {
         mouseClicked.add(value);
         synchronized (this) {
             this.notify();
         }
     }
-    
-    public synchronized void setKeyLock(String key) {
-        lock = key;
+
+    public synchronized void addScriptFuture(Future<?> future) {
+        scriptFutures.add(future);
     }
-    
-    public synchronized String getKeyLock() {
-        return lock;
+
+    public synchronized List<Future<?>> getScriptFutures() {
+        return scriptFutures;
     }
-    
-    public synchronized void releaseKeyLock() { 
-        lock = ""; 
+
+    public synchronized void removeScriptFuture(Future future) {
+        scriptFutures.remove(future);
+    }
+
+    public synchronized void clearScriptFutures() {
+        scriptFutures.clear();
     }
 }
