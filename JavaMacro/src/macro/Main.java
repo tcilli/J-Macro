@@ -21,14 +21,6 @@ public class Main {
         console.setLength(0);
     }
 
-    // Declare the ScriptExecutor as a field
-    private static ScriptExecutor scriptExecutor;
-
-    // Add a getter method for the ScriptExecutor
-    public static ScriptExecutor getScriptExecutor() {
-        return scriptExecutor;
-    }
-
 
     private static KeyMap map;
 
@@ -39,13 +31,15 @@ public class Main {
     public static void main(String[] args) throws NativeHookException, IOException {
         map = new KeyMap();
         new MacroFileReader();
-        Synchronization synchronization = new Synchronization();
-        PeripheralHook peripheral = new PeripheralHook(synchronization);
-        InputThread inputThread = new InputThread(synchronization);
+
         ExecutorService executor = Executors.newCachedThreadPool();
-        executor.execute(peripheral);
-        executor.execute(inputThread);
-        scriptExecutor = new ScriptExecutor(synchronization);
+
+        Synchronization synchronization = new Synchronization();
+        PeripheralHook peripheral = new PeripheralHook(synchronization, executor);
+        ScriptExecutor scriptExecutor = new ScriptExecutor(synchronization, executor);
+        InputThread inputThread = new InputThread(synchronization, executor, scriptExecutor);
+
+
 
 
 

@@ -17,10 +17,11 @@ import java.util.concurrent.*;
 public class ScriptExecutor {
 
     private final Synchronization synchronization;
-    private final ExecutorService executor = Executors.newCachedThreadPool();
+    private final ExecutorService executor;
 
-    public ScriptExecutor(Synchronization s) {
-        synchronization = s;
+    public ScriptExecutor(Synchronization synchronization, ExecutorService executorService) {
+        this.synchronization = synchronization;
+        this.executor = executorService;
     }
 
     public void executeScript(final InstructionSet instructionSet) {
@@ -113,8 +114,7 @@ public class ScriptExecutor {
         });
     }
 
-    public void stopAllScripts()
-    {
+    public void stopAllScripts() {
         for (Future<?> future : synchronization.getScriptFutures()) {
             future.cancel(true);
         }

@@ -1,21 +1,19 @@
 package macro.threading;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Synchronization {
 
-    private final List<Future<?>> scriptFutures;
+    private final Queue<Future<?>> scriptFutures;
     private final Queue<Integer> keyPressed;
     private final Queue<Integer> mouseClicked;
 
     public Synchronization() {
         keyPressed = new LinkedBlockingQueue<>();
         mouseClicked = new LinkedBlockingQueue<>();
-        scriptFutures = new ArrayList<>();
+        scriptFutures = new LinkedBlockingQueue<>();
     }
 
     public int getKeyPresses() {
@@ -48,19 +46,19 @@ public class Synchronization {
         }
     }
 
-    public synchronized void addScriptFuture(Future<?> future) {
+    public void addScriptFuture(Future<?> future) {
         scriptFutures.add(future);
     }
 
-    public synchronized List<Future<?>> getScriptFutures() {
-        return scriptFutures;
-    }
-
-    public synchronized void removeScriptFuture(Future future) {
+    public void removeScriptFuture(Future<?> future) {
         scriptFutures.remove(future);
     }
 
-    public synchronized void clearScriptFutures() {
+    public void clearScriptFutures() {
         scriptFutures.clear();
+    }
+
+    public Queue<Future<?>> getScriptFutures() {
+        return scriptFutures;
     }
 }

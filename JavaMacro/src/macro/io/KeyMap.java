@@ -18,7 +18,6 @@ public class KeyMap {
         return keymap.getOrDefault(s, 0);
     }
 
-
     public int getCode(String c) {
         return keymap.getOrDefault(c, 0);
     }

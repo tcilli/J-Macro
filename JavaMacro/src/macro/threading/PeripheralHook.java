@@ -7,22 +7,30 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 import com.github.kwhat.jnativehook.mouse.NativeMouseEvent;
 import com.github.kwhat.jnativehook.mouse.NativeMouseListener;
 
-public class PeripheralHook implements Runnable {
+import java.util.concurrent.ExecutorService;
 
-    public PeripheralHook(Synchronization synchronization) throws NativeHookException
+public class PeripheralHook {
+
+    public PeripheralHook(Synchronization synchronization, ExecutorService executorService) throws NativeHookException
     {
         GlobalScreen.registerNativeHook();
-        GlobalScreen.addNativeKeyListener(new NativeKeyListener() {
-            @Override
-            public void nativeKeyPressed(NativeKeyEvent e) {
-                synchronization.addKeyPress(e.getKeyCode());
-            }
-        });
-        GlobalScreen.addNativeMouseListener(new NativeMouseListener() {
-            @Override
-            public void nativeMouseClicked(NativeMouseEvent e) {
-                synchronization.addMouseClicked(e.getButton());
-            }
+
+        executorService.execute(() ->
+        {
+            GlobalScreen.addNativeKeyListener(new NativeKeyListener()
+            {
+                @Override
+                public void nativeKeyPressed(NativeKeyEvent e) {
+                    synchronization.addKeyPress(e.getKeyCode());
+                }
+            });
+            GlobalScreen.addNativeMouseListener(new NativeMouseListener()
+            {
+                @Override
+                public void nativeMouseClicked(NativeMouseEvent e) {
+                    synchronization.addMouseClicked(e.getButton());
+                }
+            });
         });
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
@@ -31,8 +39,5 @@ public class PeripheralHook implements Runnable {
                 e.printStackTrace();
             }
         }));
-    }
-    @Override
-    public void run() {
     }
 }
