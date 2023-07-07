@@ -12,9 +12,6 @@ public class Window {
     public static String getActive() {
         Arrays.fill(buffer, '\0');
         User32.INSTANCE.GetWindowText(User32.INSTANCE.GetForegroundWindow(), buffer, buffer.length);
-        String s = Native.toString(buffer);
-        s = s.replaceAll(" ", "");
-        s = s.toLowerCase();
-        return s;
+        return Native.toString(buffer);
     }
 }
