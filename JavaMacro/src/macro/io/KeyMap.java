@@ -9,17 +9,13 @@ public class KeyMap {
 
     public static HashMap<String, Integer> keymap = new HashMap<>();
 
-    public KeyMap() {
+    static {
         loadKeyMap();
     }
 
-    public int getCode(char c) {
+    public static int getCode(char c) {
         String s = String.valueOf(c);
         return keymap.getOrDefault(s, 0);
-    }
-
-    public int getCode(String c) {
-        return keymap.getOrDefault(c, 0);
     }
 
     public static void loadKeyMap() {

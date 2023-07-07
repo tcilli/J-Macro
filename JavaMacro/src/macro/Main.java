@@ -1,10 +1,9 @@
 package macro;
 
 import com.github.kwhat.jnativehook.NativeHookException;
-import macro.io.KeyMap;
 import macro.io.MacroFileReader;
 import macro.threading.PeripheralHook;
-import macro.threading.InputThread;
+import macro.threading.ScriptDispatcher;
 import macro.threading.ScriptExecutor;
 import macro.threading.Synchronization;
 
@@ -21,15 +20,8 @@ public class Main {
         console.setLength(0);
     }
 
-
-    private static KeyMap map;
-
-    public static KeyMap getKeyMap() {
-        return map;
-    }
-
     public static void main(String[] args) throws NativeHookException, IOException {
-        map = new KeyMap();
+
         new MacroFileReader();
 
         ExecutorService executor = Executors.newCachedThreadPool();
@@ -37,7 +29,7 @@ public class Main {
         Synchronization synchronization = new Synchronization();
         PeripheralHook peripheral = new PeripheralHook(synchronization, executor);
         ScriptExecutor scriptExecutor = new ScriptExecutor(synchronization, executor);
-        InputThread inputThread = new InputThread(synchronization, executor, scriptExecutor);
+        ScriptDispatcher scriptDispatcher = new ScriptDispatcher(synchronization, executor, scriptExecutor);
 
 
 

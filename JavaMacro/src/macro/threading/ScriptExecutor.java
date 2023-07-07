@@ -19,7 +19,7 @@ public class ScriptExecutor {
     private final Synchronization synchronization;
     private final ExecutorService executor;
 
-    public ScriptExecutor(Synchronization synchronization, ExecutorService executorService) {
+    public ScriptExecutor(final Synchronization synchronization, final ExecutorService executorService) {
         this.synchronization = synchronization;
         this.executor = executorService;
     }

@@ -73,6 +73,7 @@ public class MacroFileReader {
                     key_found = true;
                     instruction = new Instruction((short) 0);
                     instruction.insert(new Data<>(key));
+                    instructionSet.key = key;
                 }
                 else if (key_found && command.equalsIgnoreCase("wait")) {
                     String wait_command = line.substring(4);
@@ -98,7 +99,7 @@ public class MacroFileReader {
                     }
                     instruction = new Instruction((short) 2);
                     for (char c : send_command.toCharArray()) {
-                        instruction.insert(new Data<>(Main.getKeyMap().getCode(c)));
+                        instruction.insert(new Data<>(KeyMap.getCode(c)));
                     }
                 }
                 else if (key_found && command.equalsIgnoreCase("hold")) {

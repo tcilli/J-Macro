@@ -1,35 +1,43 @@
 package macro.threading;
 
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
-import macro.event.InputEvent;
 import macro.instruction.InstructionSet;
 import macro.instruction.InstructionSetContainer;
 
 import java.util.concurrent.ExecutorService;
 
-public class InputThread  {
+public class ScriptDispatcher {
 
-    private final String ESC = "Escape";
+    private static final String ESC = "Escape";
+    private static final String MOUSE = "mouse";
 
-    public InputThread(Synchronization synchronization, ExecutorService executorService, ScriptExecutor scriptExecutor) {
+
+    public ScriptDispatcher(final Synchronization synchronization, final ExecutorService executorService, final ScriptExecutor scriptExecutor) {
 
         executorService.execute(() ->
         {
+            StringBuilder keyBuilder = new StringBuilder();
+
             while (true)
             {
-                if (synchronization.getKeyPresses() > 0) {
-                    String key = NativeKeyEvent.getKeyText(synchronization.getNextKeyPress());
-                    if (key.equals(ESC)) {
+                if (synchronization.getKeyPresses() > 0 || synchronization.getMouseClicks() > 0)
+                {
+                    keyBuilder.setLength(0);
+
+                    if (synchronization.getKeyPresses() > 0) {
+                       keyBuilder.append(NativeKeyEvent.getKeyText(synchronization.getNextKeyPress()));
+                    } else {
+                        keyBuilder.append(MOUSE).append(synchronization.getNextMouseClicked());
+                    }
+                    if (keyBuilder.toString().equals(ESC)) {
                         scriptExecutor.stopAllScripts();
                         continue;
                     }
                     for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
-                        if (instructionSet.getInstruction(0).getData().get(0).getValue().toString().equalsIgnoreCase(key)) {
+                        if (instructionSet.key.equalsIgnoreCase(keyBuilder.toString())) {
                             scriptExecutor.executeScript(instructionSet);
                         }
                     }
-                } else if (synchronization.getMouseClicks() > 0) {
-                    InputEvent.handleMouse(synchronization.getNextMouseClicked());
                 } else {
                     try {
                         synchronized (synchronization) {

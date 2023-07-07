@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 
 public class PeripheralHook {
 
-    public PeripheralHook(Synchronization synchronization, ExecutorService executorService) throws NativeHookException
+    public PeripheralHook(final Synchronization synchronization, final ExecutorService executorService) throws NativeHookException
     {
         GlobalScreen.registerNativeHook();
 
