@@ -33,7 +33,6 @@ public class PeripheralHook implements Runnable {
             }
         }));
     }
-
     @Override
     public void run() {
     }
