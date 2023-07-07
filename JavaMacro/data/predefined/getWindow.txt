@@ -1,0 +1,2 @@
+macro F10
+get window
