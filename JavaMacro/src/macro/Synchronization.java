@@ -50,7 +50,6 @@ public class Synchronization {
 
     public AtomicBoolean stopScript = new AtomicBoolean(false);
 
-
     public long lastrun = System.currentTimeMillis();
 
 }

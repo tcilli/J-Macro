@@ -5,7 +5,7 @@ import java.util.List;
 
 public class InstructionSet {
 
-    private List<Instruction> instructions;
+    private final List<Instruction> instructions;
     public boolean loop = false;
     public String windowTitle = "";
     public String scriptPath = "";
@@ -23,7 +23,7 @@ public class InstructionSet {
     }
 
     public Instruction getInstruction(int index) {
-        if (index < 0 || index >= instructions.size() || instructions.isEmpty()) {
+        if (index < 0 || index >= instructions.size()) {
             throw new IndexOutOfBoundsException("Invalid index, Check your commands have an attached action. EG:  wait 500  = (command=wait action=500)");
         }
         return instructions.get(index);

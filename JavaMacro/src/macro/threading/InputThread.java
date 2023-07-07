@@ -6,17 +6,16 @@ import macro.Synchronization;
 import macro.event.InputEvent;
 import macro.instruction.InstructionSet;
 import macro.instruction.InstructionSetContainer;
-import macro.jnative.Window;
 
 public class InputThread implements Runnable {
 
-    private Synchronization synchronization;
+    private final Synchronization synchronization;
 
     public InputThread(Synchronization s) {
         synchronization = s;
     }
 
-    private static final String ESC = "Escape";
+    private final String ESC = "Escape";
 
     @Override
     public void run() {
@@ -25,7 +24,7 @@ public class InputThread implements Runnable {
             {
                if (synchronization.getKeyPresses() > 0) {
                    String key = NativeKeyEvent.getKeyText(synchronization.getNextKeyPress());
-                   if (key.equals(ESC) && synchronization.getKeyLock() != "") {
+                   if (key.equals(ESC) && !synchronization.getKeyLock().isEmpty()) {
                        synchronization.stopScript.set(true);
                        continue;
                    }
