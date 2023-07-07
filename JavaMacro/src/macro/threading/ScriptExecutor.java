@@ -35,7 +35,7 @@ public class ScriptExecutor {
                     for (Instruction instruction : instructionSet.getInstructions())
                     {
                         if (instructionSet.windowTitle.length() > 0) {
-                            if (!instructionSet.windowTitle.equalsIgnoreCase(Window.getActive())) {
+                            if (!instructionSet.windowTitle.contains(Window.getActive())) {
                                 return;
                             }
                         }
