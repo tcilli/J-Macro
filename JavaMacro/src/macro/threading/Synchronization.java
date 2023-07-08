@@ -9,11 +9,13 @@ public class Synchronization {
     private final Queue<Future<?>> scriptFutures;
     private final Queue<Integer> keyPressed;
     private final Queue<Integer> mouseClicked;
+    private final Queue<String> keysInUse; 
 
     public Synchronization() {
         keyPressed = new LinkedBlockingQueue<>();
         mouseClicked = new LinkedBlockingQueue<>();
         scriptFutures = new LinkedBlockingQueue<>();
+        keysInUse = new LinkedBlockingQueue<>();
     }
 
     public int getKeyPresses() {
@@ -44,6 +46,20 @@ public class Synchronization {
         synchronized (this) {
             this.notify();
         }
+    }
+
+    public void addKey(String key) {
+        keysInUse.add(key);
+    }
+    public void removeKey(String key) {
+        keysInUse.remove(key);
+    }
+    public boolean containsKey(String key)
+    {
+        return keysInUse.contains(key);
+    }
+    public void clearKeys() {
+        keysInUse.clear();
     }
 
     public void addScriptFuture(Future<?> future) {

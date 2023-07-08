@@ -3,14 +3,11 @@ package macro.threading;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import macro.instruction.InstructionSet;
 import macro.instruction.InstructionSetContainer;
+import macro.io.KeyMap;
 
 import java.util.concurrent.ExecutorService;
 
 public class ScriptDispatcher {
-
-    private static final String ESC = "Escape";
-    private static final String MOUSE = "mouse";
-
 
     public ScriptDispatcher(final Synchronization synchronization, final ExecutorService executorService, final ScriptExecutor scriptExecutor) {
 
@@ -27,16 +24,20 @@ public class ScriptDispatcher {
                     if (synchronization.getKeyPresses() > 0) {
                        keyBuilder.append(NativeKeyEvent.getKeyText(synchronization.getNextKeyPress()));
                     } else {
-                        keyBuilder.append(MOUSE).append(synchronization.getNextMouseClicked());
+                        keyBuilder.append(KeyMap.MOUSE).append(synchronization.getNextMouseClicked());
                     }
-                    if (keyBuilder.toString().equals(ESC)) {
+                    if (keyBuilder.toString().equals(KeyMap.ESC)) {
                         scriptExecutor.stopAllScripts();
                         continue;
                     }
                     for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
-                        if (instructionSet.key.equalsIgnoreCase(keyBuilder.toString())) {
-                            scriptExecutor.executeScript(instructionSet);
-                        }
+                       if (instructionSet.key.equalsIgnoreCase(keyBuilder.toString())) {
+                           if (synchronization.containsKey(instructionSet.key)) {
+                             continue;
+                           }
+                           synchronization.addKey(instructionSet.key); //<= recursion protection
+                           scriptExecutor.executeScript(instructionSet);
+                       }
                     }
                 } else {
                     try {

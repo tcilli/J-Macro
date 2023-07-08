@@ -26,6 +26,10 @@ public class ScriptExecutor {
 
     public void executeScript(final InstructionSet instructionSet) {
 
+        if (instructionSet.running) {
+            return;
+        }
+
         Future<?> future = executor.submit(() ->
         {
             while(true)
@@ -35,7 +39,9 @@ public class ScriptExecutor {
                     for (Instruction instruction : instructionSet.getInstructions())
                     {
                         if (instructionSet.windowTitle.length() > 0) {
-                            if (!instructionSet.windowTitle.contains(Window.getActive())) {
+                            if (!instructionSet.windowTitle.toLowerCase().contains(Window.getActive().toLowerCase())) {
+                                Main.console.append("Script key: ").append(instructionSet.key).append(" requires window to be active: ").append(instructionSet.windowTitle.toLowerCase());
+                                Main.pushConsoleMessage();
                                 return;
                             }
                         }
@@ -106,8 +112,10 @@ public class ScriptExecutor {
             try {
                 future.get(); //TODO work on something more elegant than this.
                 synchronization.removeScriptFuture(future);
+                synchronization.removeKey(instructionSet.key);
             } catch (InterruptedException | CancellationException expectedExceptions) {
                 synchronization.removeScriptFuture(future);
+                synchronization.removeKey(instructionSet.key);
             } catch (ExecutionException unexpectedException) {
                 unexpectedException.printStackTrace();
             }
@@ -119,5 +127,6 @@ public class ScriptExecutor {
             future.cancel(true);
         }
         synchronization.clearScriptFutures();
+        synchronization.clearKeys();
     }
 }

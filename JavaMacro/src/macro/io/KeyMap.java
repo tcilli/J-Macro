@@ -7,6 +7,9 @@ import java.util.HashMap;
 
 public class KeyMap {
 
+    public static final String ESC = "Escape";
+    public static final String MOUSE = "mouse";
+
     public static HashMap<String, Integer> keymap = new HashMap<>();
 
     static {

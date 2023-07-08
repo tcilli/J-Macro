@@ -38,6 +38,7 @@ public class NativeInput {
     public static void pressKey(int c) {
         sendKey(c, KEYEVENTF_KEYDOWN);
         sendKey(c, KEYEVENTF_KEYUP);
+
     }
     public static void click(int mouseButton)
     {

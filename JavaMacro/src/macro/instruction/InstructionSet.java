@@ -10,6 +10,7 @@ public class InstructionSet {
     public String windowTitle = "";
     public String scriptPath = "";
     public String key = "";
+    public boolean running = false;
 
     public InstructionSet() {
         this.instructions = new ArrayList<>();

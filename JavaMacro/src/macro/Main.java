@@ -20,6 +20,8 @@ public class Main {
         console.setLength(0);
     }
 
+    public static long start = 0L;
+
     public static void main(String[] args) throws NativeHookException, IOException {
 
         new MacroFileReader();

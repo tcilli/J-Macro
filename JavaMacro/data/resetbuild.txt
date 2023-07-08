@@ -1,5 +1,0 @@
-macro k
-window fortnite
-send g
-wait 10
-rightclick
