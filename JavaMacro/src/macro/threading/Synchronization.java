@@ -48,8 +48,8 @@ public class Synchronization {
         }
     }
 
-    public void addKey(String key) {
-        keysInUse.add(key);
+    public boolean addKey(String key) {
+        return keysInUse.add(key);
     }
     public void removeKey(String key) {
         keysInUse.remove(key);

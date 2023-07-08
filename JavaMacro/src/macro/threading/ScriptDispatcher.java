@@ -32,7 +32,12 @@ public class ScriptDispatcher {
                     }
                     for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
                        if (instructionSet.key.equalsIgnoreCase(keyBuilder.toString())) {
-                           scriptExecutor.executeScript(instructionSet);
+                           if (synchronization.containsKey(instructionSet.key)) {
+                               return;
+                           }
+                           if (synchronization.addKey(instructionSet.key)) {
+                               scriptExecutor.executeScript(instructionSet);
+                           }
                        }
                     }
                 } else {

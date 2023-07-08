@@ -25,19 +25,14 @@ public class ScriptExecutor {
     }
 
     public void executeScript(final InstructionSet instructionSet) {
-        if (synchronization.containsKey(instructionSet.key)) {
-            return;
-        }
-        synchronization.addKey(instructionSet.key);
 
         Future<?> future = executor.submit(() ->
         {
             while(true)
             {
                 long start = System.currentTimeMillis();
-                try {
-
-
+                try
+                {
                     for (Instruction instruction : instructionSet.getInstructions())
                     {
                         if (instructionSet.windowTitle.length() > 0) {
