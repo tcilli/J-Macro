@@ -32,10 +32,6 @@ public class ScriptDispatcher {
                     }
                     for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
                        if (instructionSet.key.equalsIgnoreCase(keyBuilder.toString())) {
-                           if (synchronization.containsKey(instructionSet.key)) {
-                             continue;
-                           }
-                           synchronization.addKey(instructionSet.key); //<= recursion protection
                            scriptExecutor.executeScript(instructionSet);
                        }
                     }
