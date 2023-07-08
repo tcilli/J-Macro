@@ -30,14 +30,13 @@ public class ScriptDispatcher {
                         scriptExecutor.stopAllScripts();
                         continue;
                     }
+                    if (synchronization.lock.get()) {
+                        continue;
+                    }
                     for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
                        if (instructionSet.key.equalsIgnoreCase(keyBuilder.toString())) {
-                           if (synchronization.containsKey(instructionSet.key)) {
-                               return;
-                           }
-                           if (synchronization.addKey(instructionSet.key)) {
-                               scriptExecutor.executeScript(instructionSet);
-                           }
+                           synchronization.lock.set(true);
+                          scriptExecutor.executeScript(instructionSet);
                        }
                     }
                 } else {

@@ -3,19 +3,19 @@ package macro.threading;
 import java.util.Queue;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Synchronization {
 
+    public final AtomicBoolean lock = new AtomicBoolean(false);
     private final Queue<Future<?>> scriptFutures;
     private final Queue<Integer> keyPressed;
     private final Queue<Integer> mouseClicked;
-    private final Queue<String> keysInUse; 
 
     public Synchronization() {
         keyPressed = new LinkedBlockingQueue<>();
         mouseClicked = new LinkedBlockingQueue<>();
         scriptFutures = new LinkedBlockingQueue<>();
-        keysInUse = new LinkedBlockingQueue<>();
     }
 
     public int getKeyPresses() {
@@ -46,20 +46,6 @@ public class Synchronization {
         synchronized (this) {
             this.notify();
         }
-    }
-
-    public boolean addKey(String key) {
-        return keysInUse.add(key);
-    }
-    public void removeKey(String key) {
-        keysInUse.remove(key);
-    }
-    public boolean containsKey(String key)
-    {
-        return keysInUse.contains(key);
-    }
-    public void clearKeys() {
-        keysInUse.clear();
     }
 
     public void addScriptFuture(Future<?> future) {

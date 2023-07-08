@@ -30,9 +30,10 @@ public class ScriptExecutor {
         {
             while(true)
             {
-                long start = System.currentTimeMillis();
                 try
                 {
+                    instructionSet.lastRan = System.currentTimeMillis();
+
                     for (Instruction instruction : instructionSet.getInstructions())
                     {
                         if (instructionSet.windowTitle.length() > 0) {
@@ -44,7 +45,8 @@ public class ScriptExecutor {
                         }
                         switch(instruction.getFlag()) {
                             case 0: break;
-                            case 1: Thread.sleep((long) instruction.get(0).getValue());break;
+                            case 1: Thread.sleep((long) instruction.get(0).getValue());
+                                break;
                             case 2:
                                 for (Data<?> d : instruction.getData()) {
                                     NativeInput.pressKey((int) d.getValue());
@@ -94,13 +96,19 @@ public class ScriptExecutor {
                 if (!instructionSet.loop) {
                     return;
                 }
-                if (System.currentTimeMillis() - start < 100) {
+
+                if (System.currentTimeMillis() - instructionSet.lastRan < 100) {
                     Main.console.append("Script detected as running too quickly with looping enabled, min run time is 100ms. \n")
                             .append("Consider adding a wait time EG wait 500 or remove the loop command. \n")
                             .append("File: ").append(instructionSet.scriptPath);
                     Main.pushConsoleMessage();
                     return;
-                }
+                }/*
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                } */
             }
         });
         synchronization.addScriptFuture(future);
@@ -109,10 +117,10 @@ public class ScriptExecutor {
             try {
                 future.get(); //TODO work on something more elegant than this.
                 synchronization.removeScriptFuture(future);
-                synchronization.removeKey(instructionSet.key);
+                synchronization.lock.set(false);
             } catch (InterruptedException | CancellationException expectedExceptions) {
                 synchronization.removeScriptFuture(future);
-                synchronization.removeKey(instructionSet.key);
+                synchronization.lock.set(false);
             } catch (ExecutionException unexpectedException) {
                 unexpectedException.printStackTrace();
             }
@@ -124,6 +132,6 @@ public class ScriptExecutor {
             future.cancel(true);
         }
         synchronization.clearScriptFutures();
-        synchronization.clearKeys();
+        synchronization.lock.set(false);
     }
 }
