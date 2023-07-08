@@ -22,7 +22,6 @@ public class PeripheralHook {
             {
                 @Override
                 public void nativeKeyPressed(NativeKeyEvent e) {
-                    Main.start = System.currentTimeMillis();
                     synchronization.addKeyPress(e.getKeyCode());
                 }
             });
