@@ -4,7 +4,6 @@ import com.github.kwhat.jnativehook.NativeHookException;
 import macro.io.MacroFileReader;
 import macro.threading.PeripheralHook;
 import macro.threading.ScriptDispatcher;
-import macro.threading.ScriptExecutor;
 import macro.threading.Synchronization;
 
 import java.io.IOException;
@@ -25,7 +24,6 @@ public class Main {
         ExecutorService executor = Executors.newCachedThreadPool();
         Synchronization synchronization = new Synchronization();
         PeripheralHook peripheral = new PeripheralHook(synchronization, executor);
-        ScriptExecutor scriptExecutor = new ScriptExecutor(synchronization, executor);
-        ScriptDispatcher scriptDispatcher = new ScriptDispatcher(synchronization, executor, scriptExecutor);
+        ScriptDispatcher scriptDispatcher = new ScriptDispatcher(synchronization, executor);
     }
 }
