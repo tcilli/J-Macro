@@ -151,18 +151,22 @@ public class MacroFileReader {
                     move_command = move_command.replaceAll("[a-zA-Z]", ""); // Remove non-numeric characters except commas
                     String[] coordinates = move_command.split(","); // Split the string by comma
 
-                    if (coordinates.length == 2) {
-                        coordinates[0] = coordinates[0].replaceAll("\\D", "");
-                        coordinates[1] = coordinates[1].replaceAll("\\D", "");
-
+                    if (coordinates.length >= 2) {
+                        for (int i = 0; i < coordinates.length; i++) {
+                            coordinates[i] = coordinates[i].replaceAll("\\D", "");
+                        }
                         try {
                             int x = Integer.parseInt(coordinates[0]);
                             int y = Integer.parseInt(coordinates[1]);
-
+                            int delay = 0;
+                            if (coordinates.length == 3) {
+                                delay = Integer.parseInt(coordinates[2]);
+                            }
                             if (x > 0 && x < 65535 && y > 0 && y < 65535) { //0 - 65535 because -> (x * (65535 / screenWidth)) to get the normal
-                                instruction = new Instruction((short) 14);
+                                instruction = new Instruction((short) 14 );
                                 instruction.insert(new Data<>(x));
                                 instruction.insert(new Data<>(y));
+                                instruction.insert(new Data<>(delay));
                             }
                         } catch (NumberFormatException e) {
                             Main.console .append("Invalid number format for ").append(line).append("\n")

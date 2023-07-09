@@ -67,8 +67,10 @@ public class ScriptExecutor {
 
                             case 12: NativeInput.clickDown(3); break;
                             case 13: NativeInput.clickUp(3); break;
-                            case 14: NativeInput.mouseMove((int) instruction.get(0).getValue(),(int)instruction.get(1).getValue(), true); break;
+                            case 14:
 
+                                NativeInput.mouseMove((int) instruction.get(0).getValue(),(int)instruction.get(1).getValue(), (int) instruction.get(2).getValue(), true);
+                                break;
                             case 15: new MacroFileReader(); break;
                             case 16:
                                 int count = 0;
@@ -85,6 +87,7 @@ public class ScriptExecutor {
                                 Main.console.append("Current window: ").append(Window.getActive()).append("\n");
                                 Main.pushConsoleMessage();
                                 break;
+
                         }
                     }
                 } catch (InterruptedException expectedException) {
@@ -103,12 +106,7 @@ public class ScriptExecutor {
                             .append("File: ").append(instructionSet.scriptPath);
                     Main.pushConsoleMessage();
                     return;
-                }/*
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                } */
+                }
             }
         });
         synchronization.addScriptFuture(future);
