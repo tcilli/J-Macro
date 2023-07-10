@@ -151,13 +151,14 @@ public class ScriptDispatcher {
         executorService.execute(() -> {
             try {
                 future.get(); //TODO work on something more elegant than this.
-                synchronization.removeScriptFuture(future);
-                synchronization.lock.set(false);
+
             } catch (InterruptedException | CancellationException expectedExceptions) {
-                synchronization.removeScriptFuture(future);
-                synchronization.lock.set(false);
+
             } catch (ExecutionException unexpectedException) {
                 unexpectedException.printStackTrace();
+            } finally {
+                synchronization.removeScriptFuture(future);
+                synchronization.lock.set(false);
             }
         });
     }
