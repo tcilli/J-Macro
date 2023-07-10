@@ -3,11 +3,10 @@ package macro.threading;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import macro.Main;
 import macro.MemoryUtil;
-import macro.instruction.Data;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 import macro.instruction.InstructionSetContainer;
-import macro.io.KeyMap;
+import macro.io.Keys;
 import macro.io.MacroFileReader;
 import macro.jnative.NativeInput;
 import macro.jnative.Window;
@@ -42,10 +41,10 @@ public class ScriptDispatcher {
                     if (synchronization.getKeyPresses() > 0)  {
                        keyBuilder.append(NativeKeyEvent.getKeyText(synchronization.getNextKeyPress()));
                     } else {
-                        keyBuilder.append(KeyMap.MOUSE).append(synchronization.getNextMouseClicked());
+                        keyBuilder.append(Keys.MOUSE).append(synchronization.getNextMouseClicked());
                     }
 
-                    if (keyBuilder.toString().equals(KeyMap.ESC)) {
+                    if (keyBuilder.toString().equals(Keys.ESC)) {
                         stopAllScripts(synchronization);
                         continue;
                     }
@@ -93,22 +92,16 @@ public class ScriptDispatcher {
                     for (Instruction instruction : instructionSet.getInstructions()) {
                         if (instructionSet.windowTitle.length() > 0) {
                             if (!instructionSet.windowTitle.toLowerCase().contains(Window.getActive().toLowerCase())) {
-                                Main.console.append("Script key: ").append(instructionSet.key).append(" requires window to be active: ").append(instructionSet.windowTitle.toLowerCase());
+                                Main.console.append("Script key: ").append(instructionSet.key)
+                                        .append(" requires window to be active: ").append(instructionSet.windowTitle.toLowerCase());
                                 Main.pushConsoleMessage();
                                 return;
                             }
                         }
                         switch(instruction.getFlag()) {
-                            case 0: break;
-                            case 1: Thread.sleep((long) instruction.get(0).getValue());
-                                break;
-                            case 2:
-                                for (Data<?> d : instruction.getData()) {
-                                    NativeInput.pressKey((int) d.getValue());
-                                }
-                                break;
-                            case 3:  NativeInput.pressKeyDown((Integer) instruction.get(0).getValue()); break;
-                            case 4:  NativeInput.pressKeyUp((Integer) instruction.get(0).getValue()); break;
+                            case 0:  break;
+                            case 1:  Thread.sleep((long) instruction.get(0).getValue()); break;
+                            case 2:  Keys.sendString((String) instruction.get(0).getValue());  break;
                             case 5:  NativeInput.click(1); break;
                             case 6:  NativeInput.click(2); break;
                             case 7:  NativeInput.click(3); break;
@@ -118,9 +111,7 @@ public class ScriptDispatcher {
                             case 11: NativeInput.clickUp(2); break;
                             case 12: NativeInput.clickDown(3); break;
                             case 13: NativeInput.clickUp(3); break;
-                            case 14:
-                                NativeInput.mouseMove((int) instruction.get(0).getValue(),(int)instruction.get(1).getValue(), (int) instruction.get(2).getValue(), true);
-                                break;
+                            case 14:  NativeInput.mouseMove((int) instruction.get(0).getValue(),(int)instruction.get(1).getValue(), (int) instruction.get(2).getValue(), true); break;
                             case 15: new MacroFileReader(); break;
                             case 16:
                                 int count = 0;

@@ -1,6 +1,7 @@
 package macro;
 
 import com.github.kwhat.jnativehook.NativeHookException;
+import macro.io.Keys;
 import macro.io.MacroFileReader;
 import macro.threading.PeripheralHook;
 import macro.threading.ScriptDispatcher;
@@ -20,10 +21,11 @@ public class Main {
     }
 
     public static void main(String[] args) throws NativeHookException, IOException {
+        Keys.loadKeyMap();
         new MacroFileReader();
         ExecutorService executor = Executors.newCachedThreadPool();
         Synchronization synchronization = new Synchronization();
-        PeripheralHook peripheral = new PeripheralHook(synchronization, executor);
-        ScriptDispatcher scriptDispatcher = new ScriptDispatcher(synchronization, executor);
+        new PeripheralHook(synchronization, executor);
+        new ScriptDispatcher(synchronization, executor);
     }
 }

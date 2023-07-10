@@ -115,9 +115,7 @@ public class NativeInput {
 
             long startTime = System.currentTimeMillis();
             long elapsedTime = 0;
-            double nextX = 0;
-            double nextY = 0;
-            double progress = 0;
+            double nextX, nextY, progress = 0;
 
             while (elapsedTime < delay) {
                 progress = Math.min(1.0, (double) elapsedTime / delay);
@@ -145,6 +143,7 @@ public class NativeInput {
 
             WinUser.INPUT[] inputs = {input};
             User32.INSTANCE.SendInput(nInput, inputs, input.size());
+            click(1);
         } else {
             Main.console.append("Invalid targetX: ").append(targetX).append(" and targetY ").append(targetY).append(", Must be within 1 - 65535");
             Main.pushConsoleMessage();

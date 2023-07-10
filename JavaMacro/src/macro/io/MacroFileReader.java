@@ -98,25 +98,8 @@ public class MacroFileReader {
                         send_command = send_command.substring(1);
                     }
                     instruction = new Instruction((short) 2);
-                    for (char c : send_command.toCharArray()) {
-                        instruction.insert(new Data<>(KeyMap.getCode(c)));
-                    }
-                }
-                else if (key_found && command.equalsIgnoreCase("hold")) {
-                    String hold_command = line.substring(4);
-                    if (hold_command.charAt(0) == ' ') {
-                        hold_command = hold_command.substring(1);
-                    }
-                    instruction = new Instruction((short) 3);
-                    instruction.insert(new Data<>(KeyMap.keymap.get(hold_command)));
-                }
-                else if (key_found && command.equalsIgnoreCase("rele")) {
-                    String release_command = line.substring(7);
-                    if (release_command.charAt(0) == ' ') {
-                        release_command = release_command.substring(1);
-                    }
-                    instruction = new Instruction((short) 4);
-                    instruction.insert(new Data<>(KeyMap.keymap.get(release_command)));
+                    instruction.insert(new Data<>(send_command));
+
                 }
                 else if (key_found && line.equalsIgnoreCase("click")) {
                     instruction = new Instruction((short) 5);
