@@ -1,6 +1,7 @@
 package macro.threading;
 
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
+
 import macro.Main;
 import macro.MemoryUtil;
 import macro.instruction.Instruction;
@@ -21,38 +22,36 @@ import java.util.concurrent.Future;
 public class ScriptDispatcher {
 
     /**
-     * Constructs a ScriptDispatcher object.
+     * ScriptDispatcher reads key & mouse inputs from the synchronization class and prepares them for execution
      *
      * @param synchronization The synchronization object for coordinating script execution.
      * @param executorService The executor service for running script execution tasks.
      */
     public ScriptDispatcher(final Synchronization synchronization, final ExecutorService executorService) {
 
-        executorService.execute(() -> {
-
+        executorService.execute(() ->
+        {
             StringBuilder keyBuilder = new StringBuilder();
-
-            while (true) {
-
-                if (synchronization.getKeyPresses() > 0 || synchronization.getMouseClicks() > 0)
+            while (true)
+            {
+                if (synchronization.getKeyPresses() > 0 || synchronization.getMouseClicks() > 0 || synchronization.getKeyReleases() > 0)
                 {
                     keyBuilder.setLength(0);
 
                     if (synchronization.getKeyPresses() > 0)  {
-                       keyBuilder.append(NativeKeyEvent.getKeyText(synchronization.getNextKeyPress()));
+                        keyBuilder.append("ondown-").append(NativeKeyEvent.getKeyText(synchronization.getNextKeyPress()));
+                    } else if (synchronization.getKeyReleases() > 0) {
+                        keyBuilder.append("onrelease-").append(NativeKeyEvent.getKeyText(synchronization.getNextKeyRelease()));
                     } else {
                         keyBuilder.append(Keys.MOUSE).append(synchronization.getNextMouseClicked());
                     }
-
                     if (keyBuilder.toString().equals(Keys.ESC)) {
                         stopAllScripts(synchronization);
                         continue;
                     }
-
                     if (synchronization.lock.get()) {
                         continue;
                     }
-
                     for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
                        if (instructionSet.key.equalsIgnoreCase(keyBuilder.toString())) {
                            synchronization.lock.set(true);
