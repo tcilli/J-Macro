@@ -18,27 +18,18 @@ import java.util.concurrent.Future;
 
 public class ScriptDispatcher {
 
-    private final CommandHandler commandHandler;
-    private volatile boolean running = true;
-
-    public void stop() {
-        running = false;
-    }
-
     /**
      * ScriptDispatcher reads key & mouse inputs from the synchronization class and prepares them for execution
      *
      * @param synchronization The synchronization object for coordinating script execution.
      * @param executorService The executor service for running script execution tasks.
      */
-    public ScriptDispatcher(final Synchronization synchronization, final ExecutorService executorService) {
+    public ScriptDispatcher(final Synchronization synchronization, final ExecutorService executorService, final CommandHandler commandHandler) {
 
-        commandHandler = new CommandHandler();
-
-        executorService.execute(() ->
+       executorService.execute(() ->
         {
             StringBuilder keyBuilder = new StringBuilder();
-            while (running)
+            while (synchronization.isRunning())
             {
                 if (synchronization.getKeyPresses() > 0 || synchronization.getMouseClicks() > 0 || synchronization.getKeyReleases() > 0)
                 {
@@ -61,7 +52,7 @@ public class ScriptDispatcher {
                     for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
                        if (instructionSet.key.equalsIgnoreCase(keyBuilder.toString())) {
                            synchronization.lock.set(true);
-                           executeScript(synchronization, instructionSet, executorService);
+                           executeScript(synchronization, instructionSet, executorService, commandHandler);
                        }
                     }
                 } else {
@@ -84,11 +75,11 @@ public class ScriptDispatcher {
      * @param instructionSet  The instruction set containing the script to be executed.
      * @param executorService The executor service for running the script in a separate thread.
      */
-    private void executeScript(final Synchronization synchronization, final InstructionSet instructionSet, final ExecutorService executorService) {
+    private void executeScript(final Synchronization synchronization, final InstructionSet instructionSet, final ExecutorService executorService, final CommandHandler commandHandler) {
 
         Future<?> future = executorService.submit(() -> {
 
-            while(true) {
+            while(synchronization.isRunning()) {
                 try {
                     instructionSet.lastRan = System.currentTimeMillis();
 
@@ -133,6 +124,7 @@ public class ScriptDispatcher {
                 // expected exceptions
             } catch (ExecutionException unexpectedException) {
                 unexpectedException.printStackTrace();
+                synchronization.stop();
             } finally {
                 synchronization.removeScriptFuture(future);
                 synchronization.lock.set(false);

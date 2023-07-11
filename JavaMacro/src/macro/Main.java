@@ -1,6 +1,7 @@
 package macro;
 
 import com.github.kwhat.jnativehook.NativeHookException;
+import macro.scripting.CommandHandler;
 import macro.threading.PeripheralHook;
 import macro.threading.ScriptDispatcher;
 import macro.threading.Synchronization;
@@ -24,11 +25,15 @@ public class Main {
     public static void main(String[] args) throws NativeHookException {
         Keys.loadKeyMap();
         new MacroFileReader();
+        final CommandHandler commandHandler = new CommandHandler();
         final ExecutorService executor = Executors.newCachedThreadPool();
         final Synchronization synchronization = new Synchronization();
         new PeripheralHook(synchronization, executor);
-        new ScriptDispatcher(synchronization, executor);
+        new ScriptDispatcher(synchronization, executor, commandHandler);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(executor::shutdown));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            synchronization.stop();
+            executor.shutdown();
+        }));
     }
 }

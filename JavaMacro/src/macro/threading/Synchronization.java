@@ -75,4 +75,15 @@ public class Synchronization {
     public Queue<Future<?>> getScriptFutures() {
         return scriptFutures;
     }
+
+    private volatile boolean running = true;
+
+    public void stop() {
+        running = false;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
 }
