@@ -6,19 +6,20 @@ import java.util.List;
 public class Instruction {
 
     private int flag;
+
     private List<Data<?>> data;
 
-    public Instruction(int flag) {
+    /**
+     * Creates a new instruction with the given flag
+     * @param flag determines the type of instruction and how it's later handled
+     */
+    public Instruction(final int flag) {
         this.flag = flag;
         this.data = new ArrayList<>();
     }
 
     public int getFlag() {
         return flag;
-    }
-
-    public List<Data<?>> getData() {
-        return data;
     }
 
     public Data<?> get(int index) {
@@ -31,6 +32,4 @@ public class Instruction {
     public void insert(Data<?> data) {
         this.data.add(data);
     }
-
-
 }

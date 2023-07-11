@@ -4,20 +4,36 @@ import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-import static macro.jnative.NativeInput.*;
+import static macro.jnative.NativeInput.pressKey;
+import static macro.jnative.NativeInput.pressKeyDown;
+import static macro.jnative.NativeInput.pressKeyUp;
 
 public class Keys {
 
     public static final String ESC = "Escape";
     public static final String MOUSE = "mouse";
 
+    /**
+     * A map of characters to keycodes.
+     */
     private static final Map<Character, Integer> keymap = new HashMap<>();
 
-    public static boolean keyRequiresShift(char c) {
-        return Character.isUpperCase(c) || "~!@#$%^&*()_+{}|:\"<>?".indexOf(c) >= 0;
+    /**
+     * Returns true if the given character requires the shift key to be pressed
+     * @param c The character to check
+     * @return  True if the character requires shift, false otherwise
+     */
+    public static boolean keyRequiresShift(final char c) {
+        return Character.isUpperCase(c)
+                || "~!@#$%^&*()_+{}|:\"<>?".indexOf(c) >= 0;
     }
 
-    public static void sendString(String s) {
+    /**
+     * Sends a string of characters to the active window.
+     * @param s The string to send.
+     */
+    public static void sendString(final String s) {
+        // Send each character in the string
         for (char c : s.toCharArray()) {
             int keycode = keymap.get(c);
             boolean shiftNeeded = keyRequiresShift(c);
@@ -31,6 +47,10 @@ public class Keys {
         }
     }
 
+    /**
+     *
+     * Loads the keymap with keycodes for common characters.
+     */
     public static void loadKeyMap() {
         // Load keycodes for lowercase and uppercase characters
         for (char c = 'a'; c <= 'z'; ++c) {
