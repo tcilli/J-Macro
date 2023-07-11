@@ -74,7 +74,7 @@ public class ScriptDispatcher {
     /**
      * Executes the specified script in a separate thread.
      *
-     * @param synchronization The synchronization object for coordinating script execution.
+     * @param synchronization A class for thread safe data sharing between threads.
      * @param instructionSet  The instruction set containing the script to be executed.
      * @param executorService The executor service for running the script in a separate thread.
      */
@@ -83,9 +83,7 @@ public class ScriptDispatcher {
         Future<?> future = executorService.submit(() -> {
 
             while(true) {
-
                 try {
-
                     instructionSet.lastRan = System.currentTimeMillis();
 
                     for (Instruction instruction : instructionSet.getInstructions()) {
@@ -101,16 +99,10 @@ public class ScriptDispatcher {
                             case 0:  break;
                             case 1:  Thread.sleep((long) instruction.get(0).getValue()); break;
                             case 2:  Keys.sendString((String) instruction.get(0).getValue());  break;
-                            case 5:  NativeInput.click(1); break;
-                            case 6:  NativeInput.click(2); break;
-                            case 7:  NativeInput.click(3); break;
-                            case 8:  NativeInput.clickDown(1); break;
-                            case 9:  NativeInput.clickUp(1); break;
-                            case 10: NativeInput.clickDown(2); break;
-                            case 11: NativeInput.clickUp(2); break;
-                            case 12: NativeInput.clickDown(3); break;
-                            case 13: NativeInput.clickUp(3); break;
-                            case 14:  NativeInput.mouseMove((int) instruction.get(0).getValue(),(int)instruction.get(1).getValue(), (int) instruction.get(2).getValue(), true); break;
+                            case 5:  NativeInput.click((int) instruction.get(0).getValue()); break;
+                            case 8:  NativeInput.clickDown((int) instruction.get(0).getValue()); break;
+                            case 9:  NativeInput.clickUp((int) instruction.get(0).getValue()); break;
+                            case 14: NativeInput.mouseMove((int) instruction.get(0).getValue(),(int)instruction.get(1).getValue(), (int) instruction.get(2).getValue(), true); break;
                             case 15: new MacroFileReader(); break;
                             case 16:
                                 int count = 0;
@@ -147,12 +139,12 @@ public class ScriptDispatcher {
             }
         });
         synchronization.addScriptFuture(future);
-        executorService.execute(() -> {
+
+        executorService.execute(() ->
+        {
             try {
-                future.get(); //TODO work on something more elegant than this.
-
+                future.get();
             } catch (InterruptedException | CancellationException expectedExceptions) {
-
             } catch (ExecutionException unexpectedException) {
                 unexpectedException.printStackTrace();
             } finally {
@@ -164,8 +156,7 @@ public class ScriptDispatcher {
 
     /**
      * Stops all running scripts.
-     *
-     * @param synchronization The synchronization object for coordinating script execution.
+     * @param synchronization A class for thread safe data sharing between threads.
      */
     private void stopAllScripts(Synchronization synchronization) {
         for (Future<?> future : synchronization.getScriptFutures()) {

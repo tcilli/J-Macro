@@ -11,10 +11,24 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
+/**
+ * Hook into peripheral devices and listen for events.
+ */
 public class PeripheralHook {
 
+    /**
+     * A Set of currently pressed keys.
+     */
     private Set<Integer> pressedKeys = ConcurrentHashMap.newKeySet();
 
+    /**
+     * The PeripheralHook class.
+     * Hooks into peripheral devices to listen for key and mouse events.
+     *
+     * @param synchronization A class for thread safe data sharing between threads.
+     * @param executorService An ExecutorService to asynchronously handle the event listeners.
+     * @throws NativeHookException If the native hook could not be created.
+     */
     public PeripheralHook(final Synchronization synchronization, final ExecutorService executorService) throws NativeHookException
     {
         GlobalScreen.registerNativeHook();

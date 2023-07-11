@@ -5,6 +5,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * A class to synchronize any data shared between threads.
+ */
 public class Synchronization {
 
     public final AtomicBoolean lock = new AtomicBoolean(false);

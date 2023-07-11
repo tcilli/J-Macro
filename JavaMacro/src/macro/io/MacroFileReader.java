@@ -103,22 +103,31 @@ public class MacroFileReader {
                 }
                 else if (key_found && line.equalsIgnoreCase("click")) {
                     instruction = new Instruction((short) 5);
+                    instruction.insert(new Data<>(1));
                 } else if (key_found && line.equalsIgnoreCase("rightclick")) {
-                    instruction = new Instruction((short) 6);
+                    instruction = new Instruction((short) 5);
+                    instruction.insert(new Data<>(2));
                 } else if (key_found && line.equalsIgnoreCase("middleclick")) {
-                    instruction = new Instruction((short) 7);
+                    instruction = new Instruction((short) 5);
+                    instruction.insert(new Data<>(3));
                 }  else if (key_found && line.equalsIgnoreCase("mouse1down")) {
                     instruction = new Instruction((short) 8);
+                    instruction.insert(new Data<>(1));
                 } else if (key_found && line.equalsIgnoreCase("mouse1up")) {
                     instruction = new Instruction((short) 9);
+                    instruction.insert(new Data<>(1));
                 } else if (key_found && line.equalsIgnoreCase("mouse2down")) {
-                    instruction = new Instruction((short) 10);
+                    instruction = new Instruction((short) 8);
+                    instruction.insert(new Data<>(2));
                 } else if (key_found && line.equalsIgnoreCase("mouse2up")) {
-                    instruction = new Instruction((short) 11);
+                    instruction = new Instruction((short) 9);
+                    instruction.insert(new Data<>(2));
                 } else if (key_found && line.equalsIgnoreCase("mouse3down")) {
-                    instruction = new Instruction((short) 12);
+                    instruction = new Instruction((short) 8);
+                    instruction.insert(new Data<>(3));
                 } else if (key_found && line.equalsIgnoreCase("mouse3up")) {
-                    instruction = new Instruction((short) 13);
+                    instruction = new Instruction((short) 9);
+                    instruction.insert(new Data<>(3));
                 } else if (key_found && line.equalsIgnoreCase("reload")) {
                     instruction = new Instruction((short) 15);
                 } else if (key_found && line.equalsIgnoreCase("get scripts")) {
