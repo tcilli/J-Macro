@@ -16,7 +16,7 @@ public class NativeInput {
     private static final int MOUSEEVENTF_RIGHTUP = 16;
     private static final int MOUSEEVENTF_MIDDLEDOWN = 32;
     private static final int MOUSEEVENTF_MIDDLEUP = 64;
-    private static final int MOUSEEVENTF_WHEEL = 2048;
+    //private static final int MOUSEEVENTF_WHEEL = 2048;
     private static final int MOUSEEVENTF_ABS = 0x8000;
 
     public static final int KEYEVENTF_KEYDOWN = 0;

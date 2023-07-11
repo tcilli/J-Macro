@@ -5,7 +5,6 @@ import macro.threading.PeripheralHook;
 import macro.threading.ScriptDispatcher;
 import macro.threading.Synchronization;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 

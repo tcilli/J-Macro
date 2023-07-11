@@ -19,6 +19,11 @@ import java.util.concurrent.Future;
 public class ScriptDispatcher {
 
     private final CommandHandler commandHandler;
+    private volatile boolean running = true;
+
+    public void stop() {
+        running = false;
+    }
 
     /**
      * ScriptDispatcher reads key & mouse inputs from the synchronization class and prepares them for execution
@@ -33,7 +38,7 @@ public class ScriptDispatcher {
         executorService.execute(() ->
         {
             StringBuilder keyBuilder = new StringBuilder();
-            while (true)
+            while (running)
             {
                 if (synchronization.getKeyPresses() > 0 || synchronization.getMouseClicks() > 0 || synchronization.getKeyReleases() > 0)
                 {
