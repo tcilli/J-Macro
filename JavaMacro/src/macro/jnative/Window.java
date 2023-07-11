@@ -2,6 +2,7 @@ package macro.jnative;
 
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.User32;
+import macro.Main;
 
 import java.util.Arrays;
 
@@ -13,5 +14,10 @@ public class Window {
         Arrays.fill(buffer, '\0');
         User32.INSTANCE.GetWindowText(User32.INSTANCE.GetForegroundWindow(), buffer, buffer.length);
         return Native.toString(buffer);
+    }
+
+    public static void printActive() {
+        Main.console.append("Active window: ").append(Window.getActive()).append("\n");
+        Main.pushConsoleMessage();
     }
 }
