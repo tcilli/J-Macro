@@ -1,5 +1,7 @@
 package macro.instruction;
 
+import macro.Main;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +17,7 @@ public class InstructionSetContainer {
     }
 
     private List<InstructionSet> instructionSets = new ArrayList<>();
+
     public List<InstructionSet> getInstructionSets() {
         return instructionSets;
     }
@@ -24,14 +27,15 @@ public class InstructionSetContainer {
     public void clearInstructions() {
         instructionSets = new ArrayList<>();
     }
-    public int getSize() {
-        return instructionSets.size();
+
+    public void listInstructions() {
+        int count = 0;
+        for (InstructionSet sets : InstructionSetContainer.getInstance().getInstructionSets()) {
+            Main.console.append(count).append("-> bind: ").append(sets.getInstruction(0).get(0).getValue().toString()).append("\n")
+                    .append(count++).append("-> path: ").append(sets.scriptPath).append("\n");
+        }
+        Main.console.append("Total of ").append(count).append(" scripts");
+        Main.pushConsoleMessage();
     }
 
-    public InstructionSet getInstructionSet(int index) {
-        if (index < 0 || index >= instructionSets.size()) {
-            throw new IndexOutOfBoundsException("Invalid index");
-        }
-        return instructionSets.get(index);
-    }
 }

@@ -3,19 +3,14 @@ package macro.threading;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 
 import macro.Main;
-import macro.MemoryUtil;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 import macro.instruction.InstructionSetContainer;
-import macro.io.Keys;
-import macro.io.MacroFileReader;
-import macro.jnative.NativeInput;
-import macro.jnative.Window;
+import macro.Keys;
+import macro.Window;
 import macro.scripting.Command;
 import macro.scripting.CommandHandler;
 
-import java.io.IOException;
-import java.lang.management.MemoryUsage;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -108,10 +103,6 @@ public class ScriptDispatcher {
                             System.out.println("Unknown command: " + instruction.getFlag());
                         }
                     }
-                } catch (InterruptedException expectedException) {
-                    break;
-                } catch (IOException e) {
-                    e.printStackTrace();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

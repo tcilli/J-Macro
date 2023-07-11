@@ -1,4 +1,4 @@
-package macro.io;
+package macro;
 
 import java.awt.event.KeyEvent;
 import java.util.HashMap;

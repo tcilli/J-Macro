@@ -31,4 +31,6 @@ public class Instruction {
     public void insert(Data<?> data) {
         this.data.add(data);
     }
+
+
 }

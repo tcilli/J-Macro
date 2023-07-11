@@ -1,4 +1,4 @@
-package macro.io;
+package macro;
 
 import macro.Main;
 import macro.instruction.Data;
@@ -16,10 +16,18 @@ public class MacroFileReader {
     public static final String DIR1 = "./data/";
     public static final String DIR2 = "./data/predefined";
 
-    public MacroFileReader() throws IOException {
+    public MacroFileReader() {
         InstructionSetContainer.getInstance().clearInstructions();
-        readFiles(DIR2);
-        readFiles(DIR1);
+        try {
+            readFiles(DIR2);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            readFiles(DIR1);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         Main.console.append("Scripts can be stopped by pressing Esc");
         Main.pushConsoleMessage();
         System.gc();

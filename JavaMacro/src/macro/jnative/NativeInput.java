@@ -143,7 +143,7 @@ public class NativeInput {
 
             WinUser.INPUT[] inputs = {input};
             User32.INSTANCE.SendInput(nInput, inputs, input.size());
-            click(1);
+
         } else {
             Main.console.append("Invalid targetX: ").append(targetX).append(" and targetY ").append(targetY).append(", Must be within 1 - 65535");
             Main.pushConsoleMessage();
