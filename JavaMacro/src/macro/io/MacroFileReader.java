@@ -71,7 +71,7 @@ public class MacroFileReader {
                 if (!key_found && line.length() >= 7 && line.substring(0, 6).equalsIgnoreCase("macro ")) {
                     key = line.substring(6);
                     key_found = true;
-                    instruction = new Instruction((short) 0);
+                    instruction = new Instruction(0);
                     instruction.insert(new Data<>(key));
                     instructionSet.key = key;
                 }
@@ -81,7 +81,7 @@ public class MacroFileReader {
                     try {
                         long wait_for = Long.parseLong(wait_command);
                         if (wait_for > 0 && wait_for < Long.MAX_VALUE) {
-                            instruction = new Instruction((short) 1);
+                            instruction = new Instruction(1);
                             instruction.insert(new Data<>(wait_for));
                         }
                     } catch (NumberFormatException e) {
@@ -97,45 +97,47 @@ public class MacroFileReader {
                     if (send_command.charAt(0) == ' ') {
                         send_command = send_command.substring(1);
                     }
-                    instruction = new Instruction((short) 2);
+                    instruction = new Instruction(2);
                     instruction.insert(new Data<>(send_command));
 
                 }
                 else if (key_found && line.equalsIgnoreCase("click")) {
-                    instruction = new Instruction((short) 5);
+                    instruction = new Instruction(3);
                     instruction.insert(new Data<>(1));
                 } else if (key_found && line.equalsIgnoreCase("rightclick")) {
-                    instruction = new Instruction((short) 5);
+                    instruction = new Instruction(3);
                     instruction.insert(new Data<>(2));
                 } else if (key_found && line.equalsIgnoreCase("middleclick")) {
-                    instruction = new Instruction((short) 5);
+                    instruction = new Instruction(3);
                     instruction.insert(new Data<>(3));
                 }  else if (key_found && line.equalsIgnoreCase("mouse1down")) {
-                    instruction = new Instruction((short) 8);
+                    instruction = new Instruction(4);
                     instruction.insert(new Data<>(1));
                 } else if (key_found && line.equalsIgnoreCase("mouse1up")) {
-                    instruction = new Instruction((short) 9);
+                    instruction = new Instruction(5);
                     instruction.insert(new Data<>(1));
                 } else if (key_found && line.equalsIgnoreCase("mouse2down")) {
-                    instruction = new Instruction((short) 8);
+                    instruction = new Instruction(4);
                     instruction.insert(new Data<>(2));
                 } else if (key_found && line.equalsIgnoreCase("mouse2up")) {
-                    instruction = new Instruction((short) 9);
+                    instruction = new Instruction(5);
                     instruction.insert(new Data<>(2));
                 } else if (key_found && line.equalsIgnoreCase("mouse3down")) {
-                    instruction = new Instruction((short) 8);
+                    instruction = new Instruction(4);
                     instruction.insert(new Data<>(3));
                 } else if (key_found && line.equalsIgnoreCase("mouse3up")) {
-                    instruction = new Instruction((short) 9);
+                    instruction = new Instruction(5);
                     instruction.insert(new Data<>(3));
                 } else if (key_found && line.equalsIgnoreCase("reload")) {
-                    instruction = new Instruction((short) 15);
+                    instruction = new Instruction(7);
                 } else if (key_found && line.equalsIgnoreCase("get scripts")) {
-                    instruction = new Instruction((short) 16);
+                    instruction = new Instruction(9);
                 } else if (key_found && line.equalsIgnoreCase("get mousepos")) {
-                    instruction = new Instruction((short) 17);
+                    instruction = new Instruction(10);
                 } else if (key_found && line.equalsIgnoreCase("get window")) {
-                    instruction = new Instruction((short) 18);
+                    instruction = new Instruction(11);
+                } else if (key_found && line.equalsIgnoreCase("get memory")) {
+                    instruction = new Instruction(8);
                 }
                 else if (key_found && command.equalsIgnoreCase("move")) {
                     String move_command = line.substring(4);
@@ -154,8 +156,8 @@ public class MacroFileReader {
                             if (coordinates.length == 3) {
                                 delay = Integer.parseInt(coordinates[2]);
                             }
-                            if (x > 0 && x < 65535 && y > 0 && y < 65535) { //0 - 65535 because -> (x * (65535 / screenWidth)) to get the normal
-                                instruction = new Instruction((short) 14 );
+                            if (x > 0 && x < 65535 && y > 0 && y < 65535) {
+                                instruction = new Instruction(6);
                                 instruction.insert(new Data<>(x));
                                 instruction.insert(new Data<>(y));
                                 instruction.insert(new Data<>(delay));

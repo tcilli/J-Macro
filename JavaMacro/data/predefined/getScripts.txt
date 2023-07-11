@@ -1,2 +1,2 @@
-macro F9
+macro ondown-F9
 get scripts

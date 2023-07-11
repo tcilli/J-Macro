@@ -11,6 +11,8 @@ import macro.io.Keys;
 import macro.io.MacroFileReader;
 import macro.jnative.NativeInput;
 import macro.jnative.Window;
+import macro.scripting.Command;
+import macro.scripting.CommandHandler;
 
 import java.io.IOException;
 import java.lang.management.MemoryUsage;
@@ -21,6 +23,8 @@ import java.util.concurrent.Future;
 
 public class ScriptDispatcher {
 
+    private CommandHandler commandHandler;
+
     /**
      * ScriptDispatcher reads key & mouse inputs from the synchronization class and prepares them for execution
      *
@@ -28,6 +32,8 @@ public class ScriptDispatcher {
      * @param executorService The executor service for running script execution tasks.
      */
     public ScriptDispatcher(final Synchronization synchronization, final ExecutorService executorService) {
+
+        commandHandler = new CommandHandler();
 
         executorService.execute(() ->
         {
@@ -95,35 +101,18 @@ public class ScriptDispatcher {
                                 return;
                             }
                         }
-                        switch(instruction.getFlag()) {
-                            case 0:  break;
-                            case 1:  Thread.sleep((long) instruction.get(0).getValue()); break;
-                            case 2:  Keys.sendString((String) instruction.get(0).getValue());  break;
-                            case 5:  NativeInput.click((int) instruction.get(0).getValue()); break;
-                            case 8:  NativeInput.clickDown((int) instruction.get(0).getValue()); break;
-                            case 9:  NativeInput.clickUp((int) instruction.get(0).getValue()); break;
-                            case 14: NativeInput.mouseMove((int) instruction.get(0).getValue(),(int)instruction.get(1).getValue(), (int) instruction.get(2).getValue(), true); break;
-                            case 15: new MacroFileReader(); break;
-                            case 16:
-                                int count = 0;
-                                for (InstructionSet sets : InstructionSetContainer.getInstance().getInstructionSets()) {
-                                    Main.console.append(count).append("-> bind: ").append(sets.getInstruction(0).get(0).getValue().toString()).append("\n")
-                                            .append(count++).append("-> path: ").append(sets.scriptPath).append("\n");
-                                }
-                                MemoryUsage heapMemoryUsage = MemoryUtil.getHeapMemoryUsage();
-                                Main.console.append("Total of ").append(count).append(" scripts, Memory Heap: ").append(heapMemoryUsage).append("\n");
-                                Main.pushConsoleMessage();
-                                break;
-                            case 17: NativeInput.getMousePosition(); break;
-                            case 18:
-                                Main.console.append("Current window: ").append(Window.getActive()).append("\n");
-                                Main.pushConsoleMessage();
-                                break;
+                        Command command = commandHandler.commandMap.get(instruction.getFlag());
+                        if (command != null) {
+                            command.execute(instruction);
+                        } else {
+                            System.out.println("Unknown command: " + instruction.getFlag());
                         }
                     }
                 } catch (InterruptedException expectedException) {
                     break;
                 } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 if (!instructionSet.loop) {

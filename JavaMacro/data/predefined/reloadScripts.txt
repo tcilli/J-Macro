@@ -1,2 +1,2 @@
-macro F12
+macro ondown-F12
 reload

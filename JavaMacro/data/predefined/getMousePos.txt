@@ -1,2 +1,2 @@
-macro F11
+macro ondown-F11
 get mousepos

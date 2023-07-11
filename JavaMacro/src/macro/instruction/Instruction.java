@@ -5,15 +5,15 @@ import java.util.List;
 
 public class Instruction {
 
-    private short flag;
+    private int flag;
     private List<Data<?>> data;
 
-    public Instruction(short flag) {
+    public Instruction(int flag) {
         this.flag = flag;
         this.data = new ArrayList<>();
     }
 
-    public short getFlag() {
+    public int getFlag() {
         return flag;
     }
 

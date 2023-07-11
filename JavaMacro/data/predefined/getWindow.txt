@@ -1,2 +1,2 @@
-macro F10
+macro ondown-F10
 get window
