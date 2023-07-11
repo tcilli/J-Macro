@@ -5,9 +5,9 @@ import java.util.List;
 
 public class Instruction {
 
-    private int flag;
+    private final int flag;
 
-    private List<Data<?>> data;
+    private final List<Data<?>> data;
 
     /**
      * Creates a new instruction with the given flag
@@ -23,7 +23,7 @@ public class Instruction {
     }
 
     public Data<?> get(int index) {
-        if (index < 0 || index >= data.size() || data.isEmpty()) {
+        if (index < 0 || index >= data.size()) {
             throw new IndexOutOfBoundsException("Invalid index: "+ index+" instruction.data size: "+ data.size());
         }
         return data.get(index);
