@@ -18,7 +18,7 @@ import java.util.concurrent.Future;
 
 public class ScriptDispatcher {
 
-    private CommandHandler commandHandler;
+    private final CommandHandler commandHandler;
 
     /**
      * ScriptDispatcher reads key & mouse inputs from the synchronization class and prepares them for execution
@@ -125,6 +125,7 @@ public class ScriptDispatcher {
             try {
                 future.get();
             } catch (InterruptedException | CancellationException expectedExceptions) {
+                // expected exceptions
             } catch (ExecutionException unexpectedException) {
                 unexpectedException.printStackTrace();
             } finally {

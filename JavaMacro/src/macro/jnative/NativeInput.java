@@ -115,7 +115,7 @@ public class NativeInput {
 
             long startTime = System.currentTimeMillis();
             long elapsedTime = 0;
-            double nextX, nextY, progress = 0;
+            double nextX, nextY, progress;
 
             while (elapsedTime < delay) {
                 progress = Math.min(1.0, (double) elapsedTime / delay);

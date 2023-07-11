@@ -17,13 +17,12 @@ public class Main {
         return console;
     }
 
-
     public synchronized static void pushConsoleMessage() {
-        System.out.println(console.toString());
+        System.out.println(console);
         console.setLength(0);
     }
 
-    public static void main(String[] args) throws NativeHookException, IOException {
+    public static void main(String[] args) throws NativeHookException {
         Keys.loadKeyMap();
         new MacroFileReader();
         final ExecutorService executor = Executors.newCachedThreadPool();
