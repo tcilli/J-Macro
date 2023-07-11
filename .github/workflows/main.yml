@@ -5,7 +5,7 @@ on: push
 jobs:
   super-lint:
     name: Lint code base
-    runs-on: microsoft-windows
+    runs-on: windows
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
