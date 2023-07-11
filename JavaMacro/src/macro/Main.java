@@ -11,9 +11,9 @@ import java.util.concurrent.Executors;
 
 public class Main {
 
-    public static StringBuilder console = new StringBuilder();
+    public static StringBuffer console = new StringBuffer();
 
-    public static void pushConsoleMessage() {
+    public synchronized static void pushConsoleMessage() {
         System.out.println(console.toString());
         console.setLength(0);
     }
@@ -25,5 +25,7 @@ public class Main {
         Synchronization synchronization = new Synchronization();
         new PeripheralHook(synchronization, executor);
         new ScriptDispatcher(synchronization, executor);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(executor::shutdown));
     }
 }

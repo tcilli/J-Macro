@@ -3,7 +3,6 @@ package macro.scripting;
 import macro.MacroFileReader;
 import macro.MemoryUtil;
 import macro.Window;
-import macro.instruction.Instruction;
 import macro.instruction.InstructionSetContainer;
 import macro.jnative.NativeInput;
 

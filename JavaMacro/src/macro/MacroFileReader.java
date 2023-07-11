@@ -30,7 +30,6 @@ public class MacroFileReader {
         }
         Main.console.append("Scripts can be stopped by pressing Esc");
         Main.pushConsoleMessage();
-        System.gc();
     }
 
     public void readFiles(String DIR) throws IOException {
