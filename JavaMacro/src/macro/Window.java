@@ -16,7 +16,7 @@ public class Window {
     }
 
     public static void printActive() {
-        Main.console.append("Active window: ").append(Window.getActive()).append("\n");
+        Main.getConsoleBuffer().append("Active window: ").append(Window.getActive()).append("\n");
         Main.pushConsoleMessage();
     }
 }

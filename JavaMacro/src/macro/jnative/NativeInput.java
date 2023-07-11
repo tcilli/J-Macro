@@ -86,7 +86,7 @@ public class NativeInput {
             WinUser.INPUT[] inputs = { input };
             User32.INSTANCE.SendInput(nInput, inputs, input.size());
         } else {
-            Main.console.append("Invalid x: ").append(x).append(" and y ").append(y).append(", Must be within 1 - 65535");
+            Main.getConsoleBuffer().append("Invalid x: ").append(x).append(" and y ").append(y).append(", Must be within 1 - 65535");
             Main.pushConsoleMessage();
         }
     }
@@ -145,7 +145,7 @@ public class NativeInput {
             User32.INSTANCE.SendInput(nInput, inputs, input.size());
 
         } else {
-            Main.console.append("Invalid targetX: ").append(targetX).append(" and targetY ").append(targetY).append(", Must be within 1 - 65535");
+            Main.getConsoleBuffer().append("Invalid targetX: ").append(targetX).append(" and targetY ").append(targetY).append(", Must be within 1 - 65535");
             Main.pushConsoleMessage();
         }
     }
@@ -153,7 +153,7 @@ public class NativeInput {
     public static void getMousePosition()
     {
         PointerInfo info = MouseInfo.getPointerInfo();
-        Main.console.append("mousePosX: ").append(info.getLocation().getX()).append(" mousePosY: ").append(info.getLocation().getY());
+        Main.getConsoleBuffer().append("mousePosX: ").append(info.getLocation().getX()).append(" mousePosY: ").append(info.getLocation().getY());
         Main.pushConsoleMessage();
     }
 }

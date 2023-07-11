@@ -90,7 +90,7 @@ public class ScriptDispatcher {
                     for (Instruction instruction : instructionSet.getInstructions()) {
                         if (instructionSet.windowTitle.length() > 0) {
                             if (!instructionSet.windowTitle.toLowerCase().contains(Window.getActive().toLowerCase())) {
-                                Main.console.append("Script key: ").append(instructionSet.key)
+                                Main.getConsoleBuffer().append("Script key: ").append(instructionSet.key)
                                         .append(" requires window to be active: ").append(instructionSet.windowTitle.toLowerCase());
                                 Main.pushConsoleMessage();
                                 return;
@@ -110,7 +110,7 @@ public class ScriptDispatcher {
                     return;
                 }
                 if (System.currentTimeMillis() - instructionSet.lastRan < 100) {
-                    Main.console.append("Script detected as running too quickly with looping enabled, min run time is 100ms. \n")
+                    Main.getConsoleBuffer().append("Script detected as running too quickly with looping enabled, min run time is 100ms. \n")
                             .append("Consider adding a wait time EG wait 500 or remove the loop command. \n")
                             .append("File: ").append(instructionSet.scriptPath);
                     Main.pushConsoleMessage();

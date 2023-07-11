@@ -29,7 +29,7 @@ public class Instruction {
         return data.get(index);
     }
 
-    public void insert(Data<?> data) {
-        this.data.add(data);
+    public <T> void insert(T data) {
+        this.data.add(new Data<>(data));
     }
 }

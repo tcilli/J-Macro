@@ -31,10 +31,10 @@ public class InstructionSetContainer {
     public void listInstructions() {
         int count = 0;
         for (InstructionSet sets : InstructionSetContainer.getInstance().getInstructionSets()) {
-            Main.console.append(count).append("-> bind: ").append(sets.getInstruction(0).get(0).value().toString()).append("\n")
+            Main.getConsoleBuffer().append(count).append("-> bind: ").append(sets.getInstruction(0).get(0).value().toString()).append("\n")
                     .append(count++).append("-> path: ").append(sets.scriptPath).append("\n");
         }
-        Main.console.append("Total of ").append(count).append(" scripts");
+        Main.getConsoleBuffer().append("Total of ").append(count).append(" scripts");
         Main.pushConsoleMessage();
     }
 

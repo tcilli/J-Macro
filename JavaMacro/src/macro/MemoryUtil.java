@@ -14,7 +14,7 @@ public class MemoryUtil {
     }
 
     public static void printHeapMemoryUsage() {
-        Main.console.append("Memory Heap: ").append(getHeapMemoryUsage()).append("\n")
+        Main.getConsoleBuffer().append("Memory Heap: ").append(getHeapMemoryUsage()).append("\n")
                     .append("Memory Non-Heap: ").append(getNonHeapMemoryUsage());
         Main.pushConsoleMessage();
     }

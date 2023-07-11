@@ -11,7 +11,12 @@ import java.util.concurrent.Executors;
 
 public class Main {
 
-    public static StringBuffer console = new StringBuffer();
+    private static final StringBuffer console = new StringBuffer();
+
+    public static StringBuffer getConsoleBuffer() {
+        return console;
+    }
+
 
     public synchronized static void pushConsoleMessage() {
         System.out.println(console.toString());
@@ -21,8 +26,8 @@ public class Main {
     public static void main(String[] args) throws NativeHookException, IOException {
         Keys.loadKeyMap();
         new MacroFileReader();
-        ExecutorService executor = Executors.newCachedThreadPool();
-        Synchronization synchronization = new Synchronization();
+        final ExecutorService executor = Executors.newCachedThreadPool();
+        final Synchronization synchronization = new Synchronization();
         new PeripheralHook(synchronization, executor);
         new ScriptDispatcher(synchronization, executor);
 
