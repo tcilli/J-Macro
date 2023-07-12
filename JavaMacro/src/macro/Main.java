@@ -1,6 +1,8 @@
 package macro;
 
 import com.github.kwhat.jnativehook.NativeHookException;
+import macro.instruction.InstructionSet;
+import macro.instruction.InstructionSetContainer;
 import macro.threading.PeripheralHook;
 import macro.threading.ScriptDispatcher;
 import macro.threading.Synchronization;
@@ -21,11 +23,23 @@ public class Main {
         console.setLength(0);
     }
 
+		private static InstructionSetContainer instructionSetContainer;
+
+		public static InstructionSetContainer getInstructionSetContainer() {
+			return instructionSetContainer;
+		}
+
     public static void main(String[] args) throws NativeHookException {
+
+	      instructionSetContainer = new InstructionSetContainer();
+
         Keys.loadKeyMap();
         new MacroFileReader();
+
+
         final ExecutorService executor = Executors.newCachedThreadPool();
         final Synchronization synchronization = new Synchronization();
+
         new PeripheralHook(synchronization, executor);
         new ScriptDispatcher(synchronization, executor);
 

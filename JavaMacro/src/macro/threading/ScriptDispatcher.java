@@ -2,6 +2,7 @@ package macro.threading;
 
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 
+import macro.Main;
 import macro.instruction.InstructionSet;
 import macro.instruction.InstructionSetContainer;
 import macro.Keys;
@@ -45,13 +46,13 @@ public class ScriptDispatcher {
 					}
 
 					if (keyBuilder.toString().equals(Keys.ESC)) {
-						for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
+						for (InstructionSet instructionSet : Main.getInstructionSetContainer().getInstructionSets()) {
 							instructionSet.lock.set(false);
 						}
 						continue;
 					}
 
-					for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
+					for (InstructionSet instructionSet : Main.getInstructionSetContainer().getInstructionSets()) {
 						if (instructionSet.key.equalsIgnoreCase(keyBuilder.toString()) && !instructionSet.lock.get()) {
 							instructionSet.lock.set(true);
 							ScriptExecutor.executeScript(instructionSet, executorService);

@@ -1,12 +1,8 @@
 package macro.scripting;
 
-import macro.MacroFileReader;
-import macro.MemoryUtil;
-import macro.Window;
+import macro.*;
 import macro.instruction.InstructionSetContainer;
 import macro.jnative.NativeInput;
-
-import macro.Keys;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -75,7 +71,7 @@ public class CommandHandler {
                 __ -> MemoryUtil.printHeapMemoryUsage());
 
         commandMap.put(COMMAND_LIST_INSTRUCTIONS,
-                __ -> InstructionSetContainer.getInstance().listInstructions());
+                __ -> Main.getInstructionSetContainer().listInstructions());
 
         commandMap.put(COMMAND_GET_MOUSE_POSITION,
                 __ -> NativeInput.getMousePosition());

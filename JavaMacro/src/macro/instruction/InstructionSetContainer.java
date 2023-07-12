@@ -7,15 +7,6 @@ import java.util.List;
 
 public class InstructionSetContainer {
 
-    private static InstructionSetContainer instance = null;
-
-    public static InstructionSetContainer getInstance() {
-        if (instance == null) {
-            instance = new InstructionSetContainer();
-        }
-        return instance;
-    }
-
     private List<InstructionSet> instructionSets = new ArrayList<>();
 
     public List<InstructionSet> getInstructionSets() {
@@ -30,7 +21,7 @@ public class InstructionSetContainer {
 
     public void listInstructions() {
         int count = 0;
-        for (InstructionSet sets : InstructionSetContainer.getInstance().getInstructionSets()) {
+        for (InstructionSet sets : getInstructionSets()) {
             Main.getConsoleBuffer().append(count).append("-> bind: ").append(sets.getInstruction(0).get(0).value().toString()).append("\n")
                     .append(count++).append("-> path: ").append(sets.scriptPath).append("\n");
         }
