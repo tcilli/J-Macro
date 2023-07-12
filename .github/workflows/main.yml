@@ -16,4 +16,9 @@ jobs:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          excluded: 'annotations,comments'
+          excluded: |
+            annotations
+            comments
+            javadoc
+            **/*
+            !src/**
