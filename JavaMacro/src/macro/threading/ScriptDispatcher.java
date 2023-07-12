@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
  * ScriptDispatcher.java.
  * <p>
  *     Reads key & mouse inputs from the synchronization class and prepares them for execution.
- *     If the ScriptDispatcher Thread should never be interrupted.
+ *     The ScriptDispatcher Thread should never be interrupted.
  *     This class is now complete and should not be modified.
  * </p>
  */
