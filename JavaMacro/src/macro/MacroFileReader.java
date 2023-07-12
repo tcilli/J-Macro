@@ -3,6 +3,8 @@ package macro;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 import macro.instruction.InstructionSetContainer;
+import macro.jnative.NativeInput;
+import macro.scripting.CommandHandler;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -76,8 +78,6 @@ public class MacroFileReader {
                 if (!key_found && line.length() >= 7 && line.substring(0, 6).equalsIgnoreCase("macro ")) {
                     key = line.substring(6);
                     key_found = true;
-                    instruction = new Instruction(0);
-                    instruction.insert(key);
                     instructionSet.key = key;
                 }
                 else if (key_found && command.equalsIgnoreCase("wait")) {
@@ -86,7 +86,7 @@ public class MacroFileReader {
                     try {
                         long wait_for = Long.parseLong(wait_command);
                         if (wait_for > 0 && wait_for < Long.MAX_VALUE) {
-                            instruction = new Instruction(1);
+                            instruction = new Instruction(CommandHandler.COMMAND_SLEEP);
                             instruction.insert(wait_for);
                         }
                     } catch (NumberFormatException e) {
@@ -98,51 +98,46 @@ public class MacroFileReader {
                     }
                 }
                 else if (key_found && command.equalsIgnoreCase("send")) {
-                    String send_command = line.substring(4);
-                    if (send_command.charAt(0) == ' ') {
-                        send_command = send_command.substring(1);
-                    }
-                    instruction = new Instruction(2);
-                    instruction.insert(send_command);
-
+                    instruction = new Instruction(CommandHandler.COMMAND_SEND_STRING);
+                    instruction.insert(line.substring(5));
                 }
                 else if (key_found && line.equalsIgnoreCase("click")) {
-                    instruction = new Instruction(3);
-                    instruction.insert(1);
+                    instruction = new Instruction(CommandHandler.COMMAND_CLICK);
+                    instruction.insert(NativeInput.MOUSE_BUTTON_LEFT);
                 } else if (key_found && line.equalsIgnoreCase("rightclick")) {
-                    instruction = new Instruction(3);
-                    instruction.insert(2);
+                    instruction = new Instruction(CommandHandler.COMMAND_CLICK);
+                    instruction.insert(NativeInput.MOUSE_BUTTON_RIGHT);
                 } else if (key_found && line.equalsIgnoreCase("middleclick")) {
-                    instruction = new Instruction(3);
-                    instruction.insert(3);
+                    instruction = new Instruction(CommandHandler.COMMAND_CLICK);
+                    instruction.insert(NativeInput.MOUSE_BUTTON_MIDDLE);
                 }  else if (key_found && line.equalsIgnoreCase("mouse1down")) {
-                    instruction = new Instruction(4);
-                    instruction.insert(1);
+                    instruction = new Instruction(CommandHandler.COMMAND_CLICK_DOWN);
+                    instruction.insert(NativeInput.MOUSE_BUTTON_LEFT);
                 } else if (key_found && line.equalsIgnoreCase("mouse1up")) {
-                    instruction = new Instruction(5);
-                    instruction.insert(1);
+                    instruction = new Instruction(CommandHandler.COMMAND_CLICK_UP);
+                    instruction.insert(NativeInput.MOUSE_BUTTON_LEFT);
                 } else if (key_found && line.equalsIgnoreCase("mouse2down")) {
-                    instruction = new Instruction(4);
-                    instruction.insert(2);
+                    instruction = new Instruction(CommandHandler.COMMAND_CLICK_DOWN);
+                    instruction.insert(NativeInput.MOUSE_BUTTON_RIGHT);
                 } else if (key_found && line.equalsIgnoreCase("mouse2up")) {
-                    instruction = new Instruction(5);
-                    instruction.insert(2);
+                    instruction = new Instruction(CommandHandler.COMMAND_CLICK_UP);
+                    instruction.insert(NativeInput.MOUSE_BUTTON_RIGHT);
                 } else if (key_found && line.equalsIgnoreCase("mouse3down")) {
-                    instruction = new Instruction(4);
-                    instruction.insert(3);
+                    instruction = new Instruction(CommandHandler.COMMAND_CLICK_DOWN);
+                    instruction.insert(NativeInput.MOUSE_BUTTON_MIDDLE);
                 } else if (key_found && line.equalsIgnoreCase("mouse3up")) {
-                    instruction = new Instruction(5);
-                    instruction.insert(3);
+                    instruction = new Instruction(CommandHandler.COMMAND_CLICK_UP);
+                    instruction.insert(NativeInput.MOUSE_BUTTON_MIDDLE);
                 } else if (key_found && line.equalsIgnoreCase("reload")) {
-                    instruction = new Instruction(7);
+                    instruction = new Instruction(CommandHandler.COMMAND_READ_MACRO_FILE);
                 } else if (key_found && line.equalsIgnoreCase("get scripts")) {
-                    instruction = new Instruction(9);
+                    instruction = new Instruction(CommandHandler.COMMAND_LIST_INSTRUCTIONS);
                 } else if (key_found && line.equalsIgnoreCase("get mousepos")) {
-                    instruction = new Instruction(10);
+                    instruction = new Instruction(CommandHandler.COMMAND_GET_MOUSE_POSITION);
                 } else if (key_found && line.equalsIgnoreCase("get window")) {
-                    instruction = new Instruction(11);
+                    instruction = new Instruction(CommandHandler.COMMAND_PRINT_ACTIVE_WINDOW);
                 } else if (key_found && line.equalsIgnoreCase("get memory")) {
-                    instruction = new Instruction(8);
+                    instruction = new Instruction(CommandHandler.COMMAND_PRINT_MEMORY);
                 }
                 else if (key_found && command.equalsIgnoreCase("move")) {
                     String move_command = line.substring(4);
@@ -162,7 +157,7 @@ public class MacroFileReader {
                                 delay = Integer.parseInt(coordinates[2]);
                             }
                             if (x > 0 && x < 65535 && y > 0 && y < 65535) {
-                                instruction = new Instruction(6);
+                                instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE);
                                 instruction.insert(x);
                                 instruction.insert(y);
                                 instruction.insert(delay);

@@ -21,6 +21,10 @@ public class NativeInput {
 
     public static final int KEYEVENTF_KEYDOWN = 0;
     public static final int KEYEVENTF_KEYUP = 2;
+
+    public static final int MOUSE_BUTTON_LEFT = 1;
+    public static final int MOUSE_BUTTON_RIGHT = 2;
+    public static final int MOUSE_BUTTON_MIDDLE = 3;
     
     private static final WinUser.INPUT input = new WinUser.INPUT();
     private static final WinDef.DWORD nInput = new WinDef.DWORD(1);

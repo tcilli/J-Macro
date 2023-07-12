@@ -2,6 +2,7 @@ package macro.instruction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class InstructionSet {
 
@@ -11,6 +12,9 @@ public class InstructionSet {
     public String scriptPath = "";
     public String key = "";
     public long lastRan = 0L;
+
+    //prevents multiple instances of the same script from running at the same time
+    public AtomicBoolean lock = new AtomicBoolean(false);
 
     public InstructionSet() {
         this.instructions = new ArrayList<>();

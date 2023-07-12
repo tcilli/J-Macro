@@ -46,12 +46,10 @@ public class ScriptDispatcher {
                         stopAllScripts(synchronization);
                         continue;
                     }
-                    if (synchronization.lock.get()) {
-                        continue;
-                    }
+
                     for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
-                       if (instructionSet.key.equalsIgnoreCase(keyBuilder.toString())) {
-                           synchronization.lock.set(true);
+                       if (instructionSet.key.equalsIgnoreCase(keyBuilder.toString()) && !instructionSet.lock.get()) {
+                            instructionSet.lock.set(true);
                            executeScript(synchronization, instructionSet, executorService, commandHandler);
                        }
                     }
@@ -78,12 +76,13 @@ public class ScriptDispatcher {
     private void executeScript(final Synchronization synchronization, final InstructionSet instructionSet, final ExecutorService executorService, final CommandHandler commandHandler) {
 
         Future<?> future = executorService.submit(() -> {
+            try {
+                while(instructionSet.lock.get() && !Thread.currentThread().isInterrupted()) {
 
-            while(synchronization.isRunning()) {
-                try {
                     instructionSet.lastRan = System.currentTimeMillis();
 
                     for (Instruction instruction : instructionSet.getInstructions()) {
+
                         if (instructionSet.windowTitle.length() > 0) {
                             if (!instructionSet.windowTitle.toLowerCase().contains(Window.getActive().toLowerCase())) {
                                 Main.getConsoleBuffer().append("Script key: ").append(instructionSet.key)
@@ -95,39 +94,37 @@ public class ScriptDispatcher {
                         Command command = commandHandler.commandMap.get(instruction.getFlag());
                         if (command != null) {
                             command.execute(instruction);
-                        } else {
-                            System.out.println("Unknown command: " + instruction.getFlag());
                         }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    if (!instructionSet.loop) {
+                        return;
+                    }
+                    if (System.currentTimeMillis() - instructionSet.lastRan < 100) {
+                        Main.getConsoleBuffer().append("Script ended. \n")
+                                .append("File: ").append(instructionSet.scriptPath);
+                        Main.pushConsoleMessage();
+                        return;
+                    }
                 }
-                if (!instructionSet.loop) {
-                    return;
-                }
-                if (System.currentTimeMillis() - instructionSet.lastRan < 100) {
-                    Main.getConsoleBuffer().append("Script detected as running too quickly with looping enabled, min run time is 100ms. \n")
-                            .append("Consider adding a wait time EG wait 500 or remove the loop command. \n")
-                            .append("File: ").append(instructionSet.scriptPath);
-                    Main.pushConsoleMessage();
-                    return;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (Thread.currentThread().isInterrupted()) {
+                    System.out.println("Script interrupted.");
                 }
             }
         });
-        synchronization.addScriptFuture(future);
 
+        // this thread will wait for the script to finish executing before unlocking the synchronization object
         executorService.execute(() ->
         {
             try {
                 future.get();
-            } catch (InterruptedException | CancellationException expectedExceptions) {
-                // expected exceptions
-            } catch (ExecutionException unexpectedException) {
-                unexpectedException.printStackTrace();
-                synchronization.stop();
+            } catch (InterruptedException | ExecutionException | CancellationException e) {
+                e.printStackTrace();
             } finally {
                 synchronization.removeScriptFuture(future);
-                synchronization.lock.set(false);
+                instructionSet.lock.set(false);
             }
         });
     }
@@ -137,10 +134,12 @@ public class ScriptDispatcher {
      * @param synchronization A class for thread safe data sharing between threads.
      */
     private void stopAllScripts(Synchronization synchronization) {
+        for (InstructionSet instructionSet : InstructionSetContainer.getInstance().getInstructionSets()) {
+            instructionSet.lock.set(false);
+        }
         for (Future<?> future : synchronization.getScriptFutures()) {
             future.cancel(true);
         }
         synchronization.clearScriptFutures();
-        synchronization.lock.set(false);
     }
 }
