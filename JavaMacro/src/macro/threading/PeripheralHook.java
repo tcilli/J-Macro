@@ -19,7 +19,7 @@ public class PeripheralHook {
     /**
      * A Set of currently pressed keys.
      */
-    private Set<Integer> pressedKeys = ConcurrentHashMap.newKeySet();
+    private final Set<Integer> pressedKeys = ConcurrentHashMap.newKeySet();
 
     /**
      * The PeripheralHook class.

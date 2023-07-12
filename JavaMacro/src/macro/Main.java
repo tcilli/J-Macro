@@ -25,11 +25,10 @@ public class Main {
     public static void main(String[] args) throws NativeHookException {
         Keys.loadKeyMap();
         new MacroFileReader();
-        final CommandHandler commandHandler = new CommandHandler();
         final ExecutorService executor = Executors.newCachedThreadPool();
         final Synchronization synchronization = new Synchronization();
         new PeripheralHook(synchronization, executor);
-        new ScriptDispatcher(synchronization, executor, commandHandler);
+        new ScriptDispatcher(synchronization, executor);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             synchronization.stop();

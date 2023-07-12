@@ -15,10 +15,12 @@ import static macro.jnative.NativeInput.pressKey;
 import static macro.jnative.NativeInput.pressKeyDown;
 import static macro.jnative.NativeInput.pressKeyUp;
 
-public class Keys {
+public final class Keys {
 
     // Prevent instantiation
-    private Keys() {}
+    private Keys() {
+
+    }
 
     /**
      * A map of characters to keycodes.
@@ -28,7 +30,8 @@ public class Keys {
     /**
      * Returns true if the given character requires the shift key to be pressed.
      * @param c The character to check.
-     * @return  True if the character requires shift to be pressed, false otherwise.
+     * @return  True if the character requires shift to be pressed,
+     * false otherwise.
      */
     public static boolean keyRequiresShift(final char c) {
         return Character.isUpperCase(c)
@@ -113,4 +116,6 @@ public class Keys {
     // Just a few common keys used in the macro
     public static final String ESC = "ondown-Escape";
     public static final String MOUSE = "mouse";
+		public static final String ONRELEASE = "onrelease-";
+		public static final String ONDOWN = "ondown-";
 }

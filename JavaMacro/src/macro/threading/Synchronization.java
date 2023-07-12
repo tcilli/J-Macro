@@ -1,15 +1,13 @@
 package macro.threading;
 
 import java.util.Queue;
-import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * A class to synchronize any data shared between threads.
  */
-public class Synchronization {
+public final class Synchronization {
 
-    private final Queue<Future<?>> scriptFutures;
     private final Queue<Integer> keyPressed;
     private final Queue<Integer> keyReleased;
     private final Queue<Integer> mouseClicked;
@@ -18,7 +16,6 @@ public class Synchronization {
         keyPressed = new LinkedBlockingQueue<>();
         keyReleased = new LinkedBlockingQueue<>();
         mouseClicked = new LinkedBlockingQueue<>();
-        scriptFutures = new LinkedBlockingQueue<>();
     }
 
     public int getKeyPresses() {
@@ -41,36 +38,23 @@ public class Synchronization {
         return mouseClicked.poll();
     }
 
-    public void addKeyPress(Integer value) {
+    public void addKeyPress(final Integer value) {
         keyPressed.add(value);
         synchronized (this) {
             this.notify();
         }
     }
-    public void addKeyReleased(Integer value) {
+    public void addKeyReleased(final Integer value) {
         keyReleased.add(value);
         synchronized (this) {
             this.notify();
         }
     }
-    public void addMouseClicked(Integer value) {
+    public void addMouseClicked(final Integer value) {
         mouseClicked.add(value);
         synchronized (this) {
             this.notify();
         }
-    }
-
-    public void addScriptFuture(Future<?> future) {
-        scriptFutures.add(future);
-    }
-    public void removeScriptFuture(Future<?> future) {
-        scriptFutures.remove(future);
-    }
-    public void clearScriptFutures() {
-        scriptFutures.clear();
-    }
-    public Queue<Future<?>> getScriptFutures() {
-        return scriptFutures;
     }
 
     private volatile boolean running = true;
@@ -82,5 +66,4 @@ public class Synchronization {
     public boolean isRunning() {
         return running;
     }
-
 }
