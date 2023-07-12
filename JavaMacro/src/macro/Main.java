@@ -1,7 +1,6 @@
 package macro;
 
 import com.github.kwhat.jnativehook.NativeHookException;
-import macro.scripting.CommandHandler;
 import macro.threading.PeripheralHook;
 import macro.threading.ScriptDispatcher;
 import macro.threading.Synchronization;
