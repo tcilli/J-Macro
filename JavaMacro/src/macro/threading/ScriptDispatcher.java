@@ -114,6 +114,7 @@ public class ScriptDispatcher {
                 }
             }
         });
+        synchronization.addScriptFuture(future);
 
         // this thread will wait for the script to finish executing before unlocking the synchronization object
         executorService.execute(() ->
