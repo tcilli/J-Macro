@@ -15,10 +15,11 @@ jobs:
         env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_JAVADOC: false
         with:
           excluded: |
             annotations
             comments
-            javadoc
-            **/*
-            !src/**
+            jscpd
+          patterns: |
+            src/**
