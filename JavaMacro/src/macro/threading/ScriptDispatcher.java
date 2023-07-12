@@ -4,7 +4,6 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 
 import macro.Main;
 import macro.instruction.InstructionSet;
-import macro.instruction.InstructionSetContainer;
 import macro.Keys;
 
 import java.util.concurrent.ExecutorService;

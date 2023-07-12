@@ -2,7 +2,6 @@ package macro;
 
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
-import macro.instruction.InstructionSetContainer;
 import macro.jnative.NativeInput;
 import macro.scripting.CommandHandler;
 

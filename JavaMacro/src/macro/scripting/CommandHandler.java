@@ -1,7 +1,6 @@
 package macro.scripting;
 
 import macro.*;
-import macro.instruction.InstructionSetContainer;
 import macro.jnative.NativeInput;
 
 import java.util.HashMap;

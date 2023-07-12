@@ -1,7 +1,6 @@
 package macro;
 
 import com.github.kwhat.jnativehook.NativeHookException;
-import macro.instruction.InstructionSet;
 import macro.instruction.InstructionSetContainer;
 import macro.threading.PeripheralHook;
 import macro.threading.ScriptDispatcher;
