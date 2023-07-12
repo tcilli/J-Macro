@@ -1,25 +1,17 @@
-name: Super-Linter
+name: Format
 
-on: push
+on:
+  push:
+    branches: [ master ]
 
 jobs:
-  super-lint:
-    name: Lint code base
+
+  formatting:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Run Super-Linter
-        uses: github/super-linter@v4
-        env:
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_JAVADOC: false
+      - uses: actions/checkout@v3 # v2 minimum required
+      - uses: axel-op/googlejavaformat-action@v3
         with:
-          excluded: |
-            annotations
-            comments
-            jscpd
-          patterns: |
-            src/**
+          args: "--skip-sorting-imports --replace"
+          # Recommended if you use MacOS:
+          # github-token: ${{ secrets.GITHUB_TOKEN }}
