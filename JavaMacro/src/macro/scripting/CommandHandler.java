@@ -11,7 +11,7 @@ public class CommandHandler {
 	public static CommandHandler instance = null;
 
 	public static CommandHandler getInstance() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new CommandHandler();
 		}
 		return instance;

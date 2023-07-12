@@ -63,7 +63,7 @@ public class ScriptDispatcher {
 							synchronization.wait();
 						}
 					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
+						e.printStackTrace();
 					}
 				}
 			}
