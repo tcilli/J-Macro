@@ -7,44 +7,27 @@ import macro.instruction.InstructionSet;
 import java.util.concurrent.ExecutorService;
 
 /**
- * ScriptExecutor.java.
+ * The {@link ScriptExecutor} class.
  * <p>
- *   Executes the specified script in a separate thread.
- *   This class is now complete and should not be modified.
+ *  Using {@link #execute(InstructionSet, ExecutorService)}
+ *  this will execute an {@link InstructionSet} on a thread pool {@link ExecutorService}.
+ *  The {@link InstructionSet} contains a list of {@link Instruction}s. which are executed in order.
  * </p>
  */
 public class ScriptExecutor {
 
 	/**
-	 * Executes the specified script in a separate thread.
-	 *
-	 * @param insSet  The instruction set containing the script to be executed.
-	 * @param executorService The executor service for running the script in a separate thread.
+	 * Executes an {@link InstructionSet} using a thread pool provided by the {@link ExecutorService}
+	 * allows multiple scripts to be executed simultaneously.
+	 * This is however, limited to one instance per {@link InstructionSet}.
+	 * @param instructionSet The {@link InstructionSet}.
+	 * @param threadPool The {@link ExecutorService}.
 	 */
-	public static void executeScript(final InstructionSet insSet, final ExecutorService executorService) {
-
-		/*
-		 *  Executes the script in a separate thread.
-		 */
-		executorService.execute(() -> {
-
-			while (insSet.lock.get()) {
-
-				/*
-				 *  Loop through each instruction in this instruction set.
-				 */
-				for (Instruction ins : insSet.getInstructions()) {
-
-
-					/*
-					 * Execute the command associated with this instruction. This should never be null!.
-					 * The InstructionSet lock is passed in as a parameter to the command because the
-					 * command may need to release the lock on the InstructionSet.
-					 */
-					Main.getCommandHandler().commandMap.get(ins.getFlag())
-							.execute
-									(ins.getData(), insSet);
-
+	public static void execute(final InstructionSet instructionSet, final ExecutorService threadPool) {
+		threadPool.execute(() -> {
+			while (instructionSet.lock.get()) {
+				for (Instruction ins : instructionSet.getInstructions()) {
+					Main.getCommandHandler().commandMap.get(ins.getFlag()).execute(ins.getData(), instructionSet);
 				}
 			}
 		});

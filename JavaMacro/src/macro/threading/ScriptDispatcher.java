@@ -48,7 +48,7 @@ public class ScriptDispatcher {
 
 					if (instructionSet != null && !instructionSet.lock.get()) {
 						instructionSet.lock.set(true);
-						ScriptExecutor.executeScript(instructionSet, executorService);
+						ScriptExecutor.execute(instructionSet, executorService);
 					}
 				} else {
 					try {
