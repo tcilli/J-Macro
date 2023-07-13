@@ -59,7 +59,7 @@ public class MacroFileReader {
 		}
 	}
 
-	private void readLinesFromFile(File file) throws IOException {
+	private void readLinesFromFile(File file) {
 		InstructionSet instructionSet = new InstructionSet();
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {

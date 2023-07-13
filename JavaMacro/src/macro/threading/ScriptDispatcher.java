@@ -27,7 +27,7 @@ public class ScriptDispatcher {
 
 		executorService.execute(() -> {
 
-			int keycode = 0;
+			int keycode;
 
 			while (synchronization.isRunning()) {
 

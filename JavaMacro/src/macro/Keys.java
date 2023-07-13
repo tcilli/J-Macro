@@ -118,12 +118,6 @@ public final class Keys {
         KEYMAP.put(')', KeyEvent.VK_0); // Requires Shift
     }
 
-    // Just a few common keys used in the macro
-    public static final String ESC = "ondown-Escape";
-    public static final String MOUSE = "mouse";
-	public static final String ONRELEASE = "onrelease-";
-	public static final String ONDOWN = "ondown-";
-
 	// Map of key names to keycodes
 	private static final Map<String, Integer> KEYCODE_MAP = new HashMap<>();
 
