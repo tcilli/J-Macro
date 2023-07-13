@@ -1,12 +1,10 @@
 package macro.threading;
 
+import macro.Main;
 import macro.Window;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 import macro.scripting.Command;
-import macro.scripting.CommandHandler;
-
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -38,8 +36,14 @@ public class ScriptExecutor {
 								return;
 							}
 						}
-						Optional<Command> optionalCommand = Optional.ofNullable(CommandHandler.getInstance().commandMap.get(instruction.getFlag()));
-						optionalCommand.ifPresent(command -> command.execute(instruction, instructionSet));
+						Command command = Main.getCommandHandler().commandMap.get(instruction.getFlag());
+
+						if (command != null) {
+							command.execute(instruction, instructionSet);
+						} else {
+							instructionSet.lock.set(false);
+							return;
+						}
 					}
 				}
 			} catch (Exception e) {

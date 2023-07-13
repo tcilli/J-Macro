@@ -8,8 +8,13 @@
 package macro;
 
 import java.awt.event.KeyEvent;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+
+
+import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 
 import static macro.jnative.NativeInput.pressKey;
 import static macro.jnative.NativeInput.pressKeyDown;
@@ -116,6 +121,37 @@ public final class Keys {
     // Just a few common keys used in the macro
     public static final String ESC = "ondown-Escape";
     public static final String MOUSE = "mouse";
-		public static final String ONRELEASE = "onrelease-";
-		public static final String ONDOWN = "ondown-";
+	public static final String ONRELEASE = "onrelease-";
+	public static final String ONDOWN = "ondown-";
+
+	// Map of key names to keycodes
+	private static final Map<String, Integer> KEYCODE_MAP = new HashMap<>();
+
+	static {
+		// yoink those keycodes, ty
+		for (Field field : NativeKeyEvent.class.getDeclaredFields()) {
+			if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers()) && field.getType() == int.class && field.getName().startsWith("VC_")) {
+				try {
+					int keyCode = field.getInt(null);
+					String keyName = field.getName().substring(3);
+					KEYCODE_MAP.put(keyName, keyCode);
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public static int getKeyCode(String keyText) {
+		keyText = keyText.toUpperCase();
+
+		// Get the corresponding keycode from the map
+		Integer keyCode = KEYCODE_MAP.get(keyText);
+
+		if (keyCode == null) {
+			System.out.println("No keycode found for '" + keyText + "'");
+			return NativeKeyEvent.VC_UNDEFINED;
+		}
+		return keyCode;
+	}
 }

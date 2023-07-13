@@ -8,15 +8,6 @@ import java.util.Map;
 
 public class CommandHandler {
 
-	public static CommandHandler instance = null;
-
-	public static CommandHandler getInstance() {
-		if (instance == null) {
-			instance = new CommandHandler();
-		}
-		return instance;
-	}
-
     // Define constants for command numbers
     public static final int COMMAND_SLEEP = 1;
     public static final int COMMAND_SEND_STRING = 2;

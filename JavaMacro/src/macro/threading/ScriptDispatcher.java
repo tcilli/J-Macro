@@ -1,12 +1,11 @@
 package macro.threading;
 
-import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
-
 import macro.Main;
 import macro.instruction.InstructionSet;
-import macro.Keys;
 
 import java.util.concurrent.ExecutorService;
+
+import static com.github.kwhat.jnativehook.keyboard.NativeKeyEvent.VC_ESCAPE;
 
 /**
  * ScriptDispatcher.java.
@@ -28,34 +27,28 @@ public class ScriptDispatcher {
 
 		executorService.execute(() -> {
 
-			final StringBuilder keyBuilder = new StringBuilder();
+			int keycode = 0;
 
 			while (synchronization.isRunning()) {
 
 				if (synchronization.getKeyPresses() > 0 || synchronization.getMouseClicks() > 0 || synchronization.getKeyReleases() > 0) {
 
-					keyBuilder.setLength(0);
-
 					if (synchronization.getKeyPresses() > 0) {
-						keyBuilder.append(Keys.ONDOWN).append(NativeKeyEvent.getKeyText(synchronization.getNextKeyPress()));
+						keycode = synchronization.getNextKeyPress();
 					} else if (synchronization.getKeyReleases() > 0) {
-						keyBuilder.append(Keys.ONRELEASE).append(NativeKeyEvent.getKeyText(synchronization.getNextKeyRelease()));
+						keycode = synchronization.getNextKeyRelease();
 					} else {
-						keyBuilder.append(Keys.MOUSE).append(synchronization.getNextMouseClicked());
+						keycode = synchronization.getNextMouseClicked();
 					}
-
-					if (keyBuilder.toString().equals(Keys.ESC)) {
-						for (InstructionSet instructionSet : Main.getInstructionSetContainer().getInstructionSets()) {
-							instructionSet.lock.set(false);
-						}
+					if (keycode == VC_ESCAPE) {
+						Main.getInstructionSetContainer().clearLocks();
 						continue;
 					}
+					InstructionSet instructionSet = Main.getInstructionSetContainer().getInstructionSet(keycode);
 
-					for (InstructionSet instructionSet : Main.getInstructionSetContainer().getInstructionSets()) {
-						if (instructionSet.key.equalsIgnoreCase(keyBuilder.toString()) && !instructionSet.lock.get()) {
-							instructionSet.lock.set(true);
-							ScriptExecutor.executeScript(instructionSet, executorService);
-						}
+					if (instructionSet != null && !instructionSet.lock.get()) {
+						instructionSet.lock.set(true);
+						ScriptExecutor.executeScript(instructionSet, executorService);
 					}
 				} else {
 					try {

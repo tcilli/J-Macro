@@ -10,6 +10,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * MacroFileReader.java.
+ * <p>
+ *     Class may look like ass but it does the job
+ *     Eventually ill get around to making this tidy.
+ * </p>
+ */
+
 public class MacroFileReader {
 
 	public static final String DIR1 = "./data/";
@@ -79,8 +87,23 @@ public class MacroFileReader {
 
 				if (!key_found && line.length() >= 7 && line.substring(0, 6).equalsIgnoreCase("macro ")) {
 					key = line.substring(6);
-					key_found = true;
-					instructionSet.key = key;
+
+					String test = key;
+					test = test.replace("ondown-", "").replace("onrelease-", "");
+
+					int keyCode = Keys.getKeyCode(test.toUpperCase());
+					if (keyCode != 0) {
+						if (key.contains("onrelease-")) {
+							keyCode *= -1;
+						}
+						instructionSet.key = keyCode;
+						key_found = true;
+					} else {
+						Main.getConsoleBuffer().append("Invalid key: ").append(key).append(" , Example: , would be comma").append("\n");
+						Main.pushConsoleMessage();
+						return;
+					}
+
 				} else if (key_found && command.equalsIgnoreCase("wait")) {
 					String wait_command = line.substring(4);
 					wait_command = wait_command.replaceAll("\\D", "");
@@ -188,7 +211,7 @@ public class MacroFileReader {
 				long waitTime = 0;
 				for (Instruction i : instructionSet.getInstructions()) {
 					if (i.getFlag() == CommandHandler.COMMAND_SLEEP) {
-						waitTime += (long) i.get(0).toLong();
+						waitTime += i.get(0).toLong();
 						if (waitTime >= 100) {
 							hasWait = true;
 						}
@@ -207,7 +230,8 @@ public class MacroFileReader {
 				Main.getConsoleBuffer().append("File: ").append(file).append(" has been accepted. key bind:")
 					.append(key).append(" loop:").append(instructionSet.loop).append(" window:").append(instructionSet.windowTitle);
 				Main.pushConsoleMessage();
-				Main.getInstructionSetContainer().insert(instructionSet);
+				System.out.println("Insert instructionSet using key:"+instructionSet.key);
+				Main.getInstructionSetContainer().insert1(instructionSet);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

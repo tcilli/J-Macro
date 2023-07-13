@@ -4,8 +4,6 @@ import com.github.kwhat.jnativehook.GlobalScreen;
 import com.github.kwhat.jnativehook.NativeHookException;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
-import com.github.kwhat.jnativehook.mouse.NativeMouseEvent;
-import com.github.kwhat.jnativehook.mouse.NativeMouseListener;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,6 +35,7 @@ public class PeripheralHook {
             GlobalScreen.addNativeKeyListener(new NativeKeyListener() {
                 @Override
                 public void nativeKeyPressed(NativeKeyEvent e) {
+
                     if (pressedKeys.add(e.getKeyCode())) {
                         synchronization.addKeyPress(e.getKeyCode());
                     }
@@ -44,15 +43,16 @@ public class PeripheralHook {
                 @Override
                 public void nativeKeyReleased(NativeKeyEvent e) {
                     pressedKeys.remove(e.getKeyCode());
-                    synchronization.addKeyReleased(e.getKeyCode());
+                    synchronization.addKeyReleased(e.getKeyCode() * -1);
                 }
             });
+			/* leave mouse out for now, since its more optimal to remap a mouse as this can only detect 3 buttons...
             GlobalScreen.addNativeMouseListener(new NativeMouseListener() {
                 @Override
                 public void nativeMouseClicked(NativeMouseEvent e) {
                     synchronization.addMouseClicked(e.getButton());
                 }
-            });
+            });*/
         });
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {

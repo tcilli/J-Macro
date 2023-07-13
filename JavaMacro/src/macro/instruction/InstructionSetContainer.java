@@ -2,22 +2,31 @@ package macro.instruction;
 
 import macro.Main;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class InstructionSetContainer {
 
-    private List<InstructionSet> instructionSets = new ArrayList<>();
+	private final Map<Integer, InstructionSet> instructionSetMap = new HashMap<>();
 
-    public List<InstructionSet> getInstructionSets() {
-        return instructionSets;
-    }
-    public void insert(InstructionSet instructionSet) {
-        instructionSets.add(instructionSet);
-    }
-    public void clearInstructions() {
-        instructionSets = new ArrayList<>();
-    }
+	public void insert1(final InstructionSet instructionSet) {
+		instructionSetMap.put(instructionSet.key, instructionSet);
+	}
+
+	public InstructionSet getInstructionSet(int key) {
+		return instructionSetMap.get(key);
+	}
+
+	public void clearInstructions() {
+	   instructionSetMap.clear();
+   }
+
+	//resets all locks back to false
+	public void clearLocks() {
+		for (Map.Entry<Integer, InstructionSet> entry : instructionSetMap.entrySet()) {
+			InstructionSet set = entry.getValue();
+			set.lock.set(false);
+		}
+	}
 
     public void listInstructions(InstructionSet set) {
         int count = 0;

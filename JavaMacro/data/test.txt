@@ -1,5 +1,2 @@
-macro ondown-7
-send 7
-wait 50
-wait 7
-wait 43
+macro ondown-a
+send typing
