@@ -1,7 +1,6 @@
 package macro.threading;
 
 import macro.Main;
-import macro.Window;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 
