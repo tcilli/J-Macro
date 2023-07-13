@@ -1,5 +1,5 @@
 macro ondown-7
-
 send 7
-loop
-wait 100hello
+wait 50
+wait 7
+wait 43

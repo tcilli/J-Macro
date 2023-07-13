@@ -30,8 +30,6 @@ public class ScriptExecutor {
 			try {
 				while (instructionSet.lock.get() && !Thread.currentThread().isInterrupted()) {
 
-					instructionSet.lastRan = System.currentTimeMillis();
-
 					for (Instruction instruction : instructionSet.getInstructions()) {
 
 						if (instructionSet.windowTitle.length() > 0) {
@@ -41,17 +39,7 @@ public class ScriptExecutor {
 							}
 						}
 						Optional<Command> optionalCommand = Optional.ofNullable(CommandHandler.getInstance().commandMap.get(instruction.getFlag()));
-						optionalCommand.ifPresent(command -> command.execute(instruction));
-					}
-
-					if (!instructionSet.loop) {
-						instructionSet.lock.set(false);
-						return;
-					}
-
-					if (System.currentTimeMillis() - instructionSet.lastRan < 50) {
-						instructionSet.lock.set(false);
-						return;
+						optionalCommand.ifPresent(command -> command.execute(instruction, instructionSet));
 					}
 				}
 			} catch (Exception e) {

@@ -19,13 +19,13 @@ public class InstructionSetContainer {
         instructionSets = new ArrayList<>();
     }
 
-    public void listInstructions() {
+    public void listInstructions(InstructionSet set) {
         int count = 0;
-        for (InstructionSet sets : getInstructionSets()) {
-            Main.getConsoleBuffer().append(count).append("-> bind: ").append(sets.getInstruction(0).get(0).value().toString()).append("\n")
-                    .append(count++).append("-> path: ").append(sets.scriptPath).append("\n");
+        for (Instruction i : set.getInstructions()) {
+            Main.getConsoleBuffer().append(count).append("-> bind: ").append(i.get(0).value().toString()).append("\n")
+                    .append(count++).append("-> path: ").append(set.scriptPath).append("\n");
         }
-        Main.getConsoleBuffer().append("Total of ").append(count).append(" scripts");
+        Main.getConsoleBuffer().append("Total of ").append(count).append(" instructions");
         Main.pushConsoleMessage();
     }
 

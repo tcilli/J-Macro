@@ -32,56 +32,56 @@ public class NativeInput {
     private static final int SCREEN_SCALE_FACTOR_X = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CXSCREEN));
     private static final int SCREEN_SCALE_FACTOR_Y = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CYSCREEN));
 
-
     public static void pressKeyDown(int c) {
         sendKey(c, KEYEVENTF_KEYDOWN);
     }
+
     public static void pressKeyUp(int c) {
         sendKey(c, KEYEVENTF_KEYUP);
     }
+
     public static void pressKey(int c) {
         sendKey(c, KEYEVENTF_KEYDOWN);
         sendKey(c, KEYEVENTF_KEYUP);
 
     }
-    public static void click(int mouseButton)
-    {
+
+    public static void click(int mouseButton) {
         mouseClick(
                 mouseButton == 1 ? MOUSEEVENTF_LEFTDOWN   | MOUSEEVENTF_LEFTUP :
                 mouseButton == 2 ? MOUSEEVENTF_RIGHTDOWN  | MOUSEEVENTF_RIGHTUP :
                                    MOUSEEVENTF_MIDDLEDOWN | MOUSEEVENTF_MIDDLEUP);
     }
-    public static void clickDown(int mouseButton)
-    {
+
+    public static void clickDown(int mouseButton) {
         mouseClick(
                 mouseButton == 1 ? MOUSEEVENTF_LEFTDOWN :
                 mouseButton == 2 ? MOUSEEVENTF_RIGHTDOWN :
                                    MOUSEEVENTF_MIDDLEDOWN);
     }
-    public static void clickUp(int mouseButton)
-    {
+
+    public static void clickUp(int mouseButton) {
         mouseClick(
                 mouseButton == 1 ? MOUSEEVENTF_LEFTUP :
                 mouseButton == 2 ? MOUSEEVENTF_RIGHTUP :
                                    MOUSEEVENTF_MIDDLEUP);
     }
 
-    private static void mouseClick(int flags)
-    {
+    private static void mouseClick(int flags) {
         input.input.setType("mi");
         input.type.setValue(WinUser.INPUT.INPUT_MOUSE);
         input.input.mi.dwFlags.setValue(flags);
         WinUser.INPUT[] inputs = { input };
         User32.INSTANCE.SendInput(nInput, inputs, input.size());
     }
+
     public static void mouseMove(int x, int y, int delay, boolean absolute)
     {
         if (delay > 0) {
             mouseMoveStraight(x, y, true, delay);
             return;
         }
-        if (x >= 1 && x <= 65535 && y >= 1 && y <= 65535)
-        {
+        if (x >= 1 && x <= 65535 && y >= 1 && y <= 65535) {
             input.input.setType("mi");
             input.type.setValue(WinUser.INPUT.INPUT_MOUSE);
             input.input.mi.dx.setValue((long) x * SCREEN_SCALE_FACTOR_X);
@@ -94,6 +94,7 @@ public class NativeInput {
             Main.pushConsoleMessage();
         }
     }
+
     private static void sendKey(int c, int flag) {
         input.type.setValue(WinUser.INPUT.INPUT_KEYBOARD);
         input.input.setType("ki");
@@ -106,7 +107,7 @@ public class NativeInput {
         User32.INSTANCE.SendInput(nInput, inputs, input.size());
     }
 
-    public static void mouseMoveStraight(int targetX, int targetY, boolean absolute, int delay) {
+    public static void mouseMoveStraight(final int targetX, final int targetY, final boolean absolute, final int delay) {
         PointerInfo pointerInfo = MouseInfo.getPointerInfo();
         Point currentPosition = pointerInfo.getLocation();
 
@@ -119,7 +120,9 @@ public class NativeInput {
 
             long startTime = System.currentTimeMillis();
             long elapsedTime = 0;
-            double nextX, nextY, progress;
+            double nextX;
+						double nextY;
+						double progress;
 
             while (elapsedTime < delay) {
                 progress = Math.min(1.0, (double) elapsedTime / delay);
@@ -154,8 +157,7 @@ public class NativeInput {
         }
     }
 
-    public static void getMousePosition()
-    {
+    public static void getMousePosition() {
         PointerInfo info = MouseInfo.getPointerInfo();
         Main.getConsoleBuffer().append("mousePosX: ").append(info.getLocation().getX()).append(" mousePosY: ").append(info.getLocation().getY());
         Main.pushConsoleMessage();

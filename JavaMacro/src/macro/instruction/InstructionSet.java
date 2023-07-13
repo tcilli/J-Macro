@@ -11,7 +11,6 @@ public class InstructionSet {
     public String windowTitle = "";
     public String scriptPath = "";
     public String key = "";
-    public long lastRan = 0L;
 
     //prevents multiple instances of the same script from running at the same time
     public AtomicBoolean lock = new AtomicBoolean(false);
