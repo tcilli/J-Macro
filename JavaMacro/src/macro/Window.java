@@ -13,7 +13,7 @@ public class Window {
 	public static String getActive() {
 		Arrays.fill(BUFFER, '\0');
 		User32.INSTANCE.GetWindowText(User32.INSTANCE.GetForegroundWindow(), BUFFER, BUFFER.length);
-		return Native.toString(BUFFER);
+		return Native.toString(BUFFER).toLowerCase();
 	}
 
 	public static void printActive() {

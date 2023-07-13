@@ -61,7 +61,7 @@ public class MacroFileReader {
 
 	private void readLinesFromFile(File file) {
 		InstructionSet instructionSet = new InstructionSet();
-
+		instructionSet.scriptPath = file.getPath();
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line;
 			int cur_line = 0;
@@ -231,7 +231,7 @@ public class MacroFileReader {
 					.append(key).append(" loop:").append(instructionSet.loop).append(" window:").append(instructionSet.windowTitle);
 				Main.pushConsoleMessage();
 				System.out.println("Insert instructionSet using key:"+instructionSet.key);
-				Main.getInstructionSetContainer().insert1(instructionSet);
+				Main.getInstructionSetContainer().insert(instructionSet);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -1,2 +1,2 @@
-macro ondown-a
+macro ondown-HOME
 send typing

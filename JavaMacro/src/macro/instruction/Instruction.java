@@ -22,7 +22,11 @@ public class Instruction {
         return flag;
     }
 
-    public Data<?> get(int index) {
+	public List<Data<?>> getData() {
+		return data;
+	}
+
+	public Data<?> get(int index) {
         if (index < 0 || index >= data.size()) {
             throw new IndexOutOfBoundsException("Invalid index: "+ index+" instruction.data size: "+ data.size());
         }

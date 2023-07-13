@@ -4,7 +4,7 @@ import macro.Main;
 import macro.Window;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
-import macro.scripting.Command;
+
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -19,36 +19,34 @@ public class ScriptExecutor {
 	/**
 	 * Executes the specified script in a separate thread.
 	 *
-	 * @param instructionSet  The instruction set containing the script to be executed.
+	 * @param insSet  The instruction set containing the script to be executed.
 	 * @param executorService The executor service for running the script in a separate thread.
 	 */
-	public static void executeScript(final InstructionSet instructionSet, final ExecutorService executorService) {
+	public static void executeScript(final InstructionSet insSet, final ExecutorService executorService) {
 
+		/*
+		 *  Executes the script in a separate thread.
+		 */
 		executorService.execute(() -> {
-			try {
-				while (instructionSet.lock.get() && !Thread.currentThread().isInterrupted()) {
 
-					for (Instruction instruction : instructionSet.getInstructions()) {
+			while (insSet.lock.get()) {
 
-						if (instructionSet.windowTitle.length() > 0) {
-							if (!instructionSet.windowTitle.toLowerCase().contains(Window.getActive().toLowerCase())) {
-								instructionSet.lock.set(false);
-								return;
-							}
-						}
-						Command command = Main.getCommandHandler().commandMap.get(instruction.getFlag());
+				/*
+				 *  Loop through each instruction in this instruction set.
+				 */
+				for (Instruction ins : insSet.getInstructions()) {
 
-						if (command != null) {
-							command.execute(instruction, instructionSet);
-						} else {
-							instructionSet.lock.set(false);
-							return;
-						}
-					}
+
+					/*
+					 * Execute the command associated with this instruction. This should never be null!.
+					 * The InstructionSet lock is passed in as a parameter to the command because the
+					 * command may need to release the lock on the InstructionSet.
+					 */
+					Main.getCommandHandler().commandMap.get(ins.getFlag())
+							.execute
+									(ins.getData(), insSet);
+
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				instructionSet.lock.set(false);
 			}
 		});
 	}

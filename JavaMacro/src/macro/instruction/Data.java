@@ -25,4 +25,8 @@ public record Data<T>(T value) {
             throw new ClassCastException("Cannot cast " + value.getClass().getSimpleName() + " to Long");
         }
     }
+
+	public String print() {
+		return String.valueOf(value);
+	}
 }

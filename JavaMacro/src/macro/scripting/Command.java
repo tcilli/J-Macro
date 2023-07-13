@@ -1,7 +1,12 @@
 package macro.scripting;
 
+import macro.instruction.Data;
+import macro.instruction.InstructionSet;
+
+import java.util.List;
+
 public interface Command {
 
-    void execute(macro.instruction.Instruction instruction, macro.instruction.InstructionSet set);
+    void execute(List<Data<?>> data, InstructionSet insSet);
 
 }

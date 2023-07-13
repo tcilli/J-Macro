@@ -25,51 +25,80 @@ public class CommandHandler {
     // Define a map of command numbers to command functions
     public Map<Integer, Command> commandMap = new HashMap<>();
 
-    // Contains Lambda functions for each command
-    public CommandHandler()
+	/*
+	 * Please note only some commands require a window check, such as mouse clicks and sending strings
+	 */
+	public CommandHandler()
     {
-        commandMap.put(COMMAND_SLEEP, (instruction, set)-> {
+        commandMap.put(COMMAND_SLEEP,  (data, set) -> {
             try {
-                Thread.sleep(instruction.get(0).toLong());
+                Thread.sleep(data.get(0).toLong());
             } catch(InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         });
 
-        commandMap.put(COMMAND_SEND_STRING,
-		        (instruction, set)-> Keys.sendString(instruction.get(0).toString()));
+        commandMap.put(COMMAND_SEND_STRING, (data, set) -> {
+			if (failedWindowCheck(set.windowTitle)) {
+				return;
+			}
+			Keys.sendString(data.get(0).toString());
+		});
 
-        commandMap.put(COMMAND_CLICK,
-		        (instruction, set)-> NativeInput.click(instruction.get(0).toInt()));
+        commandMap.put(COMMAND_CLICK,  (data, set) -> {
+			if (failedWindowCheck(set.windowTitle)) {
+				return;
+			}
+			NativeInput.click(data.get(0).toInt());
+		});
 
-        commandMap.put(COMMAND_CLICK_DOWN,
-		        (instruction, set)-> NativeInput.clickDown(instruction.get(0).toInt()));
+        commandMap.put(COMMAND_CLICK_DOWN, (data, set) -> {
+			if (failedWindowCheck(set.windowTitle)) {
+				return;
+			}
+			NativeInput.clickDown(data.get(0).toInt());
+		});
 
-        commandMap.put(COMMAND_CLICK_UP,
-		        (instruction, set)-> NativeInput.clickUp(instruction.get(0).toInt()));
+        commandMap.put(COMMAND_CLICK_UP, (data, set) -> {
+			if (failedWindowCheck(set.windowTitle)) {
+				return;
+			}
+			NativeInput.clickUp(data.get(0).toInt());
+		});
 
-        commandMap.put(COMMAND_MOUSE_MOVE,
-		        (instruction, set)-> NativeInput.mouseMove(
-                        instruction.get(0).toInt(),
-                        instruction.get(1).toInt(),
-                        instruction.get(2).toInt(), true));
+        commandMap.put(COMMAND_MOUSE_MOVE, (data, set) -> {
+			if (failedWindowCheck(set.windowTitle)) {
+				return;
+			}
+			NativeInput.mouseMove(
+					data.get(0).toInt(),
+					data.get(1).toInt(),
+					data.get(2).toInt(), true);
+		});
 
         commandMap.put(COMMAND_READ_MACRO_FILE,
-		        (instruction, set)-> new MacroFileReader());
+		        (data, set) -> new MacroFileReader());
 
         commandMap.put(COMMAND_PRINT_MEMORY,
-		        (instruction, set)-> MemoryUtil.printHeapMemoryUsage());
+		        (data, set) -> MemoryUtil.printHeapMemoryUsage());
 
         commandMap.put(COMMAND_LIST_INSTRUCTIONS,
-		        (instruction, set)-> Main.getInstructionSetContainer().listInstructions(set));
+		        (data, set) -> Main.getInstructionSetContainer().listInstructions());
 
         commandMap.put(COMMAND_GET_MOUSE_POSITION,
-		        (instruction, set)-> NativeInput.getMousePosition());
+		        (data, set) -> NativeInput.getMousePosition());
 
         commandMap.put(COMMAND_PRINT_ACTIVE_WINDOW,
-		        (instruction, set)-> Window.printActive());
+		        (data, set) -> Window.printActive());
 
 		commandMap.put(COMMAND_END,
-				(instruction, set) -> set.lock.set(false));
+				(data, set) -> set.lock.set(false));
     }
+
+	private boolean failedWindowCheck(String windowTitle) {
+		if (windowTitle.length() > 0) {
+			return !Window.getActive().contains(windowTitle);
+		}
+		return false;
+	}
 }
