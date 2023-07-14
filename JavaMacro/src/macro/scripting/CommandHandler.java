@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * The {@link CommandHandler} class is responsible for
  * linking of the {@link Instruction#getFlag()} to {@link Command} interface.
- * The {@link Command} interface is used to execute the list of {@link Instruction}.{@link Data} {@link Record}s.
+ * The {@link Command} interface is used to execute the stored action of an {@link Instruction}.
  * <p>See {@link Command#execute(List, InstructionSet)}</p>
  */
 public class CommandHandler {
@@ -28,7 +28,7 @@ public class CommandHandler {
 	 * Note: only some commands require a window check, such as mouse clicks and sending strings.
 	 * This prevents an {@link Instruction} from executing in the wrong window (if the user has specified a window).
 	 * Each {@link Instruction} consists of {@link Instruction#getFlag()} used as the Key for the {@link #commandMap}
-	 * and a list of {@link Data} {@link Record}s.
+	 * and a list of {@link Data} {@link Record}s. The {@link #commandMap} stores the action of a specific {@link Instruction}.
 	 */
 	public CommandHandler() {
 		/*
