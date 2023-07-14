@@ -1,2 +1,0 @@
-macro ondown-HOME
-send typing

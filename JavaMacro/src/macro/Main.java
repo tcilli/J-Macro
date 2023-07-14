@@ -4,8 +4,6 @@ import com.github.kwhat.jnativehook.NativeHookException;
 import macro.instruction.InstructionSetContainer;
 import macro.scripting.CommandHandler;
 import macro.threading.PeripheralHook;
-import macro.threading.ScriptDispatcher;
-import macro.threading.Synchronization;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,7 +16,7 @@ import java.util.concurrent.Executors;
  *     Date: 08/07/2023
  * </p>
  */
-public class Main {
+public class Main  {
 
     private static final StringBuffer console = new StringBuffer();
 	private static InstructionSetContainer instructionSetContainer;
@@ -29,18 +27,15 @@ public class Main {
 		instructionSetContainer = new InstructionSetContainer();
 		commandHandler = new CommandHandler();
 
-        Keys.loadKeyMap();
         new MacroFileReader();
 
-
         final ExecutorService executor = Executors.newCachedThreadPool();
-        final Synchronization synchronization = new Synchronization();
+		final PeripheralHook peripheralHook = new PeripheralHook(executor);
 
-        new PeripheralHook(synchronization, executor);
-        new ScriptDispatcher(synchronization, executor);
+        executor.submit(peripheralHook);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            synchronization.stop();
+			peripheralHook.unregisterNativeHook();
             executor.shutdown();
         }));
     }

@@ -4,7 +4,9 @@ import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 import macro.jnative.NativeInput;
 import macro.scripting.CommandHandler;
+import macro.win.MyUser32;
 
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -62,6 +64,10 @@ public class MacroFileReader {
 	private void readLinesFromFile(File file) {
 		InstructionSet instructionSet = new InstructionSet();
 		instructionSet.scriptPath = file.getPath();
+		boolean hasSleep = false;
+		boolean hasMovement = false;
+		boolean delayMovement = false;
+
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line;
 			int cur_line = 0;
@@ -96,6 +102,7 @@ public class MacroFileReader {
 						if (key.contains("onrelease-")) {
 							keyCode *= -1;
 						}
+
 						instructionSet.key = keyCode;
 						key_found = true;
 					} else {
@@ -112,6 +119,7 @@ public class MacroFileReader {
 						if (wait_for > 0 && wait_for < Long.MAX_VALUE) {
 							instruction = new Instruction(CommandHandler.COMMAND_SLEEP);
 							instruction.insert(wait_for);
+							hasSleep = true;
 						}
 					} catch (NumberFormatException e) {
 						Main.getConsoleBuffer().append("Invalid number format for ").append(line).append("\n").append("Syntax: wait 1000 \n").append(e);
@@ -174,6 +182,9 @@ public class MacroFileReader {
 							int delay = 0;
 							if (coordinates.length == 3) {
 								delay = Integer.parseInt(coordinates[2]);
+								if (delay > 0) {
+									hasSleep = true;
+								}
 							}
 							if (x > 0 && x < 65535 && y > 0 && y < 65535) {
 								instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE);
@@ -193,6 +204,10 @@ public class MacroFileReader {
 					}
 				} else if (key_found && command.equalsIgnoreCase("loop")) {
 					instructionSet.loop = true;
+				} else if (key_found && line.equalsIgnoreCase("consume")) {
+					instructionSet.consumeKey = true;
+					//Keys.consumeKey(instructionSet.key);
+
 				} else if (key_found && command.equalsIgnoreCase("wind")) {
 					String title = line.substring(6);
 					title = title.replaceAll(" ", "");
@@ -231,6 +246,9 @@ public class MacroFileReader {
 					.append(key).append(" loop:").append(instructionSet.loop).append(" window:").append(instructionSet.windowTitle);
 				Main.pushConsoleMessage();
 				System.out.println("Insert instructionSet using key:"+instructionSet.key);
+
+				instructionSet.threadless = !instructionSet.loop && !hasSleep;
+
 				Main.getInstructionSetContainer().insert(instructionSet);
 			}
 		} catch (IOException e) {

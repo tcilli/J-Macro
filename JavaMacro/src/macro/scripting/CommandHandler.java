@@ -21,7 +21,7 @@ public class CommandHandler {
 	/**
 	 * The commandMap
 	 */
-	public Map<Integer, Command> commandMap = new HashMap<>();
+	public final Map<Integer, Command> commandMap = new HashMap<>();
 
 	/**
 	 * Populates the {@link #commandMap} Each {@link Command} is an interface.
@@ -145,7 +145,7 @@ public class CommandHandler {
 	 * @param windowTitle the window title to look for
 	 * @return True if the window title is not found and was specified.
 	 */
-	private boolean failedWindowCheck(String windowTitle) {
+	private boolean failedWindowCheck(final String windowTitle) {
 		if (windowTitle.length() > 0) {
 			return !Window.getActive().contains(windowTitle);
 		}

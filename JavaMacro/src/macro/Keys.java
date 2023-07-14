@@ -40,7 +40,7 @@ public final class Keys {
      */
     public static boolean keyRequiresShift(final char c) {
         return Character.isUpperCase(c)
-                || "~!@#$%^&*()_+{}|:\"<>?".indexOf(c) >= 0;
+            || "~!@#$%^&*()_+{}|:\"<>?".indexOf(c) >= 0;
     }
 
     /**
@@ -50,7 +50,7 @@ public final class Keys {
     public static void sendString(final String s) {
         // Send each character in the string
         for (char c : s.toCharArray()) {
-            int keycode = KEYMAP.get(c);
+            int keycode = KEYMAP.getOrDefault(c, 0);
             boolean shiftNeeded = keyRequiresShift(c);
             if (shiftNeeded) {
                 pressKeyDown(KeyEvent.VK_SHIFT);
@@ -59,6 +59,9 @@ public final class Keys {
             if (shiftNeeded) {
                 pressKeyUp(KeyEvent.VK_SHIFT);
             }
+            if (keycode == 0) {
+                System.err.println("Unknown character: " + c);
+            }
         }
     }
 
@@ -66,7 +69,7 @@ public final class Keys {
      *
      * Loads the keymap with keycodes for common characters.
      */
-    public static void loadKeyMap() {
+    static  {
         // Load keycodes for lowercase and uppercase characters
         for (char c = 'a'; c <= 'z'; ++c) {
             KEYMAP.put(c, KeyEvent.VK_A + (c - 'a'));
@@ -118,34 +121,34 @@ public final class Keys {
         KEYMAP.put(')', KeyEvent.VK_0); // Requires Shift
     }
 
-	// Map of key names to keycodes
-	private static final Map<String, Integer> KEYCODE_MAP = new HashMap<>();
+    // Map of key names to keycodes
+    private static final Map<String, Integer> KEYCODE_MAP = new HashMap<>();
 
-	static {
-		// yoink those keycodes, ty
-		for (Field field : NativeKeyEvent.class.getDeclaredFields()) {
-			if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers()) && field.getType() == int.class && field.getName().startsWith("VC_")) {
-				try {
-					int keyCode = field.getInt(null);
-					String keyName = field.getName().substring(3);
-					KEYCODE_MAP.put(keyName, keyCode);
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+    static {
+        // yoink those keycodes, ty
+        for (Field field : NativeKeyEvent.class.getDeclaredFields()) {
+            if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers()) && field.getType() == int.class && field.getName().startsWith("VC_")) {
+                try {
+                    int keyCode = field.getInt(null);
+                    String keyName = field.getName().substring(3);
+                    KEYCODE_MAP.put(keyName, keyCode);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 
-	public static int getKeyCode(String keyText) {
-		keyText = keyText.toUpperCase();
+    public static int getKeyCode(String keyText) {
+        keyText = keyText.toUpperCase();
 
-		// Get the corresponding keycode from the map
-		Integer keyCode = KEYCODE_MAP.get(keyText);
+        // Get the corresponding keycode from the map
+        Integer keyCode = KEYCODE_MAP.get(keyText);
 
-		if (keyCode == null) {
-			System.out.println("No keycode found for '" + keyText + "'");
-			return NativeKeyEvent.VC_UNDEFINED;
-		}
-		return keyCode;
-	}
+        if (keyCode == null) {
+            System.out.println("No keycode found for '" + keyText + "'");
+            return NativeKeyEvent.VC_UNDEFINED;
+        }
+        return keyCode;
+    }
 }
