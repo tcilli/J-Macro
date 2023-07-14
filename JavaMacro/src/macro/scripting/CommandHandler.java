@@ -1,14 +1,20 @@
 package macro.scripting;
 
 import macro.*;
+import macro.instruction.Data;
+import macro.instruction.Instruction;
+import macro.instruction.InstructionSet;
 import macro.jnative.NativeInput;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * The {@link CommandHandler} class is responsible for
- * linking and handling of all command interfaces
+ * linking of the {@link Instruction#getFlag()} to {@link Command} interface.
+ * The {@link Command} interface is used to execute the list of {@link Instruction}.{@link Data} {@link Record}s.
+ * <p>See {@link Command#execute(List, InstructionSet)}</p>
  */
 public class CommandHandler {
 
@@ -20,10 +26,14 @@ public class CommandHandler {
 	/**
 	 * Populates the {@link #commandMap} Each {@link Command} is an interface.
 	 * Note: only some commands require a window check, such as mouse clicks and sending strings.
-	 * This prevents an instruction from executing in the wrong window (if the user has specified a window).
+	 * This prevents an {@link Instruction} from executing in the wrong window (if the user has specified a window).
+	 * Each {@link Instruction} consists of {@link Instruction#getFlag()} used as the Key for the {@link #commandMap}
+	 * and a list of {@link Data} {@link Record}s.
 	 */
-	public CommandHandler()
-	{
+	public CommandHandler() {
+		/*
+		 * The sleep command requires 1 data argument: (long) duration
+		 */
 		commandMap.put(COMMAND_SLEEP,  (data, set) -> {
 			try {
 				Thread.sleep(data.get(0).toLong());
@@ -32,6 +42,9 @@ public class CommandHandler {
 			}
 		});
 
+		/*
+		 * The send string command requires 1 data argument: (String) message
+		 */
 		commandMap.put(COMMAND_SEND_STRING, (data, set) -> {
 			if (failedWindowCheck(set.windowTitle)) {
 				return;
@@ -39,6 +52,9 @@ public class CommandHandler {
 			Keys.sendString(data.get(0).toString());
 		});
 
+		/*
+		 * The mouse click command requires 1 data argument: (Integer) mouseButton
+		 */
 		commandMap.put(COMMAND_CLICK,  (data, set) -> {
 			if (failedWindowCheck(set.windowTitle)) {
 				return;
@@ -46,6 +62,9 @@ public class CommandHandler {
 			NativeInput.click(data.get(0).toInt());
 		});
 
+		/*
+		 * The mouse click down command requires 1 data argument: (Integer) mouseButton
+		 */
 		commandMap.put(COMMAND_CLICK_DOWN, (data, set) -> {
 			if (failedWindowCheck(set.windowTitle)) {
 				return;
@@ -53,6 +72,9 @@ public class CommandHandler {
 			NativeInput.clickDown(data.get(0).toInt());
 		});
 
+		/*
+		 * The mouse click up command requires 1 data argument: (Integer) mouseButton
+		 */
 		commandMap.put(COMMAND_CLICK_UP, (data, set) -> {
 			if (failedWindowCheck(set.windowTitle)) {
 				return;
@@ -60,6 +82,14 @@ public class CommandHandler {
 			NativeInput.clickUp(data.get(0).toInt());
 		});
 
+		/*
+		 * The mouse move command requires 3 data arguments:
+		 * (Integer) x position
+		 * (Integer) y position
+		 * (Integer) duration
+		 * Also Requires 1 boolean argument:
+		 * (Boolean) relative
+		 */
 		commandMap.put(COMMAND_MOUSE_MOVE, (data, set) -> {
 			if (failedWindowCheck(set.windowTitle)) {
 				return;
@@ -70,25 +100,51 @@ public class CommandHandler {
 				data.get(2).toInt(), true);
 		});
 
+		/*
+		 * Reloads the macro file
+		 */
 		commandMap.put(COMMAND_READ_MACRO_FILE,
 			(data, set) -> new MacroFileReader());
 
+		/*
+		 * Prints the current heap memory usage
+		 */
 		commandMap.put(COMMAND_PRINT_MEMORY,
 			(data, set) -> MemoryUtil.printHeapMemoryUsage());
 
+		/*
+		 * Prints the all the InstructionSets
+		 */
 		commandMap.put(COMMAND_LIST_INSTRUCTIONS,
 			(data, set) -> Main.getInstructionSetContainer().listInstructions());
 
+		/*
+		 * Prints the current mouse position
+		 */
 		commandMap.put(COMMAND_GET_MOUSE_POSITION,
 			(data, set) -> NativeInput.getMousePosition());
 
+		/*
+		 * Prints the active window title
+		 */
 		commandMap.put(COMMAND_PRINT_ACTIVE_WINDOW,
 			(data, set) -> Window.printActive());
 
+		/*
+		 * Sets the lock to false, which will end the effective macro/script
+		 */
 		commandMap.put(COMMAND_END,
 			(data, set) -> set.lock.set(false));
 	}
 
+	/**
+	 * Compares the {@link String} windowTitle to {@link Window#getActive()}.
+	 * This is only used for commands that require a window check.
+	 * This only applies to an {@link InstructionSet} where the user has specified a {@link InstructionSet#windowTitle}.
+	 * If not specified, this will always return false
+	 * @param windowTitle the window title to look for
+	 * @return True if the window title is not found and was specified.
+	 */
 	private boolean failedWindowCheck(String windowTitle) {
 		if (windowTitle.length() > 0) {
 			return !Window.getActive().contains(windowTitle);
