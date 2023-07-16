@@ -100,6 +100,16 @@ public class CommandHandler {
 				data.get(2).toInt(), true);
 		});
 
+		commandMap.put(COMMAND_MOVE_MOUSE_RETURN, (data, set) -> {
+			if (failedWindowCheck(set.windowTitle)) {
+				return;
+			}
+			NativeInput.moveMouseReturn(
+				data.get(0).toInt(),
+				data.get(1).toInt(),
+				data.get(2).toInt(), true);
+		});
+
 		/*
 		 * Reloads the macro file
 		 */
@@ -116,7 +126,7 @@ public class CommandHandler {
 		 * Prints the all the InstructionSets
 		 */
 		commandMap.put(COMMAND_LIST_INSTRUCTIONS,
-			(data, set) -> Main.getInstructionSetContainer().listInstructions());
+			(data, set) -> Main.getScriptContainer().listInstructions());
 
 		/*
 		 * Prints the current mouse position
@@ -165,5 +175,6 @@ public class CommandHandler {
 	public static final int COMMAND_GET_MOUSE_POSITION = 10;
 	public static final int COMMAND_PRINT_ACTIVE_WINDOW = 11;
 	public static final int COMMAND_END = 12;
+	public static final int COMMAND_MOVE_MOUSE_RETURN = 13;
 }
 

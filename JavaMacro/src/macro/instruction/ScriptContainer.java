@@ -5,12 +5,16 @@ import macro.Main;
 
 import java.util.*;
 
-public class InstructionSetContainer {
+public class ScriptContainer {
 
 	private final Map<Integer, InstructionSet> instructionSetMap = new HashMap<>();
 
 	public void insert(final InstructionSet instructionSet) {
 		instructionSetMap.put(instructionSet.key, instructionSet);
+	}
+
+	public final Map<Integer, InstructionSet> getInstructionSetMap() {
+		return this.instructionSetMap;
 	}
 
 	public InstructionSet getInstructionSet(int key) {
@@ -46,5 +50,7 @@ public class InstructionSetContainer {
 	    }
         Main.pushConsoleMessage();
     }
+
+
 
 }

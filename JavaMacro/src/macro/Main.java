@@ -1,9 +1,9 @@
 package macro;
 
 import com.github.kwhat.jnativehook.NativeHookException;
-import macro.instruction.InstructionSetContainer;
+import macro.instruction.ScriptContainer;
 import macro.scripting.CommandHandler;
-import macro.threading.PeripheralHook;
+import macro.win32.KbHook;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,23 +19,23 @@ import java.util.concurrent.Executors;
 public class Main  {
 
     private static final StringBuffer console = new StringBuffer();
-	private static InstructionSetContainer instructionSetContainer;
+	private static ScriptContainer scriptContainer;
 	private static CommandHandler commandHandler;
 
     public static void main(String[] args) throws NativeHookException {
 
-		instructionSetContainer = new InstructionSetContainer();
+		scriptContainer = new ScriptContainer();
 		commandHandler = new CommandHandler();
 
         new MacroFileReader();
 
         final ExecutorService executor = Executors.newCachedThreadPool();
-		final PeripheralHook peripheralHook = new PeripheralHook(executor);
+		final KbHook KBHook = new KbHook(executor);
 
-        executor.submit(peripheralHook);
+		executor.submit(KBHook);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			peripheralHook.unregisterNativeHook();
+			KBHook.unhook();
             executor.shutdown();
         }));
     }
@@ -49,8 +49,8 @@ public class Main  {
 		console.setLength(0);
 	}
 
-	public static InstructionSetContainer getInstructionSetContainer() {
-		return instructionSetContainer;
+	public static ScriptContainer getScriptContainer() {
+		return scriptContainer;
 	}
 
 	public static CommandHandler getCommandHandler() {

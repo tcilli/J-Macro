@@ -1,5 +1,7 @@
 package macro.instruction;
 
+import macro.Main;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -27,5 +29,11 @@ public class InstructionSet {
 
     public void insert(Instruction instruction) {
         instructions.add(instruction);
+    }
+
+    public void run() {
+        for (Instruction ins : getInstructions()) {
+            Main.getCommandHandler().commandMap.get(ins.getFlag()).execute(ins.getData(), this);
+        }
     }
 }

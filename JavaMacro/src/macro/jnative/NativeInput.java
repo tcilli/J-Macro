@@ -4,6 +4,7 @@ import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinUser;
 import macro.Main;
+import macro.win32.KbInterface;
 
 import java.awt.*;
 
@@ -32,19 +33,7 @@ public class NativeInput {
     private static final int SCREEN_SCALE_FACTOR_X = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CXSCREEN));
     private static final int SCREEN_SCALE_FACTOR_Y = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CYSCREEN));
 
-    public static void pressKeyDown(int c) {
-        sendKey(c, KEYEVENTF_KEYDOWN);
-    }
 
-    public static void pressKeyUp(int c) {
-        sendKey(c, KEYEVENTF_KEYUP);
-    }
-
-    public static void pressKey(int c) {
-        sendKey(c, KEYEVENTF_KEYDOWN);
-        sendKey(c, KEYEVENTF_KEYUP);
-
-    }
 
     public static void click(int mouseButton) {
         mouseClick(
@@ -95,16 +84,47 @@ public class NativeInput {
         }
     }
 
-    private static void sendKey(int c, int flag) {
+
+
+    public static void pressKeyDown(int vk) {
+        keybd_event(vk, 0, KEYEVENTF_KEYDOWN);
+    }
+
+    public static void pressKeyUp(int vk) {
+        keybd_event(vk, 0, KEYEVENTF_KEYUP);
+    }
+
+    public static void pressKey(int vk) {
+        keybd_event(vk, 0, KEYEVENTF_KEYDOWN);
+        keybd_event(vk, 0, KEYEVENTF_KEYUP);
+    }
+
+    public static void keybd_event(int virtualKeyCode, int scanCode, int dwFlags) {
+        KbInterface.winUser32.keybd_event(
+            (byte)virtualKeyCode,
+            (byte)scanCode,
+            dwFlags, 0); // Key Up
+    }
+
+
+    private static void sendKey(int vk, int sc, int flag) {
         input.type.setValue(WinUser.INPUT.INPUT_KEYBOARD);
         input.input.setType("ki");
-        input.input.ki.wScan.setValue(0);
+        input.input.ki.wScan.setValue(sc);
         input.input.ki.time.setValue(0);
         input.input.ki.dwExtraInfo.setValue(0);
-        input.input.ki.wVk.setValue(c);
+        input.input.ki.wVk.setValue(vk);
         input.input.ki.dwFlags.setValue(flag);
         WinUser.INPUT[] inputs = { input };
         User32.INSTANCE.SendInput(nInput, inputs, input.size());
+    }
+
+    public static void moveMouseReturn(int x, int y, int delay, boolean absolute) {
+        int currentX = MouseInfo.getPointerInfo().getLocation().x;
+        int currentY = MouseInfo.getPointerInfo().getLocation().y;
+        mouseMove(x, y, delay, absolute);
+        click(1);
+        mouseMove(currentX, currentY, 0, absolute);
     }
 
     public static void mouseMoveStraight(final int targetX, final int targetY, final boolean absolute, final int delay) {

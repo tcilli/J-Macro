@@ -4,9 +4,7 @@ import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 import macro.jnative.NativeInput;
 import macro.scripting.CommandHandler;
-import macro.win.MyUser32;
 
-import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -26,7 +24,7 @@ public class MacroFileReader {
 	public static final String DIR2 = "./data/predefined";
 
 	public MacroFileReader() {
-		Main.getInstructionSetContainer().clearInstructions();
+		Main.getScriptContainer().clearInstructions();
 		try {
 			readFiles(DIR2);
 		} catch (IOException e) {
@@ -64,9 +62,8 @@ public class MacroFileReader {
 	private void readLinesFromFile(File file) {
 		InstructionSet instructionSet = new InstructionSet();
 		instructionSet.scriptPath = file.getPath();
+
 		boolean hasSleep = false;
-		boolean hasMovement = false;
-		boolean delayMovement = false;
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line;
@@ -166,8 +163,17 @@ public class MacroFileReader {
 					instruction = new Instruction(CommandHandler.COMMAND_PRINT_ACTIVE_WINDOW);
 				} else if (key_found && line.equalsIgnoreCase("get memory")) {
 					instruction = new Instruction(CommandHandler.COMMAND_PRINT_MEMORY);
+
 				} else if (key_found && command.equalsIgnoreCase("move")) {
-					String move_command = line.substring(4);
+
+					int offset = 4;
+
+					if (line.contains("movereturn")) {
+						System.out.println("movereturn################################################");
+						offset = 10;
+					}
+
+					String move_command = line.substring(offset);
 
 					move_command = move_command.replaceAll("[a-zA-Z]", "");
 					String[] coordinates = move_command.split(",");
@@ -187,10 +193,17 @@ public class MacroFileReader {
 								}
 							}
 							if (x > 0 && x < 65535 && y > 0 && y < 65535) {
-								instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE);
-								instruction.insert(x);
-								instruction.insert(y);
-								instruction.insert(delay);
+								if (offset == 4) {
+									instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE);
+									instruction.insert(x);
+									instruction.insert(y);
+									instruction.insert(delay);
+								} else {
+									instruction = new Instruction(CommandHandler.COMMAND_MOVE_MOUSE_RETURN);
+									instruction.insert(x);
+									instruction.insert(y);
+									instruction.insert(delay);
+								}
 							}
 						} catch (NumberFormatException e) {
 							Main.getConsoleBuffer()
@@ -206,7 +219,7 @@ public class MacroFileReader {
 					instructionSet.loop = true;
 				} else if (key_found && line.equalsIgnoreCase("consume")) {
 					instructionSet.consumeKey = true;
-					//Keys.consumeKey(instructionSet.key);
+					Keys.addKeyToConsumableList(instructionSet.key);
 
 				} else if (key_found && command.equalsIgnoreCase("wind")) {
 					String title = line.substring(6);
@@ -234,7 +247,7 @@ public class MacroFileReader {
 				}
 				if (instructionSet.loop && !hasWait) {
 					Main.getConsoleBuffer().append("File: ").append(file).append(" Rejected, Requires a wait command if using the loop instruction, \n")
-							.append("Or did not meet the required minimum wait time of 100ms. Detected delay time: ").append(waitTime).append("ms");
+						.append("Or did not meet the required minimum wait time of 100ms. Detected delay time: ").append(waitTime).append("ms");
 					Main.pushConsoleMessage();
 					return;
 				}
@@ -245,11 +258,10 @@ public class MacroFileReader {
 				Main.getConsoleBuffer().append("File: ").append(file).append(" has been accepted. key bind:")
 					.append(key).append(" loop:").append(instructionSet.loop).append(" window:").append(instructionSet.windowTitle);
 				Main.pushConsoleMessage();
-				System.out.println("Insert instructionSet using key:"+instructionSet.key);
 
 				instructionSet.threadless = !instructionSet.loop && !hasSleep;
 
-				Main.getInstructionSetContainer().insert(instructionSet);
+				Main.getScriptContainer().insert(instructionSet);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
