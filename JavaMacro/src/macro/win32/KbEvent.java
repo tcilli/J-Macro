@@ -2,6 +2,8 @@ package macro.win32;
 
 import macro.Keys;
 
+import java.awt.event.KeyEvent;
+
 import static com.sun.jna.platform.win32.WinUser.VK_SHIFT;
 
 /**
@@ -38,10 +40,19 @@ import static com.sun.jna.platform.win32.WinUser.VK_SHIFT;
 public class KbEvent {
 
     // The 'dwFlag' for signaling a key down event.
-    public static final int KEYDOWN = 0;
+    public static final int KEYDOWN = 0x0000;
+
+    // The 'dwFlag' for signaling a shift key event.
+    public static final int SHIFT_DOWN = 0x0001;
 
     //The 'dwFlag' for signaling a key up event.
-    public static final int KEYUP = 2;
+    public static final int KEYUP = 0x0002;
+
+    //The virtual code of the shift key (Windows mapping).
+    public static final int VK_SHIFT = 0x10;
+
+    //The shift key flag.
+    public static final int SHIFT_KEY = 0x01;
 
     /**
      * Simulates keystrokes by sending virtual keycode to the active window.
@@ -51,17 +62,36 @@ public class KbEvent {
     public static void send_characters(char[] charArray) {
 
         for (char c : charArray) {
-            int virtualKeyCode = KbInterface.winUser32.VkKeyScan(c);
+            int result = KbInterface.winUser32.VkKeyScan(c);
+            int virtualKeyCode = result & 0xFF;
+            int shiftState = result >> 8;
+
+            boolean shiftRequired = (shiftState & SHIFT_KEY) != 0;
+
             int dwFlags = 0;
 
-            if (Keys.keyRequiresShift(c)) {
-                dwFlags |= 0x0001;
+            /*
+             * Pressing the modifier keys.
+             */
+            if (shiftRequired) {
+                dwFlags |= SHIFT_DOWN;
                 KbInterface.winUser32.keybd_event((byte) VK_SHIFT, (byte) 0, KEYDOWN, 0);
             }
-            KbInterface.winUser32.keybd_event((byte) virtualKeyCode, (byte) 0, dwFlags, 0);
-            KbInterface.winUser32.keybd_event((byte) virtualKeyCode, (byte) 0, dwFlags | 0x0002, 0);
 
-            if (Keys.keyRequiresShift(c)) {
+            /*
+             * Pressing the key down
+             */
+            KbInterface.winUser32.keybd_event((byte) virtualKeyCode, (byte) 0, dwFlags, 0);
+
+            /*
+             * Releasing the key up
+             */
+            KbInterface.winUser32.keybd_event((byte) virtualKeyCode, (byte) 0, dwFlags | KEYUP, 0);
+
+            /*
+             * Releasing the modifier keys.
+             */
+            if (shiftRequired) {
                 KbInterface.winUser32.keybd_event((byte) VK_SHIFT, (byte) 0, KEYUP, 0);
             }
         }

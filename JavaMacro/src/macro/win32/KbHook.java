@@ -94,7 +94,6 @@ public class KbHook implements Runnable {
                          * Example: pressing shift + 1 = !, but releasing shift + 1 release = 1 released not ! released
                          */
                         if (pressedKeys.add(lParam.vkCode)) {
-                            System.out.println(characterCode);
                             handleKey(characterCode);
 
                             // If the key is a consumable key, return 1 to prevent the key from being sent to the application
@@ -126,7 +125,6 @@ public class KbHook implements Runnable {
         this.hHookKb = User32.INSTANCE.SetWindowsHookEx(WinUser.WH_KEYBOARD_LL, keyboardHook, hModule, 0);
 
         WinUser.MSG msg = new WinUser.MSG();
-
         while (true) {
             if (User32.INSTANCE.GetMessage(msg, null, 0, 0) != 0) {
                 User32.INSTANCE.TranslateMessage(msg);
