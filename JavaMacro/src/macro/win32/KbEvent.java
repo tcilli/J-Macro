@@ -1,11 +1,5 @@
 package macro.win32;
 
-import macro.Keys;
-
-import java.awt.event.KeyEvent;
-
-import static com.sun.jna.platform.win32.WinUser.VK_SHIFT;
-
 /**
  * A class for sending virtual keys to the active window.
  * A virtual key, also known as a virtual keycode or VK code,

@@ -9,7 +9,7 @@ import macro.Main;
 import macro.instruction.InstructionSet;
 import macro.Keys;
 import java.awt.event.KeyEvent;
-import java.util.*;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
@@ -40,6 +40,12 @@ public class KbHook implements Runnable {
 
         WinUser.HOOKPROC keyboardHook = new WinUser.HOOKPROC() {
 
+            /**
+             * @param nCode 0 if the hook procedure must process the message. -1 if the hook procedure should pass the message to the next hook procedure in the current hook chain.
+             * @param wParam The identifier of the keyboard message. This parameter can be one of the following messages: WM_KEYDOWN, WM_KEYUP, WM_SYSKEYDOWN, or WM_SYSKEYUP.
+             * @param lParam A pointer to a KBDLLHOOKSTRUCT structure.
+             * @return If nCode is less than zero, the hook procedure must return the value returned by CallNextHookEx.
+             */
             public WinDef.LRESULT callback(int nCode, WinDef.WPARAM wParam, WinUser.KBDLLHOOKSTRUCT lParam) {
 
                 if (nCode >= 0 && lParam.vkCode > 0) {
