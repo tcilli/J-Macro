@@ -1,37 +1,114 @@
 /**
  * Keys.java.
  * <p>
- *    A class that converts characters to keycodes.
+ *    A class that handles key conversions and key blocking.
  * </p>
  *
  */
 package macro;
 
 import java.awt.event.KeyEvent;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-
-import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
-import com.sun.jna.platform.win32.User32;
-import macro.win32.KbInterface;
-
-import static macro.jnative.NativeInput.pressKey;
-import static macro.jnative.NativeInput.pressKeyDown;
-import static macro.jnative.NativeInput.pressKeyUp;
-
 public final class Keys {
 
-    private Keys() {
+    /**
+     * If a user has added the flag "consume" in the macro file,
+     * Then the triggering key for that macro will be added to this list.
+     * This list is checked before sending a key event to the OS.
+     * If the key is in this list, then the key event will not be sent.
+     */
+    private static final Map<Integer, Integer> consumableKeys = new HashMap<>();
 
+    public static void addKeyToConsumableList(final int keyCode) {
+        consumableKeys.put(keyCode, keyCode);
+    }
+    public static void clearConsumableKeys() {
+        consumableKeys.clear();
+    }
+
+    public static boolean containsConsumableKey(final int keyCode) {
+        return consumableKeys.containsKey(keyCode);
     }
 
     /**
-     * A map of characters to keycodes.
+     * some character unicode's are the same as other virtual key codes
+     * We need to offset the virtual keycode to avoid conflicts
      */
-    private static final Map<Character, Integer> VK_KEYMAP = new HashMap<>();
+    public static final int SPECIAL_KEY_OFFSET = 1000;
+
+    public static int isFunctionKey(String s) {
+        s = s.toLowerCase();
+        for (int i = 1; i < 24; i++) {
+            if (s.equals("f" + i)) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Converts a string to a unicode if possible.
+     * If no unicode value exists, then the virtual Key code is returned.
+     * If the virtual key code conflicts with a unicode then (virtualKeyCode + 1000) is returned.
+     * @param s The string to converted
+     * @return The unicode value of the string or the virtual key code with conditions, if no unicode exists.
+     */
+    public static int getKeyCode(String s) {
+        if (s == null || s.isEmpty()) {
+            return 0;
+        }
+        if (s.length() == 1) {
+            return s.charAt(0);
+        }
+        int functionalKey = isFunctionKey(s);
+        if (functionalKey > 0) {
+            if (functionalKey < 13) {
+                return (KeyEvent.VK_F1 + (functionalKey - 1)) + SPECIAL_KEY_OFFSET;
+            }
+            if (functionalKey < 25) {
+                return (KeyEvent.VK_F13 + functionalKey - 1) + SPECIAL_KEY_OFFSET;
+            }
+        } else if (s.equalsIgnoreCase("shift")) {
+            return KeyEvent.VK_SHIFT;
+        } else if (s.equalsIgnoreCase("control")) {
+            return KeyEvent.VK_CONTROL;
+        } else if (s.equalsIgnoreCase("alt")) {
+            return KeyEvent.VK_ALT;
+        } else if (s.equalsIgnoreCase("meta")) {
+            return KeyEvent.VK_META;
+        } else if (s.equalsIgnoreCase("tab")) {
+            return KeyEvent.VK_TAB;
+        } else if (s.equalsIgnoreCase("space")) {
+            return KeyEvent.VK_SPACE;
+        } else if (s.equalsIgnoreCase("enter")) {
+            return KeyEvent.VK_ENTER;
+        } else if (s.equalsIgnoreCase("backspace")) {
+            return KeyEvent.VK_BACK_SPACE;
+        } else if (s.equalsIgnoreCase("escape")) {
+            return KeyEvent.VK_ESCAPE;
+        } else if (s.equalsIgnoreCase("delete")) {
+            return KeyEvent.VK_DELETE;
+        } else if (s.equalsIgnoreCase("home")) {
+            return KeyEvent.VK_HOME;
+        } else if (s.equalsIgnoreCase("end")) {
+            return KeyEvent.VK_END;
+        } else if (s.equalsIgnoreCase("pageup")) {
+            return KeyEvent.VK_PAGE_UP;
+        } else if (s.equalsIgnoreCase("pagedown")) {
+            return KeyEvent.VK_PAGE_DOWN;
+        } else if (s.equalsIgnoreCase("up")) {
+            return KeyEvent.VK_UP + SPECIAL_KEY_OFFSET;
+        } else if (s.equalsIgnoreCase("down")) {
+            return KeyEvent.VK_DOWN + SPECIAL_KEY_OFFSET;
+        } else if (s.equalsIgnoreCase("left")) {
+            return KeyEvent.VK_LEFT + SPECIAL_KEY_OFFSET;
+        } else if (s.equalsIgnoreCase("right")) {
+            return KeyEvent.VK_RIGHT + SPECIAL_KEY_OFFSET;
+        }
+        return 0;
+    }
 
     /**
      * Returns true if the given character requires the shift key to be pressed.
@@ -45,144 +122,15 @@ public final class Keys {
     }
 
     /**
-     * Sends a string of characters to the active window.
-     * The string is converted into a virtualKeyCode
-     * note the VK_
-     * @param s The string to send.
+     * Converts a string to a unicode character.
+     * if the string cannot be converted into a unicode character
+     * that means it is a special key such as F1, F2, home, tab, etc.
+     * If that's the case return that keys virtual key code but add 1000 to it,
+     * so we can differentiate between a unicode character and a virtual key code.
+     * @param s The string to convert. Note this is used for keys Such as F12, F11, etc.
+     * @return The virtual key code. 0 if the string could not be converted to a unicode character.
      */
-    public static void sendString(final String s) {
-        // Send each character in the string
-        for (char c : s.toCharArray()) {
-            int keycode = VK_KEYMAP.getOrDefault(c, 0);
-            boolean shiftNeeded = keyRequiresShift(c);
-            if (shiftNeeded) {
-                pressKeyDown(KeyEvent.VK_SHIFT);
-            }
-            pressKey(keycode);
-            if (shiftNeeded) {
-                pressKeyUp(KeyEvent.VK_SHIFT);
-            }
-            if (keycode == 0) {
-                System.err.println("Unknown character: " + c);
-            }
-        }
-    }
-
-    /**
-     *
-     * Loads the keymap with keycodes for common characters.
-     */
-    static  {
-        // Load keycodes for lowercase and uppercase characters
-        for (char c = 'a'; c <= 'z'; ++c) {
-            VK_KEYMAP.put(c, KeyEvent.VK_A + (c - 'a'));
-            VK_KEYMAP.put(Character.toUpperCase(c), KeyEvent.VK_A + (c - 'a'));
-        }
-
-        // Load keycodes for digits
-        for (char c = '0'; c <= '9'; ++c) {
-            VK_KEYMAP.put(c, KeyEvent.VK_0 + (c - '0'));
-        }
-
-        // Load keycodes for common punctuation marks and symbols
-        VK_KEYMAP.put('`', KeyEvent.VK_BACK_QUOTE);
-        VK_KEYMAP.put('~', KeyEvent.VK_BACK_QUOTE); // Requires Shift
-        VK_KEYMAP.put('-', KeyEvent.VK_MINUS);
-        VK_KEYMAP.put('_', KeyEvent.VK_MINUS); // Requires Shift
-        VK_KEYMAP.put('=', KeyEvent.VK_EQUALS);
-        VK_KEYMAP.put('+', KeyEvent.VK_EQUALS); // Requires Shift
-        VK_KEYMAP.put('[', KeyEvent.VK_OPEN_BRACKET);
-        VK_KEYMAP.put('{', KeyEvent.VK_OPEN_BRACKET); // Requires Shift
-        VK_KEYMAP.put(']', KeyEvent.VK_CLOSE_BRACKET);
-        VK_KEYMAP.put('}', KeyEvent.VK_CLOSE_BRACKET); // Requires Shift
-        VK_KEYMAP.put('\\', KeyEvent.VK_BACK_SLASH);
-        VK_KEYMAP.put('|', KeyEvent.VK_BACK_SLASH); // Requires Shift
-        VK_KEYMAP.put(';', KeyEvent.VK_SEMICOLON);
-        VK_KEYMAP.put(':', KeyEvent.VK_SEMICOLON); // Requires Shift
-        VK_KEYMAP.put('\'', KeyEvent.VK_QUOTE);
-        VK_KEYMAP.put('\"', KeyEvent.VK_QUOTE); // Requires Shift
-        VK_KEYMAP.put(',', KeyEvent.VK_COMMA);
-        VK_KEYMAP.put('<', KeyEvent.VK_COMMA); // Requires Shift
-        VK_KEYMAP.put('.', KeyEvent.VK_PERIOD);
-        VK_KEYMAP.put('>', KeyEvent.VK_PERIOD); // Requires Shift
-        VK_KEYMAP.put('/', KeyEvent.VK_SLASH);
-        VK_KEYMAP.put('?', KeyEvent.VK_SLASH); // Requires Shift
-        VK_KEYMAP.put(' ', KeyEvent.VK_SPACE);
-        VK_KEYMAP.put('\t', KeyEvent.VK_TAB);
-        VK_KEYMAP.put('\n', KeyEvent.VK_ENTER);
-
-        // Other keys
-        VK_KEYMAP.put('!', KeyEvent.VK_1); // Requires Shift
-        VK_KEYMAP.put('@', KeyEvent.VK_2); // Requires Shift
-        VK_KEYMAP.put('#', KeyEvent.VK_3); // Requires Shift
-        VK_KEYMAP.put('$', KeyEvent.VK_4); // Requires Shift
-        VK_KEYMAP.put('%', KeyEvent.VK_5); // Requires Shift
-        VK_KEYMAP.put('^', KeyEvent.VK_6); // Requires Shift
-        VK_KEYMAP.put('&', KeyEvent.VK_7); // Requires Shift
-        VK_KEYMAP.put('*', KeyEvent.VK_8); // Requires Shift
-        VK_KEYMAP.put('(', KeyEvent.VK_9); // Requires Shift
-        VK_KEYMAP.put(')', KeyEvent.VK_0); // Requires Shift
-    }
-
-    // Map of key names to keycodes
-    private static final Map<String, Integer> SC_KEYMAP = new HashMap<>();
-
-    static {
-        // yoink those keycodes, ty
-        for (Field field : NativeKeyEvent.class.getDeclaredFields()) {
-            if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers()) && field.getType() == int.class && field.getName().startsWith("VC_")) {
-                try {
-                    int keyCode = field.getInt(null);
-                    String keyName = field.getName().substring(3);
-                    SC_KEYMAP.put(keyName, keyCode);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    public static int getKeyCode(String keyText) {
-        keyText = keyText.toUpperCase();
-
-        // Get the corresponding keycode from the map
-        Integer keyCode = SC_KEYMAP.get(keyText);
-
-        if (keyCode == null) {
-            System.out.println("No keycode found for '" + keyText + "'");
-            return NativeKeyEvent.VC_UNDEFINED;
-        }
-        return keyCode;
-    }
-
-    /**
-     * If a user has instructed this key to not be sent to the game.
-     * it's added to this list to be blocked from sending.
-     */
-    private static final Map<Integer, Integer> consumableKeys = new HashMap<>();
-
-    public static void addKeyToConsumableList(final int keyCode) {
-        consumableKeys.put(keyCode, keyCode);
-    }
-
-    public static boolean containsConsumableKey(final int keyCode) {
-        return consumableKeys.containsKey(keyCode);
-    }
-
-    public static int virtualKeyCodeToScanCode(final int virtualKeyCode) {
-        return KbInterface.winUser32.MapVirtualKeyExA(virtualKeyCode, User32.MAPVK_VK_TO_VSC, null);
-    }
-
-    public static int scanCodeToVirtualKeyCode(final int scanCode) {
-       return KbInterface.winUser32.MapVirtualKeyExA(scanCode, User32.MAPVK_VSC_TO_VK, null);
-    }
-
-    public static char virtualKeyCodeToChar(final int virtualKeyCode) {
-        return (char) KbInterface.winUser32.MapVirtualKeyExA(virtualKeyCode, User32.MAPVK_VK_TO_CHAR, null);
-    }
-
-    public static char scanCodeToChar(final int scanCode) {
-        int virtualKeyCode = scanCodeToVirtualKeyCode(scanCode);
-        return (char) virtualKeyCode;
+    public static int toKeyCode(String s) {
+        return getKeyCode(s);
     }
 }

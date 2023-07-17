@@ -1,18 +1,19 @@
 package macro.win32;
 
-import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinUser;
-import macro.Keys;
 import macro.Main;
 import macro.instruction.InstructionSet;
-
+import macro.Keys;
+import java.awt.event.KeyEvent;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+
+import static macro.Keys.SPECIAL_KEY_OFFSET;
 
 /**
  * Hook the keyboard device and takeover the callback
@@ -36,22 +37,84 @@ public class KbHook implements Runnable {
 
     @Override
     public void run() {
+
         WinUser.HOOKPROC keyboardHook = new WinUser.HOOKPROC() {
 
             public WinDef.LRESULT callback(int nCode, WinDef.WPARAM wParam, WinUser.KBDLLHOOKSTRUCT lParam) {
 
-                if (nCode >= 0 && lParam.scanCode > 0) {
+                if (nCode >= 0 && lParam.vkCode > 0) {
+
+                    // create a byte array for storing the state of keyboard
+                    byte[] keyboardState = new byte[256];
+
+                    // store the state of the keyboard in the byte array keyboardState
+                    User32.INSTANCE.GetKeyboardState(keyboardState);
+
+                    //0000 0000 0000 0000 check if the first bit is not a 0 (GetAsyncKeyState returns a 16 bit short)
+                    if ((User32.INSTANCE.GetAsyncKeyState(KeyEvent.VK_SHIFT) & 0x8000) != 0) {
+                        //1000 0000 (8 bit) setting high bit to indicate key is down
+                        keyboardState[KeyEvent.VK_SHIFT] |= 0x80;
+                    } else {
+                        //0000 0000 (8 bit) clear high bit to indicate key is up
+                        keyboardState[KeyEvent.VK_SHIFT] &= ~0x80;
+                    }
+
+                    /*
+                    * this will determine the character code of the key pressed
+                    * if the key is a special key such as the arrow keys, function keys etc
+                    * then the character code will be the virtualKeycode + 1000
+                    * Otherwise it will be the unicode character code for the key pressed
+                    * if the unicode character doesn't exist then the character code is set
+                    * to the virtual keycode of the key pressed
+                    */
+                    int characterCode;
+
+                    if (lParam.vkCode == KeyEvent.VK_LEFT || lParam.vkCode == KeyEvent.VK_RIGHT || lParam.vkCode == KeyEvent.VK_UP || lParam.vkCode == KeyEvent.VK_DOWN ||
+                        (lParam.vkCode >= KeyEvent.VK_F1 && lParam.vkCode <= KeyEvent.VK_F24)) {
+                        // For special keys, use the vkCode directly + a magic number offset.
+                        // this solves a conflict where a character unicode matches a virtual key code
+                        // and the character is sent instead of the key code
+                        characterCode = lParam.vkCode + SPECIAL_KEY_OFFSET;
+                    } else {
+                        char[] buffer = new char[2];
+                        int toUnicodeExResult = User32.INSTANCE.ToUnicodeEx(lParam.vkCode, lParam.scanCode, keyboardState, buffer, 2, 0, null);
+                        // For normal keys, use the translated character if possible.
+                        characterCode = toUnicodeExResult > 0 ? buffer[0] : lParam.vkCode;
+                    }
+
+                    // Key Down MSG
                     if (wParam.intValue() == WinUser.WM_KEYDOWN || wParam.intValue() == WinUser.WM_SYSKEYDOWN) {
-                        if (pressedKeys.add(lParam.scanCode)) {
-                            handleKey(lParam.scanCode);
-                            if (Keys.containsConsumableKey(lParam.scanCode)) {
+
+                        /*
+                         * Only add the key to the pressedKeys set if it is not already pressed.
+                         * This prevents the key from being pressed multiple times.
+                         * we use the virtualKey code and not the character code because
+                         * we need to remove these keys from the pressedKeys set when the key is released.
+                         * and the character code can be different on release
+                         * Example: pressing shift + 1 = !, but releasing shift + 1 release = 1 released not ! released
+                         */
+                        if (pressedKeys.add(lParam.vkCode)) {
+                            System.out.println(characterCode);
+                            handleKey(characterCode);
+
+                            // If the key is a consumable key, return 1 to prevent the key from being sent to the application
+                            if (Keys.containsConsumableKey(characterCode)) {
                                 return new WinDef.LRESULT(1);
                             }
                         }
+
+                    // Key Up MSG
                     } else if (wParam.intValue() == WinUser.WM_KEYUP || wParam.intValue() == WinUser.WM_SYSKEYUP) {
-                        pressedKeys.remove(lParam.scanCode);
-                        handleKey(lParam.scanCode * -1);
-                        if (Keys.containsConsumableKey(lParam.scanCode * -1)) {
+
+                        /*
+                         * Remove the key from the pressedKeys set when the key is released.
+                         */
+                        pressedKeys.remove(lParam.vkCode);
+
+                        handleKey(characterCode * -1);
+
+                        // If the key is a consumable key, return 1 to prevent the key from being sent to the application
+                        if (Keys.containsConsumableKey(characterCode * -1)) {
                             return new WinDef.LRESULT(1);
                         }
                     }
@@ -78,16 +141,16 @@ public class KbHook implements Runnable {
      * Handle key press by executing the {@link InstructionSet} associated with the keycode.
      * If the {@link InstructionSet} is flagged as {@link InstructionSet#threadless},
      * execute without creating a new {@link Thread}. Other-wise pass it to {@link ExecutorService}.
-     * @param scanCode The keycode of the {@link NativeKeyEvent}, a released key has a unary negation applied to the keycode.
+     * @param virtualKeyCode The keycode, a released key has a unary negation applied to the keycode.
      */
-    public void handleKey(final int scanCode) {
+    public void handleKey(final int virtualKeyCode) {
 
         //If escape key is pressed, clear all locks
-        if (scanCode == NativeKeyEvent.VC_ESCAPE) {
+        if (virtualKeyCode == KeyEvent.VK_ESCAPE) {
             Main.getScriptContainer().clearLocks();
             return;
         }
-        InstructionSet instructionSet = Main.getScriptContainer().getInstructionSetMap().getOrDefault(scanCode, null);
+        InstructionSet instructionSet = Main.getScriptContainer().getInstructionSetMap().getOrDefault(virtualKeyCode, null);
 
         if (instructionSet == null) {
             return;

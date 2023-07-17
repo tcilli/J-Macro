@@ -1,0 +1,4 @@
+macro ondown-home
+consume
+wait 300
+send hi

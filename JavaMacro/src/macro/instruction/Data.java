@@ -26,6 +26,16 @@ public record Data<T>(T value) {
         }
     }
 
+    public char[] toCharArray() {
+        if (value instanceof String) {
+            return ((String) value).toCharArray();
+        } else if (value instanceof char[]) {
+            return (char[]) value;
+        } else {
+            throw new ClassCastException("Cannot cast " + value.getClass().getSimpleName() + " to char array");
+        }
+    }
+
 	public String print() {
 		return String.valueOf(value);
 	}

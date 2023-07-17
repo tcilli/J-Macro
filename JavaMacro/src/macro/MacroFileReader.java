@@ -4,6 +4,7 @@ import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 import macro.jnative.NativeInput;
 import macro.scripting.CommandHandler;
+import macro.win32.KbEvent;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,6 +26,7 @@ public class MacroFileReader {
 
 	public MacroFileReader() {
 		Main.getScriptContainer().clearInstructions();
+		Keys.clearConsumableKeys();
 		try {
 			readFiles(DIR2);
 		} catch (IOException e) {
@@ -94,16 +96,19 @@ public class MacroFileReader {
 					String test = key;
 					test = test.replace("ondown-", "").replace("onrelease-", "");
 
-					int keyCode = Keys.getKeyCode(test.toUpperCase());
+					int keyCode = keyCode = Keys.toKeyCode(test);
+
 					if (keyCode != 0) {
 						if (key.contains("onrelease-")) {
 							keyCode *= -1;
 						}
-
 						instructionSet.key = keyCode;
 						key_found = true;
 					} else {
-						Main.getConsoleBuffer().append("Invalid key: ").append(key).append(" , Example: , would be comma").append("\n");
+						Main.getConsoleBuffer().append("Invalid macro key: ").append(test).append(" , Example 1 (triggered on pressing f1): macro ondown-f1").append("\n");
+						Main.getConsoleBuffer().append("Invalid macro key: ").append(test).append(" , Example 2 (triggered on the release of f1): macro onrelease-f1").append("\n");
+						Main.getConsoleBuffer().append("Invalid macro key: ").append(test).append(" , Example 3 (triggered on the pressing home key): macro onrelease-home").append("\n");
+						Main.getConsoleBuffer().append("Invalid macro key: ").append(test).append(" , Example 4 (triggered on the release of captial J): macro onrelease-J").append("\n");
 						Main.pushConsoleMessage();
 						return;
 					}

@@ -17,11 +17,7 @@ public class NativeInput {
     private static final int MOUSEEVENTF_RIGHTUP = 16;
     private static final int MOUSEEVENTF_MIDDLEDOWN = 32;
     private static final int MOUSEEVENTF_MIDDLEUP = 64;
-    //private static final int MOUSEEVENTF_WHEEL = 2048;
     private static final int MOUSEEVENTF_ABS = 0x8000;
-
-    public static final int KEYEVENTF_KEYDOWN = 0;
-    public static final int KEYEVENTF_KEYUP = 2;
 
     public static final int MOUSE_BUTTON_LEFT = 1;
     public static final int MOUSE_BUTTON_RIGHT = 2;
@@ -32,7 +28,6 @@ public class NativeInput {
 
     private static final int SCREEN_SCALE_FACTOR_X = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CXSCREEN));
     private static final int SCREEN_SCALE_FACTOR_Y = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CYSCREEN));
-
 
 
     public static void click(int mouseButton) {
@@ -84,41 +79,6 @@ public class NativeInput {
         }
     }
 
-
-
-    public static void pressKeyDown(int vk) {
-        keybd_event(vk, 0, KEYEVENTF_KEYDOWN);
-    }
-
-    public static void pressKeyUp(int vk) {
-        keybd_event(vk, 0, KEYEVENTF_KEYUP);
-    }
-
-    public static void pressKey(int vk) {
-        keybd_event(vk, 0, KEYEVENTF_KEYDOWN);
-        keybd_event(vk, 0, KEYEVENTF_KEYUP);
-    }
-
-    public static void keybd_event(int virtualKeyCode, int scanCode, int dwFlags) {
-        KbInterface.winUser32.keybd_event(
-            (byte)virtualKeyCode,
-            (byte)scanCode,
-            dwFlags, 0); // Key Up
-    }
-
-
-    private static void sendKey(int vk, int sc, int flag) {
-        input.type.setValue(WinUser.INPUT.INPUT_KEYBOARD);
-        input.input.setType("ki");
-        input.input.ki.wScan.setValue(sc);
-        input.input.ki.time.setValue(0);
-        input.input.ki.dwExtraInfo.setValue(0);
-        input.input.ki.wVk.setValue(vk);
-        input.input.ki.dwFlags.setValue(flag);
-        WinUser.INPUT[] inputs = { input };
-        User32.INSTANCE.SendInput(nInput, inputs, input.size());
-    }
-
     public static void moveMouseReturn(int x, int y, int delay, boolean absolute) {
         int currentX = MouseInfo.getPointerInfo().getLocation().x;
         int currentY = MouseInfo.getPointerInfo().getLocation().y;
@@ -141,8 +101,8 @@ public class NativeInput {
             long startTime = System.currentTimeMillis();
             long elapsedTime = 0;
             double nextX;
-						double nextY;
-						double progress;
+            double nextY;
+            double progress;
 
             while (elapsedTime < delay) {
                 progress = Math.min(1.0, (double) elapsedTime / delay);

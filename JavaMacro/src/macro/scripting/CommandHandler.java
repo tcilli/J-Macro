@@ -5,6 +5,7 @@ import macro.instruction.Data;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 import macro.jnative.NativeInput;
+import macro.win32.KbEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +50,7 @@ public class CommandHandler {
 			if (failedWindowCheck(set.windowTitle)) {
 				return;
 			}
-			Keys.sendString(data.get(0).toString());
+			KbEvent.send_characters(data.get(0).toCharArray());
 		});
 
 		/*
