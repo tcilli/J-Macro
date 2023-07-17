@@ -18,6 +18,13 @@ import static macro.Keys.SPECIAL_KEY_OFFSET;
 /**
  * Hook the keyboard device and takeover the callback
  *  @see <a href="https://learn.microsoft.com/en-us/windows/win32/winmsg/lowlevelkeyboardproc">Keyboard Hook Procedure</a>
+ *  @see <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowshookexa">SetWindowsHookEx</a>
+ *  @see <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-callnexthookex">CallNextHookEx</a>
+ *  @see <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-unhookwindowshookex">UnhookWindowsHookEx</a>
+ *  @see <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct">KBDLLHOOKSTRUCT</a>
+ *  @see <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-msllhookstruct">MSLLHOOKSTRUCT</a>
+ *  @see <a href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-tagkbdllhookstruct">KBDLLHOOKSTRUCT</a>
+ *
  */
 public class KbHook implements Runnable {
 
@@ -35,16 +42,41 @@ public class KbHook implements Runnable {
         this.hModule = Kernel32.INSTANCE.GetModuleHandle(null);
     }
 
+
     @Override
     public void run() {
 
+        /*
+          This anonymous inner class implements the HOOKPROC interface, providing a callback
+          method that is triggered when a keyboard event is captured by the hook procedure set up
+          using the SetWindowsHookEx function.
+
+          @see WinUser.HOOKPROC
+         */
         WinUser.HOOKPROC keyboardHook = new WinUser.HOOKPROC() {
 
             /**
-             * @param nCode 0 if the hook procedure must process the message. -1 if the hook procedure should pass the message to the next hook procedure in the current hook chain.
-             * @param wParam The identifier of the keyboard message. This parameter can be one of the following messages: WM_KEYDOWN, WM_KEYUP, WM_SYSKEYDOWN, or WM_SYSKEYUP.
-             * @param lParam A pointer to a KBDLLHOOKSTRUCT structure.
+             * This is the callback that is triggered when a keyboard event is captured.
+             * It processes the event, updates the state of keys being pressed, and determines
+             * the actions to be taken based on the key press and release events.
+             *
+             * @param nCode    The hook code. If this parameter is less than 0, the hook procedure must pass
+             *                 the message to the next hook procedure in the current hook chain. If this parameter
+             *                 is greater than or equal to 0, the hook procedure must process the message.
+             * @param wParam   The identifier of the keyboard message. This parameter can be one of the following messages:
+             *                 WM_KEYDOWN, WM_KEYUP, WM_SYSKEYDOWN, or WM_SYSKEYUP.
+             *
+             * @param lParam   A pointer to a KBDLLHOOKSTRUCT structure containing information about the key event.
+             *                 typedef struct tagKBDLLHOOKSTRUCT {
+             *                      DWORD     vkCode;
+             *                      DWORD     scanCode;
+             *                      DWORD     flags;
+             *                      DWORD     time;
+             *                      ULONG_PTR dwExtraInfo;
+             *                 } KBDLLHOOKSTRUCT, *LPKBDLLHOOKSTRUCT, *PKBDLLHOOKSTRUCT;
+             *
              * @return If nCode is less than zero, the hook procedure must return the value returned by CallNextHookEx.
+             *         If the key event was processed, a LRESULT is returned based on whether the key was consumed or not.
              */
             public WinDef.LRESULT callback(int nCode, WinDef.WPARAM wParam, WinUser.KBDLLHOOKSTRUCT lParam) {
 
@@ -66,17 +98,21 @@ public class KbHook implements Runnable {
                     }
 
                     /*
-                    * this will determine the character code of the key pressed
-                    * if the key is a special key such as the arrow keys, function keys etc
-                    * then the character code will be the virtualKeycode + 1000
-                    * Otherwise it will be the unicode character code for the key pressed
-                    * if the unicode character doesn't exist then the character code is set
-                    * to the virtual keycode of the key pressed
+                     this will determine the character code of the key pressed
+                     if the key is a special key such as the arrow keys, function keys etc
+                     then the character code will be the virtualKeycode + 1000
+                     Otherwise it will be the unicode character code for the key pressed
+                     if the unicode character doesn't exist then the character code is set
+                     to the virtual keycode of the key pressed
                     */
                     int characterCode;
 
-                    if (lParam.vkCode == KeyEvent.VK_LEFT || lParam.vkCode == KeyEvent.VK_RIGHT || lParam.vkCode == KeyEvent.VK_UP || lParam.vkCode == KeyEvent.VK_DOWN ||
-                        (lParam.vkCode >= KeyEvent.VK_F1 && lParam.vkCode <= KeyEvent.VK_F24)) {
+                    if (lParam.vkCode == KeyEvent.VK_LEFT ||
+                        lParam.vkCode == KeyEvent.VK_RIGHT ||
+                        lParam.vkCode == KeyEvent.VK_UP ||
+                        lParam.vkCode == KeyEvent.VK_DOWN ||
+                        lParam.vkCode >= KeyEvent.VK_F1  && lParam.vkCode <= KeyEvent.VK_F12 ||
+                        lParam.vkCode >= KeyEvent.VK_F13 && lParam.vkCode <= KeyEvent.VK_F24) {
                         // For special keys, use the vkCode directly + a magic number offset.
                         // this solves a conflict where a character unicode matches a virtual key code
                         // and the character is sent instead of the key code
@@ -92,12 +128,12 @@ public class KbHook implements Runnable {
                     if (wParam.intValue() == WinUser.WM_KEYDOWN || wParam.intValue() == WinUser.WM_SYSKEYDOWN) {
 
                         /*
-                         * Only add the key to the pressedKeys set if it is not already pressed.
-                         * This prevents the key from being pressed multiple times.
-                         * we use the virtualKey code and not the character code because
-                         * we need to remove these keys from the pressedKeys set when the key is released.
-                         * and the character code can be different on release
-                         * Example: pressing shift + 1 = !, but releasing shift + 1 release = 1 released not ! released
+                          Only add the key to the pressedKeys set if it is not already pressed.
+                          This prevents the key from being pressed multiple times.
+                          we use the virtualKey code and not the character code because
+                          we need to remove these keys from the pressedKeys set when the key is released.
+                          and the character code can be different on release
+                          Example: pressing shift + 1 = !, but releasing shift + 1 release = 1 released not ! released
                          */
                         if (pressedKeys.add(lParam.vkCode)) {
                             handleKey(characterCode);
@@ -112,10 +148,13 @@ public class KbHook implements Runnable {
                     } else if (wParam.intValue() == WinUser.WM_KEYUP || wParam.intValue() == WinUser.WM_SYSKEYUP) {
 
                         /*
-                         * Remove the key from the pressedKeys set when the key is released.
+                          Remove the key from the pressedKeys set when the key is released.
                          */
                         pressedKeys.remove(lParam.vkCode);
 
+                        /*
+                          convert the characterCode to its unary negation value
+                         */
                         handleKey(characterCode * -1);
 
                         // If the key is a consumable key, return 1 to prevent the key from being sent to the application
@@ -128,8 +167,33 @@ public class KbHook implements Runnable {
                 return User32.INSTANCE.CallNextHookEx(null, nCode, wParam, new WinDef.LPARAM(Pointer.nativeValue(lParam.getPointer())));
             }
         };
+
+        /*
+          Sets a global low-level keyboard hook, enabling the interception and potential modification
+          of keyboard events across all threads of the current process. This uses the keyboardHook
+          defined above as the procedure to be triggered on each keyboard event.
+          WH_KEYBOARD_LL (13) Installs a hook procedure that monitors low-level keyboard input events
+         */
         this.hHookKb = User32.INSTANCE.SetWindowsHookEx(WinUser.WH_KEYBOARD_LL, keyboardHook, hModule, 0);
 
+        /*
+          MSG creates a new MSG structure that will receive
+          the details of the next message retrieved by the GetMessage function.
+
+          GetMessage calls the Windows API function GetMessage,
+          which retrieves a message from the calling thread's message queue.
+          The function waits for the arrival of a message, then places the message details in the MSG structure.
+
+          If GetMessage returns 0, the loop ends. A return value of 0 indicates that a WM_QUIT message was received,
+          signifying that the application should terminate.
+
+          TranslateMessage translates virtual-key messages into character messages.
+          This is used for keyboard input handling - essentially it takes key-down events and,
+          where appropriate, adds corresponding character translation messages to the message queue.
+
+          DispatchMessage dispatches the message to the window procedure that it was intended for, to be handled.
+          The message is dispatched based on the window handle and message ID within the MSG structure
+         */
         WinUser.MSG msg = new WinUser.MSG();
         while (true) {
             if (User32.INSTANCE.GetMessage(msg, null, 0, 0) != 0) {
@@ -142,14 +206,24 @@ public class KbHook implements Runnable {
     }
 
     /**
-     * Handle key press by executing the {@link InstructionSet} associated with the keycode.
-     * If the {@link InstructionSet} is flagged as {@link InstructionSet#threadless},
-     * execute without creating a new {@link Thread}. Other-wise pass it to {@link ExecutorService}.
-     * @param virtualKeyCode The keycode, a released key has a unary negation applied to the keycode.
+     * Handles the event of a key press by executing the associated {@link InstructionSet}.
+     * If the key pressed is ESCAPE, it clears all locks. If there's no {@link InstructionSet}
+     * associated with the key, the method simply returns.
+     *
+     * <p>The method retrieves the {@link InstructionSet} associated with the provided
+     * virtualKeyCode. If the {@link InstructionSet} isn't already locked, it locks it
+     * and proceeds to execution. If the {@link InstructionSet} is marked as 'threadless',
+     * the method runs it directly; otherwise, it passes the {@link InstructionSet}
+     * to an {@link ExecutorService} for execution in a new thread.</p>
+     *
+     * <p>For the {@link InstructionSet} passed to the {@link ExecutorService},
+     * it is executed repeatedly as long as the lock remains true.</p>
+     *
+     * @param virtualKeyCode The keycode of the pressed key. If the key has been released,
+     *                       its unary negation is applied to the keycode.
      */
     public void handleKey(final int virtualKeyCode) {
 
-        //If escape key is pressed, clear all locks
         if (virtualKeyCode == KeyEvent.VK_ESCAPE) {
             Main.getScriptContainer().clearLocks();
             return;
@@ -171,6 +245,10 @@ public class KbHook implements Runnable {
 
     /**
      * Unhook from keyboard device
+     * The hook procedure can be in the state of being called
+     * by another thread even after UnhookWindowsHookEx returns.
+     * If the hook procedure is not being called concurrently,
+     * the hook procedure is removed immediately before UnhookWindowsHookEx returns.
      */
     public void unhook() {
         if (User32.INSTANCE.UnhookWindowsHookEx(hHookKb)) {

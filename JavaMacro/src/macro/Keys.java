@@ -7,7 +7,10 @@
  */
 package macro;
 
+import macro.win32.KbInterface;
+
 import java.awt.event.KeyEvent;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,14 +58,16 @@ public final class Keys {
      * @param s The string to converted
      * @return The unicode value of the string or the virtual key code with conditions, if no unicode exists.
      */
-    public static int getKeyCode(String s) {
+    public static int getKeyCode2(final String s) {
         if (s == null || s.isEmpty()) {
             return 0;
         }
         if (s.length() == 1) {
             return s.charAt(0);
         }
+
         int functionalKey = isFunctionKey(s);
+
         if (functionalKey > 0) {
             if (functionalKey < 13) {
                 return (KeyEvent.VK_F1 + (functionalKey - 1)) + SPECIAL_KEY_OFFSET;
@@ -110,6 +115,55 @@ public final class Keys {
         return 0;
     }
 
+    private static final Map<String, Integer> keyMap;
+
+    static {
+        Map<String, Integer> tempMap = new HashMap<>();
+        tempMap.put("shift", KeyEvent.VK_SHIFT);
+        tempMap.put("control", KeyEvent.VK_CONTROL);
+        tempMap.put("alt", KeyEvent.VK_ALT);
+        tempMap.put("meta", KeyEvent.VK_META);
+        tempMap.put("tab", KeyEvent.VK_TAB);
+        tempMap.put("space", KeyEvent.VK_SPACE);
+        tempMap.put("enter", KeyEvent.VK_ENTER);
+        tempMap.put("backspace", KeyEvent.VK_BACK_SPACE);
+        tempMap.put("escape", KeyEvent.VK_ESCAPE);
+        tempMap.put("delete", KeyEvent.VK_DELETE);
+        tempMap.put("home", KeyEvent.VK_HOME);
+        tempMap.put("end", KeyEvent.VK_END);
+        tempMap.put("pageup", KeyEvent.VK_PAGE_UP);
+        tempMap.put("pagedown", KeyEvent.VK_PAGE_DOWN);
+        tempMap.put("up", KeyEvent.VK_UP + SPECIAL_KEY_OFFSET);
+        tempMap.put("down", KeyEvent.VK_DOWN + SPECIAL_KEY_OFFSET);
+        tempMap.put("left", KeyEvent.VK_LEFT + SPECIAL_KEY_OFFSET);
+        tempMap.put("right", KeyEvent.VK_RIGHT + SPECIAL_KEY_OFFSET);
+        // You may want to adjust this for the function keys:
+        for (int i = 1; i < 25; i++) {
+            if (i < 13) {
+                tempMap.put("f" + i, (KeyEvent.VK_F1 + (i - 1)) + SPECIAL_KEY_OFFSET);
+            } else {
+                tempMap.put("f" + i, (KeyEvent.VK_F13 + (i - 13)) + SPECIAL_KEY_OFFSET);
+            }
+        }
+        keyMap = Collections.unmodifiableMap(tempMap);
+    }
+
+    public static int getKeyCode(final String s) {
+        if (s == null || s.isEmpty()) {
+            throw new IllegalArgumentException("Key string cannot be null or empty");
+        }
+        if (s.length() == 1) {
+            return s.charAt(0);
+        }
+        Integer keyCode = keyMap.get(s.toLowerCase());
+        if (keyCode == null) {
+            throw new IllegalArgumentException("Unknown key: " + s);
+        }
+        return keyCode;
+    }
+
+
+
     /**
      * Returns true if the given character requires the shift key to be pressed.
      * @param c The character to check.
@@ -130,7 +184,7 @@ public final class Keys {
      * @param s The string to convert. Note this is used for keys Such as F12, F11, etc.
      * @return The virtual key code. 0 if the string could not be converted to a unicode character.
      */
-    public static int toKeyCode(String s) {
-        return getKeyCode(s);
-    }
+    //public static int toKeyCode(String s) {
+     //   return getKeyCode(s);
+    //}
 }

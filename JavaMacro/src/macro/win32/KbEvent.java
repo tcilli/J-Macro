@@ -51,13 +51,31 @@ public class KbEvent {
     /**
      * Simulates keystrokes by sending virtual keycode to the active window.
      * characters that require the shift key to be pressed are sent with the shift key pressed.
+     * <p><b>dwFlags Bits Description</b></p>
+     * <p><b>0)</b>	Specifies whether the key is an extended key,
+     * such as a function key or a key on the numeric keypad.
+     * The value is 1 if the key is an extended key; otherwise, it is 0.</p>
+     * <p><b>1)</b>	Specifies whether the event was injected from a process running at lower integrity level.
+     * The value is 1 if that is the case; otherwise, it is 0. Note that bit 4 is also set whenever bit 1 is set.</p>
+     * <p><b>2-3)</b>	Reserved.
+     * <p><b>4)</b>	Specifies whether the event was injected.
+     * The value is 1 if that is the case; otherwise, it is 0.
+     * Note that bit 1 is not necessarily set when bit 4 is set.</p>
+     * <p><b>5)</b>	The context code. The value is 1 if the ALT key is pressed; otherwise, it is 0.</p>
+     * <p><b>6)</b>	Reserved.</p>
+     * <p><b>7)</b>	The transition state. The value is 0 if the key is pressed and 1 if it is being released.</p>
+     *
      * @param charArray The array of characters to send.
      */
     public static void send_characters(char[] charArray) {
 
         for (char c : charArray) {
+
             int result = KbInterface.winUser32.VkKeyScan(c);
+
+            //Test the extended-key flag
             int virtualKeyCode = result & 0xFF;
+
             int shiftState = result >> 8;
 
             boolean shiftRequired = (shiftState & SHIFT_KEY) != 0;

@@ -96,7 +96,7 @@ public class MacroFileReader {
 					String test = key;
 					test = test.replace("ondown-", "").replace("onrelease-", "");
 
-					int keyCode = keyCode = Keys.toKeyCode(test);
+					int keyCode = Keys.getKeyCode(test);
 
 					if (keyCode != 0) {
 						if (key.contains("onrelease-")) {
