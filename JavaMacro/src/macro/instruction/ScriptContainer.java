@@ -29,7 +29,9 @@ public class ScriptContainer {
 	public void clearLocks() {
 		for (Map.Entry<Integer, InstructionSet> entry : instructionSetMap.entrySet()) {
 			InstructionSet set = entry.getValue();
-			set.lock.set(false);
+			//remove the lock flag
+			set.FLAGS &= ~0x08;
+			//set.lock.set(false);
 		}
 	}
 

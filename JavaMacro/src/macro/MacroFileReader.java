@@ -4,7 +4,6 @@ import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 import macro.jnative.NativeInput;
 import macro.scripting.CommandHandler;
-import macro.win32.KbEvent;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -174,7 +173,6 @@ public class MacroFileReader {
 					int offset = 4;
 
 					if (line.contains("movereturn")) {
-						System.out.println("movereturn################################################");
 						offset = 10;
 					}
 
@@ -221,12 +219,12 @@ public class MacroFileReader {
 						}
 					}
 				} else if (key_found && command.equalsIgnoreCase("loop")) {
-					instructionSet.loop = true;
+					instructionSet.FLAGS |= 0x04;
 				} else if (key_found && line.equalsIgnoreCase("consume")) {
-					instructionSet.consumeKey = true;
+					instructionSet.FLAGS |= 0x02;
 					Keys.addKeyToConsumableList(instructionSet.key);
-
 				} else if (key_found && command.equalsIgnoreCase("wind")) {
+					instructionSet.FLAGS |= 0x10;
 					String title = line.substring(6);
 					title = title.replaceAll(" ", "");
 					instructionSet.windowTitle = title.toLowerCase();
@@ -250,22 +248,32 @@ public class MacroFileReader {
 						}
 					}
 				}
-				if (instructionSet.loop && !hasWait) {
+				if ((instructionSet.FLAGS & 0x04) != 0 && !hasWait) {
 					Main.getConsoleBuffer().append("File: ").append(file).append(" Rejected, Requires a wait command if using the loop instruction, \n")
 						.append("Or did not meet the required minimum wait time of 100ms. Detected delay time: ").append(waitTime).append("ms");
 					Main.pushConsoleMessage();
 					return;
 				}
-				if (!instructionSet.loop) {
+
+				//if the loop flag is not set, the end instruction is inserted
+				if ((instructionSet.FLAGS & 0x04) == 0) {
 					Instruction end = new Instruction(CommandHandler.COMMAND_END);
 					instructionSet.insert(end);
 				}
+
+				//the instruction set passed message is printed to the console
 				Main.getConsoleBuffer().append("File: ").append(file).append(" has been accepted. key bind:")
-					.append(key).append(" loop:").append(instructionSet.loop).append(" window:").append(instructionSet.windowTitle);
+					.append(key).append(" loop:").append((instructionSet.FLAGS & 0x04) != 0).append(" window:").append(instructionSet.windowTitle);
 				Main.pushConsoleMessage();
 
-				instructionSet.threadless = !instructionSet.loop && !hasSleep;
+				//if the loop flag is not set and no sleeps are required, the threadless flag is set
+				if ((instructionSet.FLAGS & 0x04) == 0 && !hasSleep) {
 
+					//set the threadless flag
+					instructionSet.FLAGS |= 0x01;
+				}
+
+				//finally the instruction set is inserted into the script container
 				Main.getScriptContainer().insert(instructionSet);
 			}
 		} catch (IOException e) {

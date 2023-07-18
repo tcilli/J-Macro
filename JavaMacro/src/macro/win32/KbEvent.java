@@ -58,10 +58,6 @@ public class KbEvent {
      */
     public static void send_characters(char[] charArray) {
 
-        short captialKey = KbInterface.winUser32.GetKeyState(VK_CAPITAL);
-
-        boolean capsLockState = (captialKey & 0x01) != 0;
-
         for (char c : charArray) {
 
             int scan = KbInterface.winUser32.VkKeyScan(c);
@@ -70,15 +66,13 @@ public class KbEvent {
 
             boolean extended = ((scan >> 8) & 0x01) != 0;
 
-            boolean needShift = Character.isLowerCase(c) && capsLockState || Character.isUpperCase(c) && !capsLockState;
-
             int dwFlags = 0;
 
             /*
              * Pressing the modifier keys.
              * we are only interested in a shift key press.
              */
-            if (extended || needShift) {
+            if (extended) {
                 dwFlags |= SHIFT_DOWN;
                 KbInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEY_DOWN, 0);
             }
@@ -96,7 +90,7 @@ public class KbEvent {
             /*
              * Releasing the modifier keys.
              */
-            if (extended || needShift) {
+            if (extended) {
                 KbInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEY_UP, 0);
             }
         }

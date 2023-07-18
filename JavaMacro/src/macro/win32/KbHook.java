@@ -96,6 +96,16 @@ public class KbHook implements Runnable {
                         //0000 0000 (8 bit) clear high bit to indicate key is up
                         keyboardState[KeyEvent.VK_SHIFT] &= ~0x80;
                     }
+
+                    //check if caps lock is toggled on. If it is, set the low bit to 1
+                    //this allows us to ignore the state of the caps lock. Until I implement
+                    //shift + key, instead of lowercase or uppercase keys, this is the best.
+                    //A script can be triggered by "a" or "A" and each of these are different
+                    //scripts. This is not ideal, but it is the best solution for now
+                    //I may change this to ignore the case of the key pressed and denote a "A" as shift+a for
+                    //the command line. This will allow for a more consistent experience for the user
+                    //as the user may have caps lock on, but still want to trigger lowercase commands
+                    //such as "a" instead of being forced to ("Shift" + "a") to get a lower case "a"
                     if ((User32.INSTANCE.GetAsyncKeyState(KeyEvent.VK_CAPS_LOCK) & 0x01) != 0) {
                         keyboardState[KeyEvent.VK_CAPS_LOCK] |= 0x01;
                     } else {
@@ -238,12 +248,29 @@ public class KbHook implements Runnable {
         if (instructionSet == null) {
             return;
         }
-        if (!instructionSet.lock.get()) {
-            instructionSet.lock.set(true);
-            if (instructionSet.threadless) {
+
+        //if the instructionSet lock flag 0x08 is not set
+        if ((instructionSet.FLAGS & 0x08) == 0) {
+
+            //set the instructionSet lock flag 0x08
+            instructionSet.FLAGS |= 0x08;
+
+            //if threadless flag 0x01 was set
+            if ((instructionSet.FLAGS & 0x01) != 0) {
+
+                //execute the instructionSet directly in the current thread 1 time
                 instructionSet.run();
+
             } else {
-                executorService.execute(() -> { while (instructionSet.lock.get()) { instructionSet.run(); }});
+
+                //execute the instructionSet in a new thread
+                executorService.execute(() -> {
+
+                    //loop while the lock flag 0x08 is set
+                    while((instructionSet.FLAGS & 0x08) != 0) {
+                        instructionSet.run();
+                    }
+                });
             }
         }
     }

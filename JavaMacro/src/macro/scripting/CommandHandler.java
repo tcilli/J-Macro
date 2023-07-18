@@ -47,7 +47,7 @@ public class CommandHandler {
 		 * The send string command requires 1 data argument: (String) message
 		 */
 		commandMap.put(COMMAND_SEND_STRING, (data, set) -> {
-			if (failedWindowCheck(set.windowTitle)) {
+			if (failedWindowCheck(set)) {
 				return;
 			}
 			KbEvent.send_characters(data.get(0).toCharArray());
@@ -57,7 +57,7 @@ public class CommandHandler {
 		 * The mouse click command requires 1 data argument: (Integer) mouseButton
 		 */
 		commandMap.put(COMMAND_CLICK,  (data, set) -> {
-			if (failedWindowCheck(set.windowTitle)) {
+			if (failedWindowCheck(set)) {
 				return;
 			}
 			NativeInput.click(data.get(0).toInt());
@@ -67,7 +67,7 @@ public class CommandHandler {
 		 * The mouse click down command requires 1 data argument: (Integer) mouseButton
 		 */
 		commandMap.put(COMMAND_CLICK_DOWN, (data, set) -> {
-			if (failedWindowCheck(set.windowTitle)) {
+			if (failedWindowCheck(set)) {
 				return;
 			}
 			NativeInput.clickDown(data.get(0).toInt());
@@ -77,7 +77,7 @@ public class CommandHandler {
 		 * The mouse click up command requires 1 data argument: (Integer) mouseButton
 		 */
 		commandMap.put(COMMAND_CLICK_UP, (data, set) -> {
-			if (failedWindowCheck(set.windowTitle)) {
+			if (failedWindowCheck(set)) {
 				return;
 			}
 			NativeInput.clickUp(data.get(0).toInt());
@@ -92,7 +92,7 @@ public class CommandHandler {
 		 * (Boolean) relative
 		 */
 		commandMap.put(COMMAND_MOUSE_MOVE, (data, set) -> {
-			if (failedWindowCheck(set.windowTitle)) {
+			if (failedWindowCheck(set)) {
 				return;
 			}
 			NativeInput.mouseMove(
@@ -102,7 +102,7 @@ public class CommandHandler {
 		});
 
 		commandMap.put(COMMAND_MOVE_MOUSE_RETURN, (data, set) -> {
-			if (failedWindowCheck(set.windowTitle)) {
+			if (failedWindowCheck(set)) {
 				return;
 			}
 			NativeInput.moveMouseReturn(
@@ -145,7 +145,8 @@ public class CommandHandler {
 		 * Sets the lock to false, which will end the effective macro/script
 		 */
 		commandMap.put(COMMAND_END,
-			(data, set) -> set.lock.set(false));
+			(data, set) -> set.FLAGS |= 0x08);
+					//set.lock.set(false));
 	}
 
 	/**
@@ -156,9 +157,12 @@ public class CommandHandler {
 	 * @param windowTitle the window title to look for
 	 * @return True if the window title is not found and was specified.
 	 */
-	private boolean failedWindowCheck(final String windowTitle) {
-		if (windowTitle.length() > 0) {
-			return !Window.getActive().contains(windowTitle);
+	private boolean failedWindowCheck(InstructionSet set) {
+		if ((set.FLAGS & 0x04) == 0) {
+			return false;
+		}
+		if (set.windowTitle.length() > 0) {
+			return !Window.getActive().contains(set.windowTitle);
 		}
 		return false;
 	}

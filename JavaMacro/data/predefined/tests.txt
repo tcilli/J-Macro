@@ -1,3 +1,5 @@
-macro ondown-A
+macro ondown-a
 consume
 send hello world!
+loop
+wait 1000
