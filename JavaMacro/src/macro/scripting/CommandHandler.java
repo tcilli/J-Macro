@@ -146,7 +146,7 @@ public class CommandHandler {
 		 */
 		commandMap.put(COMMAND_END,
 			(data, set) -> set.FLAGS |= 0x08);
-					//set.lock.set(false));
+		//set.lock.set(false));
 	}
 
 	/**
@@ -154,17 +154,19 @@ public class CommandHandler {
 	 * This is only used for commands that require a window check.
 	 * This only applies to an {@link InstructionSet} where the user has specified a {@link InstructionSet#windowTitle}.
 	 * If not specified, this will always return false
-	 * @param windowTitle the window title to look for
+	 * @param set The {@link InstructionSet} being checked
 	 * @return True if the window title is not found and was specified.
 	 */
-	private boolean failedWindowCheck(InstructionSet set) {
-		if ((set.FLAGS & 0x04) == 0) {
+	private boolean failedWindowCheck(final InstructionSet set) {
+
+		//check if the window title was specified
+		//this flag is only set when the title passed a regex check
+		//and the window title was considered valid
+		if ((set.FLAGS & 0x10) == 0) {
 			return false;
 		}
-		if (set.windowTitle.length() > 0) {
-			return !Window.getActive().contains(set.windowTitle);
-		}
-		return false;
+
+		return !Window.getActive().contains(set.windowTitle);
 	}
 
 	// Command Flags

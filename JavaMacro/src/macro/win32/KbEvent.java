@@ -45,10 +45,6 @@ public class KbEvent {
     //The virtual code of the shift key (Windows mapping).
     public static final byte VK_SHIFT = 0x10;
 
-
-    //The virtual code of the caps lock key (Windows mapping).
-    public static final int VK_CAPITAL = 0x14;
-
     /**
      * Simulates keystrokes by sending virtual keycode to the active window.
      * <p>Refer to <a href="https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct">
