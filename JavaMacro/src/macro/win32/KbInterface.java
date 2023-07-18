@@ -28,4 +28,6 @@ public interface KbInterface extends User32, StdCallLibrary {
     int VkKeyScan(char ch);
 
     short GetAsyncKeyState( int i);
+
+    short GetKeyState( int i);
 }

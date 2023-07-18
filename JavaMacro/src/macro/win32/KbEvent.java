@@ -30,46 +30,24 @@ package macro.win32;
  * Scan codes are specific to the hardware and may differ across different keyboard models,
  * while virtual keys provide a consistent and platform-independent way of referring to keys.
  * </p>
- * ///////////////////////////////////////////////////////////////////////////<p></p>
- * dwFlags Bits Description 0 - 7 <p></p>
- *
- * 0 Specifies whether the key is an extended key,
- * such as a function key or a key on the numeric keypad.
- * The value is 1 if the key is an extended key; otherwise, it is 0.<p></p>
- *
- * 1 Specifies whether the event was injected from a process running at lower integrity level.
- * The value is 1 if that is the case; otherwise, it is 0. Note that bit 4 is also set whenever bit 1 is set.<p></p>
- *
- * 2-3 Reserved.<p></p>
- *
- * 4 Specifies whether the event was injected.
- * The value is 1 if that is the case; otherwise, it is 0.
- * Note that bit 1 is not necessarily set when bit 4 is set.<p></p>
- *
- * 5 The context code. The value is 1 if the ALT key is pressed; otherwise, it is 0.<p></p>
- *
- * 6 Reserved<p></p>
- *
- * 7 The transition state. The value is 0 if the key is pressed and 1 if it is being released.<p></p>
- *  ///////////////////////////////////////////////////////////////////////////
- *
  */
 public class KbEvent {
 
     // The 'dwFlag' for signaling a key down event.
-    public static final int KEYDOWN = 0x0000;
+    public static final int KEY_DOWN = 0x0000;
 
     // The 'dwFlag' for signaling a shift key event.
     public static final int SHIFT_DOWN = 0x0001;
 
     //The 'dwFlag' for signaling a key up event.
-    public static final int KEYUP = 0x0002;
+    public static final int KEY_UP = 0x0002;
 
     //The virtual code of the shift key (Windows mapping).
     public static final byte VK_SHIFT = 0x10;
 
-    //The shift key flag.
-    public static final byte SHIFT_KEY = 0x01;
+
+    //The virtual code of the caps lock key (Windows mapping).
+    public static final int VK_CAPITAL = 0x14;
 
     /**
      * Simulates keystrokes by sending virtual keycode to the active window.
@@ -80,24 +58,29 @@ public class KbEvent {
      */
     public static void send_characters(char[] charArray) {
 
+        short captialKey = KbInterface.winUser32.GetKeyState(VK_CAPITAL);
+
+        boolean capsLockState = (captialKey & 0x01) != 0;
+
         for (char c : charArray) {
 
             int scan = KbInterface.winUser32.VkKeyScan(c);
 
             byte virtualKeyCode = (byte) (scan & 0xFF);
 
-            int extended = scan >> 8;
+            boolean extended = ((scan >> 8) & 0x01) != 0;
 
-            boolean shiftRequired = (extended & SHIFT_KEY) != 0;
+            boolean needShift = Character.isLowerCase(c) && capsLockState || Character.isUpperCase(c) && !capsLockState;
 
             int dwFlags = 0;
 
             /*
              * Pressing the modifier keys.
+             * we are only interested in a shift key press.
              */
-            if (shiftRequired) {
+            if (extended || needShift) {
                 dwFlags |= SHIFT_DOWN;
-                KbInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEYDOWN, 0);
+                KbInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEY_DOWN, 0);
             }
 
             /*
@@ -108,14 +91,16 @@ public class KbEvent {
             /*
              * Releasing the key up
              */
-            KbInterface.winUser32.keybd_event(virtualKeyCode, (byte) 0, dwFlags | KEYUP, 0);
+            KbInterface.winUser32.keybd_event(virtualKeyCode, (byte) 0, dwFlags | KEY_UP, 0);
 
             /*
              * Releasing the modifier keys.
              */
-            if (shiftRequired) {
-                KbInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEYUP, 0);
+            if (extended || needShift) {
+                KbInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEY_UP, 0);
             }
         }
     }
+
+
 }

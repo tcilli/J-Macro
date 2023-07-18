@@ -96,6 +96,11 @@ public class KbHook implements Runnable {
                         //0000 0000 (8 bit) clear high bit to indicate key is up
                         keyboardState[KeyEvent.VK_SHIFT] &= ~0x80;
                     }
+                    if ((User32.INSTANCE.GetAsyncKeyState(KeyEvent.VK_CAPS_LOCK) & 0x01) != 0) {
+                        keyboardState[KeyEvent.VK_CAPS_LOCK] |= 0x01;
+                    } else {
+                        keyboardState[KeyEvent.VK_CAPS_LOCK] &= ~0x01;
+                    }
 
                     /*
                      this will determine the character code of the key pressed

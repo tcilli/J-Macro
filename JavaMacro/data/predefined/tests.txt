@@ -1,2 +1,3 @@
-macro ondown-home
-send Testing my super pog@!@@ CODE
+macro ondown-A
+consume
+send hello world!
