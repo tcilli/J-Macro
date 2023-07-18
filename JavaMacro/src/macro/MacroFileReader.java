@@ -226,10 +226,15 @@ public class MacroFileReader {
 				} else if (key_found && command.equalsIgnoreCase("wind")) {
 					String title = line.substring(6);
 					title = title.replaceAll(" ", "");
-					instructionSet.windowTitle = title.toLowerCase();
+
+					if (title.length() > 127) { // Max window title length
+						title = title.substring(0, 127);
+					}
 					if (title.length() > 0) {
 						instructionSet.FLAGS |= 0x10;
+						instructionSet.windowTitle = title.toLowerCase();
 					}
+
 				} else {
 					Main.getConsoleBuffer().append("File: ").append(file).append(" line:").append(cur_line).append(" is an invalid instruction: ").append(line);
 					Main.pushConsoleMessage();
