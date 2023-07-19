@@ -23,7 +23,7 @@ public class InstructionSet {
      * bit 6: 0100 0000 unused (0x40)
      * bit 7: 1000 0000 unused (0x80)
      */
-    public byte FLAGS = 0x00;
+    public byte bFlags = 0;
 
     public InstructionSet() {
         this.instructions = new ArrayList<>();

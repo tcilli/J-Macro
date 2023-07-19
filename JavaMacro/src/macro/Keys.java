@@ -22,16 +22,16 @@ public final class Keys {
      * This list is checked before sending a key event to the OS.
      * If the key is in this list, then the key event will not be sent.
      */
-    private static final Map<Integer, Integer> consumableKeys = new HashMap<>();
+    private static final Map<Short, Short> consumableKeys = new HashMap<>();
 
-    public static void addKeyToConsumableList(final int keyCode) {
+    public static void addKeyToConsumableList(final short keyCode) {
         consumableKeys.put(keyCode, keyCode);
     }
     public static void clearConsumableKeys() {
         consumableKeys.clear();
     }
 
-    public static boolean containsConsumableKey(final int keyCode) {
+    public static boolean containsConsumableKey(final short keyCode) {
         return consumableKeys.containsKey(keyCode);
     }
 

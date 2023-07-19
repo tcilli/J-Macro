@@ -30,7 +30,7 @@ public class ScriptContainer {
 		for (Map.Entry<Integer, InstructionSet> entry : instructionSetMap.entrySet()) {
 			InstructionSet set = entry.getValue();
 			//remove the lock flag
-			set.FLAGS &= ~0x08;
+			set.bFlags &= ~0x08;
 			//set.lock.set(false);
 		}
 	}

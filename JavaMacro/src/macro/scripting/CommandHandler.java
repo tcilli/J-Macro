@@ -141,12 +141,12 @@ public class CommandHandler {
 		commandMap.put(COMMAND_PRINT_ACTIVE_WINDOW,
 			(data, set) -> Window.printActive());
 
-		/*
-		 * Sets the lock to false, which will end the effective macro/script
-		 */
+
+		//COMMAND_END Clears the lock bit from the InstructionSet.FLAGS
+		//Essentially this unlocks the Instruction, so it can be used again.
 		commandMap.put(COMMAND_END,
-			(data, set) -> set.FLAGS |= 0x08);
-		//set.lock.set(false));
+			(data, set) -> set.bFlags &= ~0x08);
+
 	}
 
 	/**
@@ -162,7 +162,7 @@ public class CommandHandler {
 		//check if the window title was specified
 		//this flag is only set when the title passed a regex check
 		//and the window title was considered valid
-		if ((set.FLAGS & 0x10) == 0) {
+		if ((set.bFlags & 0x10) == 0) {
 			return false;
 		}
 
@@ -184,4 +184,3 @@ public class CommandHandler {
 	public static final int COMMAND_END = 12;
 	public static final int COMMAND_MOVE_MOUSE_RETURN = 13;
 }
-

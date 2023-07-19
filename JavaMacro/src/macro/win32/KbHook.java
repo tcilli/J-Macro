@@ -88,12 +88,11 @@ public class KbHook implements Runnable {
                     // store the state of the keyboard in the byte array keyboardState
                     User32.INSTANCE.GetKeyboardState(keyboardState);
 
-                    //0000 0000 0000 0000 check if the first bit is not a 0 (GetAsyncKeyState returns a 16 bit short)
+
+                    //this basically allows shift + another key to be combined
                     if ((User32.INSTANCE.GetAsyncKeyState(KeyEvent.VK_SHIFT) & 0x8000) != 0) {
-                        //1000 0000 (8 bit) setting high bit to indicate key is down
                         keyboardState[KeyEvent.VK_SHIFT] |= 0x80;
                     } else {
-                        //0000 0000 (8 bit) clear high bit to indicate key is up
                         keyboardState[KeyEvent.VK_SHIFT] &= ~0x80;
                     }
 
@@ -120,7 +119,7 @@ public class KbHook implements Runnable {
                      if the unicode character doesn't exist then the character code is set
                      to the virtual keycode of the key pressed
                     */
-                    int characterCode;
+                    short characterCode;
 
                     if (lParam.vkCode == KeyEvent.VK_LEFT ||
                         lParam.vkCode == KeyEvent.VK_RIGHT ||
@@ -131,12 +130,12 @@ public class KbHook implements Runnable {
                         // For special keys, use the vkCode directly + a magic number offset.
                         // this solves a conflict where a character unicode matches a virtual key code
                         // and the character is sent instead of the key code
-                        characterCode = lParam.vkCode + SPECIAL_KEY_OFFSET;
+                        characterCode = (short) (lParam.vkCode + SPECIAL_KEY_OFFSET);
                     } else {
                         char[] buffer = new char[2];
                         int toUnicodeExResult = User32.INSTANCE.ToUnicodeEx(lParam.vkCode, lParam.scanCode, keyboardState, buffer, 2, 0, null);
                         // For normal keys, use the translated character if possible.
-                        characterCode = toUnicodeExResult > 0 ? buffer[0] : lParam.vkCode;
+                        characterCode = (short) (toUnicodeExResult > 0 ? buffer[0] : lParam.vkCode);
                     }
 
                     // Key Down MSG
@@ -170,10 +169,11 @@ public class KbHook implements Runnable {
                         /*
                           convert the characterCode to its unary negation value
                          */
-                        handleKey(characterCode * -1);
+                        characterCode = (short) -characterCode;
+                        handleKey(characterCode);
 
                         // If the key is a consumable key, return 1 to prevent the key from being sent to the application
-                        if (Keys.containsConsumableKey(characterCode * -1)) {
+                        if (Keys.containsConsumableKey((short) (characterCode))) {
                             return new WinDef.LRESULT(1);
                         }
                     }
@@ -248,15 +248,17 @@ public class KbHook implements Runnable {
         if (instructionSet == null) {
             return;
         }
-
+        int flagsInt = instructionSet.bFlags & 0xFF;  // Convert byte to int, ensuring it's treated as unsigned
+        String flagsBits = String.format("%8s", Integer.toBinaryString(flagsInt)).replace(' ', '0');  // Convert to binary string, padding with zeros to 8 bits
+        System.out.println(flagsBits);  // Print the bits
         //if the instructionSet lock flag 0x08 is not set
-        if ((instructionSet.FLAGS & 0x08) == 0) {
+        if ((instructionSet.bFlags & 0x08) == 0) {
 
             //set the instructionSet lock flag 0x08
-            instructionSet.FLAGS |= 0x08;
+            instructionSet.bFlags |= 0x08;
 
             //if threadless flag 0x01 was set
-            if ((instructionSet.FLAGS & 0x01) != 0) {
+            if ((instructionSet.bFlags & 0x01) != 0) {
 
                 //execute the instructionSet directly in the current thread 1 time
                 instructionSet.run();
@@ -267,7 +269,7 @@ public class KbHook implements Runnable {
                 executorService.execute(() -> {
 
                     //loop while the lock flag 0x08 is set
-                    while((instructionSet.FLAGS & 0x08) != 0) {
+                    while((instructionSet.bFlags & 0x08) != 0) {
                         instructionSet.run();
                     }
                 });

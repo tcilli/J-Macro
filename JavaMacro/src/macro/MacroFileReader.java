@@ -118,7 +118,7 @@ public class MacroFileReader {
 					try {
 						long wait_for = Long.parseLong(wait_command);
 						if (wait_for > 0 && wait_for < Long.MAX_VALUE) {
-							instruction = new Instruction(CommandHandler.COMMAND_SLEEP);
+							instruction = new Instruction(0x0001);
 							instruction.insert(wait_for);
 							hasSleep = true;
 						}
@@ -219,10 +219,10 @@ public class MacroFileReader {
 						}
 					}
 				} else if (key_found && command.equalsIgnoreCase("loop")) {
-					instructionSet.FLAGS |= 0x04;
+					instructionSet.bFlags |= 0x04;
 				} else if (key_found && line.equalsIgnoreCase("consume")) {
-					instructionSet.FLAGS |= 0x02;
-					Keys.addKeyToConsumableList(instructionSet.key);
+					instructionSet.bFlags |= 0x02;
+					Keys.addKeyToConsumableList((short) instructionSet.key);
 				} else if (key_found && command.equalsIgnoreCase("wind")) {
 					String title = line.substring(6);
 					title = title.replaceAll(" ", "");
@@ -231,7 +231,7 @@ public class MacroFileReader {
 						title = title.substring(0, 127);
 					}
 					if (title.length() > 0) {
-						instructionSet.FLAGS |= 0x10;
+						instructionSet.bFlags |= 0x10;
 						instructionSet.windowTitle = title.toLowerCase();
 					}
 
@@ -255,7 +255,7 @@ public class MacroFileReader {
 						}
 					}
 				}
-				if ((instructionSet.FLAGS & 0x04) != 0 && !hasWait) {
+				if ((instructionSet.bFlags & 0x04) != 0 && !hasWait) {
 					Main.getConsoleBuffer().append("File: ").append(file).append(" Rejected, Requires a wait command if using the loop instruction, \n")
 						.append("Or did not meet the required minimum wait time of 100ms. Detected delay time: ").append(waitTime).append("ms");
 					Main.pushConsoleMessage();
@@ -263,21 +263,21 @@ public class MacroFileReader {
 				}
 
 				//if the loop flag is not set, the end instruction is inserted
-				if ((instructionSet.FLAGS & 0x04) == 0) {
+				if ((instructionSet.bFlags & 0x04) == 0) {
 					Instruction end = new Instruction(CommandHandler.COMMAND_END);
 					instructionSet.insert(end);
 				}
 
 				//the instruction set passed message is printed to the console
 				Main.getConsoleBuffer().append("File: ").append(file).append(" has been accepted. key bind:")
-					.append(key).append(" loop:").append((instructionSet.FLAGS & 0x04) != 0).append(" window:").append(instructionSet.windowTitle);
+					.append(key).append(" loop:").append((instructionSet.bFlags & 0x04) != 0).append(" window:").append(instructionSet.windowTitle);
 				Main.pushConsoleMessage();
 
 				//if the loop flag is not set and no sleeps are required, the threadless flag is set
-				if ((instructionSet.FLAGS & 0x04) == 0 && !hasSleep) {
+				if ((instructionSet.bFlags & 0x04) == 0 && !hasSleep) {
 
 					//set the threadless flag
-					instructionSet.FLAGS |= 0x01;
+					instructionSet.bFlags |= 0x01;
 				}
 
 				//finally the instruction set is inserted into the script container
