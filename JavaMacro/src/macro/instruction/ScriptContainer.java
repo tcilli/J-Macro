@@ -17,10 +17,6 @@ public class ScriptContainer {
 		return this.instructionSetMap;
 	}
 
-	public InstructionSet getInstructionSet(int key) {
-		return instructionSetMap.get(key);
-	}
-
 	public void clearInstructions() {
 	   instructionSetMap.clear();
    }
@@ -29,30 +25,7 @@ public class ScriptContainer {
 	public void clearLocks() {
 		for (Map.Entry<Integer, InstructionSet> entry : instructionSetMap.entrySet()) {
 			InstructionSet set = entry.getValue();
-			//remove the lock flag
 			set.bFlags &= ~0x08;
-			//set.lock.set(false);
 		}
 	}
-
-    public void listInstructions() {
-	    for (Map.Entry<Integer, InstructionSet> entry : instructionSetMap.entrySet()) {
-		    InstructionSet set = entry.getValue();
-			int key = entry.getKey();
-			int usableKey = key;
-			if (key < 0) {
-				usableKey = key * -1;
-			}
-		    Main.getConsoleBuffer().append("Instruction Set, keycode: ").append(set.key).append(" key: ").append(NativeKeyEvent.getKeyText(usableKey)).append(", path: ").append(set.scriptPath).append("\n");
-		    for (Instruction i : set.getInstructions()) {
-			    for (Data<?> data : i.getData()) {
-				    Main.getConsoleBuffer().append("id: ").append(i.getFlag()).append(", contents: ").append(data.print()).append("\n");
-			    }
-		    }
-	    }
-        Main.pushConsoleMessage();
-    }
-
-
-
 }

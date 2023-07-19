@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
-import static macro.Keys.SPECIAL_KEY_OFFSET;
-
 /**
  * Hook the keyboard device and takeover the callback
  *  @see <a href="https://learn.microsoft.com/en-us/windows/win32/winmsg/lowlevelkeyboardproc">Keyboard Hook Procedure</a>
@@ -130,7 +128,7 @@ public class KbHook implements Runnable {
                         // For special keys, use the vkCode directly + a magic number offset.
                         // this solves a conflict where a character unicode matches a virtual key code
                         // and the character is sent instead of the key code
-                        characterCode = (short) (lParam.vkCode + SPECIAL_KEY_OFFSET);
+                        characterCode = (short) (lParam.vkCode + Keys.SPECIAL_KEY_OFFSET);
                     } else {
                         char[] buffer = new char[2];
                         int toUnicodeExResult = User32.INSTANCE.ToUnicodeEx(lParam.vkCode, lParam.scanCode, keyboardState, buffer, 2, 0, null);

@@ -124,12 +124,6 @@ public class CommandHandler {
 			(data, set) -> MemoryUtil.printHeapMemoryUsage());
 
 		/*
-		 * Prints the all the InstructionSets
-		 */
-		commandMap.put(COMMAND_LIST_INSTRUCTIONS,
-			(data, set) -> Main.getScriptContainer().listInstructions());
-
-		/*
 		 * Prints the current mouse position
 		 */
 		commandMap.put(COMMAND_GET_MOUSE_POSITION,
@@ -178,7 +172,6 @@ public class CommandHandler {
 	public static final int COMMAND_MOUSE_MOVE = 6;
 	public static final int COMMAND_READ_MACRO_FILE = 7;
 	public static final int COMMAND_PRINT_MEMORY = 8;
-	public static final int COMMAND_LIST_INSTRUCTIONS = 9;
 	public static final int COMMAND_GET_MOUSE_POSITION = 10;
 	public static final int COMMAND_PRINT_ACTIVE_WINDOW = 11;
 	public static final int COMMAND_END = 12;

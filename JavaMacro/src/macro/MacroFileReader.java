@@ -159,8 +159,6 @@ public class MacroFileReader {
 					instruction.insert(NativeInput.MOUSE_BUTTON_MIDDLE);
 				} else if (key_found && line.equalsIgnoreCase("reload")) {
 					instruction = new Instruction(CommandHandler.COMMAND_READ_MACRO_FILE);
-				} else if (key_found && line.equalsIgnoreCase("get scripts")) {
-					instruction = new Instruction(CommandHandler.COMMAND_LIST_INSTRUCTIONS);
 				} else if (key_found && line.equalsIgnoreCase("get mousepos")) {
 					instruction = new Instruction(CommandHandler.COMMAND_GET_MOUSE_POSITION);
 				} else if (key_found && line.equalsIgnoreCase("get window")) {
@@ -222,7 +220,7 @@ public class MacroFileReader {
 					instructionSet.bFlags |= 0x04;
 				} else if (key_found && line.equalsIgnoreCase("consume")) {
 					instructionSet.bFlags |= 0x02;
-					Keys.addKeyToConsumableList((short) instructionSet.key);
+					Keys.addKeyToConsumableMap((short) instructionSet.key);
 				} else if (key_found && command.equalsIgnoreCase("wind")) {
 					String title = line.substring(6);
 					title = title.replaceAll(" ", "");
