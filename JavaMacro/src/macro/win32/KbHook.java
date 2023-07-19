@@ -235,7 +235,7 @@ public class KbHook implements Runnable {
      * @param virtualKeyCode The keycode of the pressed key. If the key has been released,
      *                       its unary negation is applied to the keycode.
      */
-    public void handleKey(final int virtualKeyCode) {
+    public void handleKey(final short virtualKeyCode) {
 
         if (virtualKeyCode == KeyEvent.VK_ESCAPE) {
             Main.getScriptContainer().clearLocks();
@@ -246,9 +246,7 @@ public class KbHook implements Runnable {
         if (instructionSet == null) {
             return;
         }
-        int flagsInt = instructionSet.bFlags & 0xFF;  // Convert byte to int, ensuring it's treated as unsigned
-        String flagsBits = String.format("%8s", Integer.toBinaryString(flagsInt)).replace(' ', '0');  // Convert to binary string, padding with zeros to 8 bits
-        System.out.println(flagsBits);  // Print the bits
+
         //if the instructionSet lock flag 0x08 is not set
         if ((instructionSet.bFlags & 0x08) == 0) {
 
@@ -259,7 +257,7 @@ public class KbHook implements Runnable {
             if ((instructionSet.bFlags & 0x01) != 0) {
 
                 //execute the instructionSet directly in the current thread 1 time
-                instructionSet.run();
+                instructionSet.execute();
 
             } else {
 
@@ -268,7 +266,7 @@ public class KbHook implements Runnable {
 
                     //loop while the lock flag 0x08 is set
                     while((instructionSet.bFlags & 0x08) != 0) {
-                        instructionSet.run();
+                        instructionSet.execute();
                     }
                 });
             }

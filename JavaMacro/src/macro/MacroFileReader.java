@@ -95,11 +95,10 @@ public class MacroFileReader {
 					String test = key;
 					test = test.replace("ondown-", "").replace("onrelease-", "");
 
-					int keyCode = Keys.getKeyCode(test);
-
+					short keyCode = Keys.getKeyCode(test);
 					if (keyCode != 0) {
 						if (key.contains("onrelease-")) {
-							keyCode *= -1;
+							keyCode = (short) -keyCode;
 						}
 						instructionSet.key = keyCode;
 						key_found = true;
@@ -193,7 +192,7 @@ public class MacroFileReader {
 									hasSleep = true;
 								}
 							}
-							if (x > 0 && x < 65535 && y > 0 && y < 65535) {
+							if (x > 0 && x < 0xFFFF && y > 0 && y < 0xFFFF) {
 								if (offset == 4) {
 									instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE);
 									instruction.insert(x);
@@ -225,8 +224,8 @@ public class MacroFileReader {
 					String title = line.substring(6);
 					title = title.replaceAll(" ", "");
 
-					if (title.length() > 127) { // Max window title length
-						title = title.substring(0, 127);
+					if (title.length() > 0x7F) { // Max window title length 127 characters
+						title = title.substring(0, 0x7F);
 					}
 					if (title.length() > 0) {
 						instructionSet.bFlags |= 0x10;
