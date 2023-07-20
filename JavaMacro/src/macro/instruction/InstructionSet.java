@@ -10,7 +10,6 @@ public class InstructionSet {
     private final List<Instruction> instructions;
     public String windowTitle = "";
     public String scriptPath = "";
-    public short key = 0;
 
     /**
      * Contains the flags for the instruction set
@@ -19,11 +18,17 @@ public class InstructionSet {
      * bit 2: 0000 0100 loop (0x04)
      * bit 3: 0000 1000 lock (0x08)
      * bit 4: 0001 0000 requires active window (0x10)
-     * bit 5: 0010 0000 unused (0x20)
-     * bit 6: 0100 0000 unused (0x40)
-     * bit 7: 1000 0000 unused (0x80)
+     * bit 5 - 15 -> unused (0x20)
+     * bits 16 - 31 -> key (0xFFFF0000)
      */
-    public byte bFlags = 0;
+    public int bFlags = 0;
+
+    public short getKey() {
+        return (short) ((bFlags >> 16) & 0xFFFF);
+    }
+    public void setKey(short key) {
+        bFlags |= ((key & 0xFFFF) << 16);
+    }
 
     public InstructionSet() {
         this.instructions = new ArrayList<>();

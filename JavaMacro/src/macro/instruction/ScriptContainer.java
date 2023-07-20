@@ -8,7 +8,7 @@ public class ScriptContainer {
 	private final Map<Short, InstructionSet> instructionSetMap = new HashMap<>();
 
 	public void insert(final InstructionSet instructionSet) {
-		instructionSetMap.put(instructionSet.key, instructionSet);
+		instructionSetMap.put(instructionSet.getKey(), instructionSet);
 	}
 
 	public final Map<Short, InstructionSet> getInstructionSetMap() {

@@ -100,7 +100,8 @@ public class MacroFileReader {
 						if (key.contains("onrelease-")) {
 							keyCode = (short) -keyCode;
 						}
-						instructionSet.key = keyCode;
+
+						instructionSet.setKey(keyCode);
 						key_found = true;
 					} else {
 						Main.getConsoleBuffer().append("Invalid macro key: ").append(test).append(" , Example 1 (triggered on pressing f1): macro ondown-f1").append("\n");
@@ -219,7 +220,7 @@ public class MacroFileReader {
 					instructionSet.bFlags |= 0x04;
 				} else if (key_found && line.equalsIgnoreCase("consume")) {
 					instructionSet.bFlags |= 0x02;
-					Keys.addKeyToConsumableMap((short) instructionSet.key);
+					Keys.addKeyToConsumableMap((short) instructionSet.getKey());
 				} else if (key_found && command.equalsIgnoreCase("wind")) {
 					String title = line.substring(6);
 					title = title.replaceAll(" ", "");
