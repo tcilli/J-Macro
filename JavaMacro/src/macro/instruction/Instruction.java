@@ -26,14 +26,14 @@ public class Instruction {
 		return data;
 	}
 
-	public Data<?> get(int index) {
+	public Data<?> get(final int index) {
         if (index < 0 || index >= data.size()) {
             throw new IndexOutOfBoundsException("Invalid index: "+ index+" instruction.data size: "+ data.size());
         }
         return data.get(index);
     }
 
-    public <T> void insert(T data) {
+    public <T> void insert(final T data) {
         this.data.add(new Data<>(data));
     }
 }
