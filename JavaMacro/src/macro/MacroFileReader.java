@@ -197,25 +197,21 @@ public class MacroFileReader {
 						}
 						try {
 							int pos = (Short.parseShort(coordinates[0]) << 16) | (Short.parseShort(coordinates[1]) & 0xFFFF);
-							short delay = 0;
+							int delay = 0;
 
 							if (coordinates.length == 3) {
 								delay = Short.parseShort(coordinates[2]);
-
-								//set the threaded flag
-								instructionSet.bFlags |= 0x01;
+								instructionSet.bFlags |= 0x01; //set the threaded flag
 							}
-							if (((pos >> 16) & 0xFFFF) > 0 && ((pos >> 16) & 0xFFFF) < 0xFFFF && (pos & 0xFFFF) > 0 && (pos & 0xFFFF) < 0xFFFF) {
+
+							if (((pos >> 16) & 0xFFFF) > 0 && (pos & 0xFFFF) > 0) {
 								if (offset == 4) {
 									instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE);
-									instruction.insert((short)((pos >> 16) & 0xFFFF));
-									instruction.insert((short)(pos & 0xFFFF));
-									instruction.insert(delay);
+									instruction.insert(((long) pos << 32) | delay);
+
 								} else {
 									instruction = new Instruction(CommandHandler.COMMAND_MOVE_MOUSE_RETURN);
-									instruction.insert((short)((pos >> 16) & 0xFFFF));
-									instruction.insert((short)(pos & 0xFFFF));
-									instruction.insert(delay);
+									instruction.insert(((long) pos << 32) | delay);
 								}
 							}
 						} catch (NumberFormatException e) {

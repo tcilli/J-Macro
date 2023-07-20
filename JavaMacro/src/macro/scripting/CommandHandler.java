@@ -95,20 +95,14 @@ public class CommandHandler {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			NativeInput.mouseMove(
-				data.get(0).toShort(),
-				data.get(1).toShort(),
-				data.get(2).toShort(), true);
+			NativeInput.mouseMove(data.get(0).toLong(), true);
 		});
 
 		commandMap.put(COMMAND_MOVE_MOUSE_RETURN, (data, set) -> {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			NativeInput.moveMouseReturn(
-				data.get(0).toInt(),
-				data.get(1).toInt(),
-				data.get(2).toInt(), true);
+			NativeInput.moveMouseReturn(data.get(0).toLong(), true);
 		});
 
 		/*

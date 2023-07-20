@@ -59,81 +59,62 @@ public class NativeInput {
         User32.INSTANCE.SendInput(nInput, inputs, input.size());
     }
 
-    public static void mouseMove(int x, int y, int delay, boolean absolute)
+    public static void mouseMove(long mouseData, boolean absolute)
     {
-        if (delay > 0) {
-            mouseMoveStraight(x, y, true, delay);
+        if ((mouseData & 0xFFFF) != 0) {
+            mouseMoveStraight(mouseData, absolute);
             return;
         }
-        if (x >= 1 && x <= 65535 && y >= 1 && y <= 65535) {
-            input.input.setType("mi");
-            input.type.setValue(WinUser.INPUT.INPUT_MOUSE);
-            input.input.mi.dx.setValue((long) x * SCREEN_SCALE_FACTOR_X);
-            input.input.mi.dy.setValue((long) y * SCREEN_SCALE_FACTOR_Y);
-            input.input.mi.dwFlags.setValue(absolute ? MOUSEEVENTF_ABS | MOUSEEVENTF_MOVE : MOUSEEVENTF_MOVE);
-            WinUser.INPUT[] inputs = { input };
-            User32.INSTANCE.SendInput(nInput, inputs, input.size());
-        } else {
-            Main.getConsoleBuffer().append("Invalid x: ").append(x).append(" and y ").append(y).append(", Must be within 1 - 65535");
-            Main.pushConsoleMessage();
-        }
+        input.input.setType("mi");
+        input.type.setValue(WinUser.INPUT.INPUT_MOUSE);
+        input.input.mi.dx.setValue(((mouseData >> 48) & 0xFFFF) * SCREEN_SCALE_FACTOR_X);
+        input.input.mi.dy.setValue(((mouseData >> 32) & 0xFFFF) * SCREEN_SCALE_FACTOR_Y);
+        input.input.mi.dwFlags.setValue(absolute ? MOUSEEVENTF_ABS | MOUSEEVENTF_MOVE : MOUSEEVENTF_MOVE);
+        WinUser.INPUT[] inputs = { input };
+        User32.INSTANCE.SendInput(nInput, inputs, input.size());
     }
 
-    public static void moveMouseReturn(int x, int y, int delay, boolean absolute) {
-        int currentX = MouseInfo.getPointerInfo().getLocation().x;
-        int currentY = MouseInfo.getPointerInfo().getLocation().y;
-        mouseMove(x, y, delay, absolute);
+    public static void moveMouseReturn(long mouseData, boolean absolute) {
+        mouseMove(mouseData, absolute);
         click(1);
-        mouseMove(currentX, currentY, 0, absolute);
+        mouseMove(mouseData, absolute);
     }
 
-    public static void mouseMoveStraight(final int targetX, final int targetY, final boolean absolute, final int delay) {
+
+    public static void mouseMoveStraight(long mouseData, boolean absolute) {
+
         PointerInfo pointerInfo = MouseInfo.getPointerInfo();
         Point currentPosition = pointerInfo.getLocation();
 
-        if (targetX >= 1 && targetX <= 65535 && targetY >= 1 && targetY <= 65535) {
-            input.input.setType("mi");
-            input.type.setValue(WinUser.INPUT.INPUT_MOUSE);
+        input.input.setType("mi");
+        input.type.setValue(WinUser.INPUT.INPUT_MOUSE);
 
-            int deltaX = (int) (targetX - currentPosition.getX());
-            int deltaY = (int) (targetY - currentPosition.getY());
+        int deltaX = (int) (((mouseData >> 48) & 0xFFFF) - currentPosition.getX());
+        int deltaY = (int) (((mouseData >> 32) & 0xFFFF) - currentPosition.getY());
 
-            long startTime = System.currentTimeMillis();
-            long elapsedTime = 0;
-            double nextX;
-            double nextY;
-            double progress;
+        long startTime = System.currentTimeMillis();
+        long elapsedTime = 0;
+        double nextX;
+        double nextY;
+        double progress;
 
-            while (elapsedTime < delay) {
-                progress = Math.min(1.0, (double) elapsedTime / delay);
-                nextX = (currentPosition.getX() + (progress * deltaX));
-                nextY = (currentPosition.getY() + (progress * deltaY));
+        while (elapsedTime < (mouseData & 0xFFFF)) {
+            progress = Math.min(1.0, (double) elapsedTime / (mouseData & 0xFFFF));
+            nextX = (currentPosition.getX() + (progress * deltaX));
+            nextY = (currentPosition.getY() + (progress * deltaY));
 
-                input.input.mi.dx.setValue((long) nextX * SCREEN_SCALE_FACTOR_X);
-                input.input.mi.dy.setValue((long) nextY * SCREEN_SCALE_FACTOR_Y);
-                input.input.mi.dwFlags.setValue(absolute ? MOUSEEVENTF_ABS | MOUSEEVENTF_MOVE : MOUSEEVENTF_MOVE);
-
-                WinUser.INPUT[] inputs = {input};
-                User32.INSTANCE.SendInput(nInput, inputs, input.size());
-               try {
-                   Thread.sleep(5); // Sleep for a short duration to prevent excessive CPU usage
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                elapsedTime = System.currentTimeMillis() - startTime;
-            }
-
-            //add a direct click at the target location to account for any precision lost in the math
-            input.input.mi.dx.setValue((long) targetX * SCREEN_SCALE_FACTOR_X);
-            input.input.mi.dy.setValue((long) targetY * SCREEN_SCALE_FACTOR_Y);
+            input.input.mi.dx.setValue((long) nextX * SCREEN_SCALE_FACTOR_X);
+            input.input.mi.dy.setValue((long) nextY * SCREEN_SCALE_FACTOR_Y);
             input.input.mi.dwFlags.setValue(absolute ? MOUSEEVENTF_ABS | MOUSEEVENTF_MOVE : MOUSEEVENTF_MOVE);
 
-            WinUser.INPUT[] inputs = {input};
-            User32.INSTANCE.SendInput(nInput, inputs, input.size());
-
-        } else {
-            Main.getConsoleBuffer().append("Invalid targetX: ").append(targetX).append(" and targetY ").append(targetY).append(", Must be within 1 - 65535");
-            Main.pushConsoleMessage();
+            try {
+                Thread.sleep(5); // Sleep for a short duration to prevent excessive CPU usage
+                WinUser.INPUT[] inputs = {input};
+                User32.INSTANCE.SendInput(nInput, inputs, input.size());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            elapsedTime = System.currentTimeMillis() - startTime;
         }
     }
 
