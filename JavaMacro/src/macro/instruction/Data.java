@@ -6,7 +6,14 @@ public record Data<T>(T value) {
         if (value instanceof Integer) {
             return (Integer) value;
         } else {
-            throw new ClassCastException("Cannot cast " + value.getClass().getSimpleName() + " to int");
+            throw new ClassCastException("Cannot cast " + value.getClass().getSimpleName() + " to Integer");
+        }
+    }
+    public int toShort() {
+        if (value instanceof Short) {
+            return (Short) value;
+        } else {
+            throw new ClassCastException("Cannot cast " + value.getClass().getSimpleName() + " to Short");
         }
     }
 
@@ -32,11 +39,8 @@ public record Data<T>(T value) {
         } else if (value instanceof char[]) {
             return (char[]) value;
         } else {
-            throw new ClassCastException("Cannot cast " + value.getClass().getSimpleName() + " to char array");
+            throw new ClassCastException("Cannot cast " + value.getClass().getSimpleName() + " to Char array");
         }
     }
 
-	public String print() {
-		return String.valueOf(value);
-	}
 }

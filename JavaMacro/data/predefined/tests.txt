@@ -1,3 +1,4 @@
 macro onrelease-a
 consume
 send hello world!
+move 670,700

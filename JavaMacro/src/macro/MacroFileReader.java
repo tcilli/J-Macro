@@ -196,7 +196,7 @@ public class MacroFileReader {
 							coordinates[i] = coordinates[i].replaceAll("\\D", "");
 						}
 						try {
-							int pos = ((short) Short.parseShort(coordinates[0]) << 16) | (Short.parseShort(coordinates[1]) & 0xFFFF);
+							int pos = (Short.parseShort(coordinates[0]) << 16) | (Short.parseShort(coordinates[1]) & 0xFFFF);
 							short delay = 0;
 
 							if (coordinates.length == 3) {
@@ -208,13 +208,13 @@ public class MacroFileReader {
 							if (((pos >> 16) & 0xFFFF) > 0 && ((pos >> 16) & 0xFFFF) < 0xFFFF && (pos & 0xFFFF) > 0 && (pos & 0xFFFF) < 0xFFFF) {
 								if (offset == 4) {
 									instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE);
-									instruction.insert(((pos >> 16) & 0xFFFF));
-									instruction.insert((pos & 0xFFFF));
+									instruction.insert((short)((pos >> 16) & 0xFFFF));
+									instruction.insert((short)(pos & 0xFFFF));
 									instruction.insert(delay);
 								} else {
 									instruction = new Instruction(CommandHandler.COMMAND_MOVE_MOUSE_RETURN);
-									instruction.insert(((pos >> 16) & 0xFFFF));
-									instruction.insert((pos & 0xFFFF));
+									instruction.insert((short)((pos >> 16) & 0xFFFF));
+									instruction.insert((short)(pos & 0xFFFF));
 									instruction.insert(delay);
 								}
 							}

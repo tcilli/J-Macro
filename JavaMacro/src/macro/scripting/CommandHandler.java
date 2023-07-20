@@ -96,9 +96,9 @@ public class CommandHandler {
 				return;
 			}
 			NativeInput.mouseMove(
-				data.get(0).toInt(),
-				data.get(1).toInt(),
-				data.get(2).toInt(), true);
+				data.get(0).toShort(),
+				data.get(1).toShort(),
+				data.get(2).toShort(), true);
 		});
 
 		commandMap.put(COMMAND_MOVE_MOUSE_RETURN, (data, set) -> {
