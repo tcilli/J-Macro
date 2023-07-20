@@ -253,8 +253,8 @@ public class KbHook implements Runnable {
             //set the instructionSet lock flag 0x08
             instructionSet.bFlags |= 0x08;
 
-            //if threadless flag 0x01 was set
-            if ((instructionSet.bFlags & 0x01) != 0) {
+            //if threaded flag 0x01 wasn't set
+            if ((instructionSet.bFlags & 0x01) == 0) {
 
                 //execute the instructionSet directly in the current thread 1 time
                 instructionSet.execute();

@@ -9,10 +9,6 @@ public class Instruction {
 
     private final List<Data<?>> data;
 
-    /**
-     * Creates a new instruction with the given flag
-     * @param flag determines the type of instruction and how it's later handled
-     */
     public Instruction(final int flag) {
         this.flag = flag;
         this.data = new ArrayList<>();

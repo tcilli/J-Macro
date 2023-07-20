@@ -1,5 +1,3 @@
 macro onrelease-a
 consume
 send hello world!
-loop
-wait 1000
