@@ -4,8 +4,6 @@ import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinUser;
 import macro.Main;
-import macro.win32.KbInterface;
-
 import java.awt.*;
 
 public class NativeInput {

@@ -109,7 +109,11 @@ public class MacroFileReader {
 						return;
 					}
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && command.equalsIgnoreCase("wait")) {
+				}
+				if (((instructionSet.bFlags >> 16) & 0xFFFF) == 0)
+					continue;
+
+				if (command.equalsIgnoreCase("wait")) {
 					String wait_command = line.substring(4);
 					wait_command = wait_command.replaceAll("\\D", "");
 
@@ -128,59 +132,59 @@ public class MacroFileReader {
 						Main.pushConsoleMessage();
 						return;
 					}
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && command.equalsIgnoreCase("send")) {
+				} else if (command.equalsIgnoreCase("send")) {
 					instruction = new Instruction(CommandHandler.COMMAND_SEND_STRING);
 					instruction.insert(line.substring(5));
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("click")) {
+				} else if (line.equalsIgnoreCase("click")) {
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
 					instruction.insert(NativeInput.MOUSE_BUTTON_LEFT);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("rightclick")) {
+				} else if (line.equalsIgnoreCase("rightclick")) {
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
 					instruction.insert(NativeInput.MOUSE_BUTTON_RIGHT);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("middleclick")) {
+				} else if (line.equalsIgnoreCase("middleclick")) {
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
 					instruction.insert(NativeInput.MOUSE_BUTTON_MIDDLE);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("mouse1down")) {
+				} else if (line.equalsIgnoreCase("mouse1down")) {
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK_DOWN);
 					instruction.insert(NativeInput.MOUSE_BUTTON_LEFT);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("mouse1up")) {
+				} else if (line.equalsIgnoreCase("mouse1up")) {
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK_UP);
 					instruction.insert(NativeInput.MOUSE_BUTTON_LEFT);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("mouse2down")) {
+				} else if (line.equalsIgnoreCase("mouse2down")) {
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK_DOWN);
 					instruction.insert(NativeInput.MOUSE_BUTTON_RIGHT);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("mouse2up")) {
+				} else if (line.equalsIgnoreCase("mouse2up")) {
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK_UP);
 					instruction.insert(NativeInput.MOUSE_BUTTON_RIGHT);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("mouse3down")) {
+				} else if (line.equalsIgnoreCase("mouse3down")) {
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK_DOWN);
 					instruction.insert(NativeInput.MOUSE_BUTTON_MIDDLE);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("mouse3up")) {
+				} else if (line.equalsIgnoreCase("mouse3up")) {
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK_UP);
 					instruction.insert(NativeInput.MOUSE_BUTTON_MIDDLE);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("reload")) {
+				} else if (line.equalsIgnoreCase("reload")) {
 					instruction = new Instruction(CommandHandler.COMMAND_READ_MACRO_FILE);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("get mousepos")) {
+				} else if (line.equalsIgnoreCase("get mousepos")) {
 					instruction = new Instruction(CommandHandler.COMMAND_GET_MOUSE_POSITION);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("get window")) {
+				} else if (line.equalsIgnoreCase("get window")) {
 					instruction = new Instruction(CommandHandler.COMMAND_PRINT_ACTIVE_WINDOW);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("get memory")) {
+				} else if (line.equalsIgnoreCase("get memory")) {
 					instruction = new Instruction(CommandHandler.COMMAND_PRINT_MEMORY);
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && command.equalsIgnoreCase("move")) {
+				} else if (command.equalsIgnoreCase("move")) {
 					int offset = 4;
 
 					if (line.contains("movereturn")) {
@@ -220,16 +224,16 @@ public class MacroFileReader {
 							return;
 						}
 					}
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && command.equalsIgnoreCase("loop")) {
+				} else if (command.equalsIgnoreCase("loop")) {
 					//set the loop flag and set the threaded flag
 					instructionSet.bFlags |= 0x04 | 0x01;
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && line.equalsIgnoreCase("consume")) {
+				} else if (line.equalsIgnoreCase("consume")) {
 					//set the consume flag
 					instructionSet.bFlags |= 0x02;
 					Keys.addKeyToConsumableMap((short) ((instructionSet.bFlags >> 16) & 0xFFFF));
 
-				} else if (((instructionSet.bFlags >> 16) & 0xFFFF) != 0 && command.equalsIgnoreCase("wind")) {
+				} else if (command.equalsIgnoreCase("wind")) {
 					String title = line.substring(6);
 					title = title.replaceAll("\\s+", " ");
 
