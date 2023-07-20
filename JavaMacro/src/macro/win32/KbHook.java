@@ -45,7 +45,7 @@ public class KbHook implements Runnable {
     public void run() {
 
         /*
-          This anonymous inner class implements the HOOKPROC interface, providing a callback
+          This class implements the HOOKPROC interface, providing a callback
           method that is triggered when a keyboard event is captured by the hook procedure set up
           using the SetWindowsHookEx function.
 
@@ -76,6 +76,7 @@ public class KbHook implements Runnable {
              * @return If nCode is less than zero, the hook procedure must return the value returned by CallNextHookEx.
              *         If the key event was processed, a LRESULT is returned based on whether the key was consumed or not.
              */
+            @SuppressWarnings("UnusedAssignment") // unsure why the compiler is saying its unused...
             public WinDef.LRESULT callback(int nCode, WinDef.WPARAM wParam, WinUser.KBDLLHOOKSTRUCT lParam) {
 
                 if (nCode >= 0 && lParam.vkCode > 0) {
@@ -171,7 +172,7 @@ public class KbHook implements Runnable {
                         handleKey(characterCode);
 
                         // If the key is a consumable key, return 1 to prevent the key from being sent to the application
-                        if (Keys.containsConsumableKey((short) (characterCode))) {
+                        if (Keys.containsConsumableKey(characterCode)) {
                             return new WinDef.LRESULT(1);
                         }
                     }

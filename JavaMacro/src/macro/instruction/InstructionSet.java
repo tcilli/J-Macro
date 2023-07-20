@@ -9,11 +9,7 @@ public class InstructionSet {
 
     private final List<Instruction> instructions;
 
-    /**
-     * The title of the window that must be active for this instruction set to be executed.
-     * If this is empty, then the instruction set will be executed regardless of the active window.
-     */
-    public String windowTitle;// = "";
+    public String windowTitle;
 
     /**
      * Contains the flags for the instruction set
@@ -26,15 +22,6 @@ public class InstructionSet {
      * bits 16 - 31 -> key (0xFFFF0000)
      */
     public int bFlags = 0;
-
-    /**
-     * The macro key is stored as a 16 bit short inside the bFlags int,
-     * Inside the higher 16 bits.
-     * @return the key that triggers this instruction set
-     */
-    public void set2Key(short key) {
-        bFlags |= ((key & 0xFFFF) << 16);
-    }
 
     public InstructionSet() {
         this.instructions = new ArrayList<>();
