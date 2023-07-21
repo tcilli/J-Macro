@@ -1,6 +1,10 @@
 package macro.win32;
 
+import com.sun.jna.platform.win32.User32;
 import macro.win32.inferfaces.KbInterface;
+
+import java.awt.event.KeyEvent;
+import java.sql.SQLOutput;
 
 /**
  * A class for sending virtual keys to the active window.
@@ -58,41 +62,55 @@ public class KbEvent {
 
         for (char c : charArray) {
 
-            int scan = KbInterface.winUser32.VkKeyScan(c);
+            //need to check if shift is already active
+            boolean shiftActive = (User32.INSTANCE.GetAsyncKeyState(KeyEvent.VK_SHIFT) & 0x8000) != 0;
 
-            byte virtualKeyCode = (byte) (scan & 0xFF);
+            //if shift is active we need to deactivate it
+            if (shiftActive) {
+                KbInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEY_UP, 0);
+            }
 
-            boolean extended = ((scan >> 8) & 0x01) != 0;
+            //VkKeyScan is a function provided by the Windows API
+            // that translates a character to the corresponding virtual-key code
+            // and shift state for the current keyboard.
+            short result = KbInterface.winUser32.VkKeyScan(c);
+
+            // Extract the virtual key code
+            byte virtualKeyCode = (byte) (result & 0xFF);
+
+            // Extract the shift state
+            byte shiftState = (byte) (result >> 8);
+
+            //1 if the SHIFT key is pressed.
+            //2 if the CTRL key is pressed.
+            //4 if the ALT key is pressed.
+            boolean shiftKey = (shiftState & 0x01) != 0;
 
             int dwFlags = 0;
 
-            /*
-             * Pressing the modifier keys.
-             * we are only interested in a shift key press.
-             */
-            if (extended) {
+            // virtualKeyCode requires shift key to be pressed
+            if (shiftKey) {
                 dwFlags |= SHIFT_DOWN;
                 KbInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEY_DOWN, 0);
             }
 
-            /*
-             * Pressing the key down
-             */
+            //send the key down
             KbInterface.winUser32.keybd_event(virtualKeyCode, (byte) 0, dwFlags, 0);
 
-            /*
-             * Releasing the key up
-             */
+            //release the key
             KbInterface.winUser32.keybd_event(virtualKeyCode, (byte) 0, dwFlags | KEY_UP, 0);
 
-            /*
-             * Releasing the modifier keys.
-             */
-            if (extended) {
+            //if the virtual key required shift key to be pressed
+            //we need to release the shift key
+            if (shiftKey) {
                 KbInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEY_UP, 0);
+            }
+
+            //if shift was active before we started
+            //we need to reactivate it
+            if (shiftActive) {
+                KbInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEY_DOWN, 0);
             }
         }
     }
-
-
 }

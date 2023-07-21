@@ -25,7 +25,7 @@ public interface KbInterface extends User32, StdCallLibrary {
 
     boolean SetKeyboardState(byte[] lpKeyState);
 
-    int VkKeyScan(char ch);
+    short VkKeyScan(char ch);
 
     short GetAsyncKeyState( int i);
 

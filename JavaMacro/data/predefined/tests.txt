@@ -1,4 +1,3 @@
-macro onrelease-a
+macro ondown-A
 consume
-send hello world!
-move 670,700
+send HELLO WORLD!
