@@ -1,6 +1,5 @@
 package macro;
 
-import com.github.kwhat.jnativehook.NativeHookException;
 import macro.instruction.ScriptContainer;
 import macro.scripting.CommandHandler;
 import macro.win32.KbHook;
@@ -17,28 +16,27 @@ import java.util.concurrent.Executors;
  * </p>
  */
 public class Main  {
-
-    private static final StringBuffer console = new StringBuffer();
+	private static final StringBuffer console = new StringBuffer();
 	private static ScriptContainer scriptContainer;
 	private static CommandHandler commandHandler;
 
-    public static void main(String[] args) throws NativeHookException {
+	public static void main(String[] args) {
 
 		scriptContainer = new ScriptContainer();
 		commandHandler = new CommandHandler();
 
-        new MacroFileReader();
+		new MacroFileReader();
 
-        final ExecutorService executor = Executors.newCachedThreadPool();
+		final ExecutorService executor = Executors.newCachedThreadPool();
 		final KbHook KBHook = new KbHook(executor);
 
 		executor.submit(KBHook);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 			KBHook.unhook();
-            executor.shutdown();
-        }));
-    }
+			executor.shutdown();
+		}));
+	}
 
 	public static StringBuffer getConsoleBuffer() {
 		return console;

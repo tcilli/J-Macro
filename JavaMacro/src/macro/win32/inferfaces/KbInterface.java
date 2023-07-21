@@ -1,4 +1,4 @@
-package macro.win32;
+package macro.win32.inferfaces;
 
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.User32;

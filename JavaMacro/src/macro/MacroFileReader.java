@@ -87,18 +87,17 @@ public class MacroFileReader {
 
 				if (((instructionSet.bFlags >> 16) & 0xFFFF) == 0 && line.length() >= 7 && line.substring(0, 6).equalsIgnoreCase("macro ")) {
 					key = line.substring(6);
-					key = key.replaceAll("\\s+", " ")
-							.replace("ondown-", "")
-							.replace("onrelease-", "");
+					key = key.replaceAll("\\s+", " ") .replace("ondown-", "") .replace("onrelease-", "");
 
 					short keyCode = Keys.getKeyCode(key);
 
 					if (keyCode != 0) {
-
 						if (line.contains("onrelease-")) {
 							keyCode = (short) -keyCode;
 						}
 						instructionSet.bFlags |= ((keyCode & 0xFFFF) << 16);
+						//key has been set. goto next line
+						continue;
 
 					} else {
 						Main.getConsoleBuffer().append("Invalid macro key: ").append(key).append(" , Example 1 (triggered on pressing f1): macro ondown-f1").append("\n");
@@ -108,10 +107,12 @@ public class MacroFileReader {
 						Main.pushConsoleMessage();
 						return;
 					}
-
 				}
-				if (((instructionSet.bFlags >> 16) & 0xFFFF) == 0)
+
+				if (((instructionSet.bFlags >> 16) & 0xFFFF) == 0) {
+					//no key was found go to next line
 					continue;
+				}
 
 				if (command.equalsIgnoreCase("wait")) {
 					String wait_command = line.substring(4);
@@ -121,7 +122,7 @@ public class MacroFileReader {
 						long wait_for = Long.parseLong(wait_command);
 
 						if (wait_for > 0 && wait_for < Long.MAX_VALUE) {
-							instruction = new Instruction(0x0001);
+							instruction = new Instruction(CommandHandler.COMMAND_SLEEP);
 							instruction.insert(wait_for);
 
 							//set the threaded flag
@@ -276,7 +277,7 @@ public class MacroFileReader {
 					instructionSet.insert(end);
 				}
 
-				//the instruction set passed message is printed to the console
+				//the instruction set passed message is printed to the console-
 				Main.getConsoleBuffer().append("File: ").append(file).append(" has been accepted. key bind:").append(key).append(" loop:").append((instructionSet.bFlags & 0x04) != 0).append(" window:").append(instructionSet.windowTitle);
 				Main.pushConsoleMessage();
 

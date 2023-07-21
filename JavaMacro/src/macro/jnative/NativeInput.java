@@ -59,7 +59,7 @@ public class NativeInput {
 
     public static void mouseMove(long mouseData, boolean absolute)
     {
-        if ((mouseData & 0xFFFF) != 0) {
+        if ((mouseData & 0xFFFFFFFFL) != 0) {
             mouseMoveStraight(mouseData, absolute);
             return;
         }
@@ -96,8 +96,8 @@ public class NativeInput {
         double nextY;
         double progress;
 
-        while (elapsedTime < (mouseData & 0xFFFF)) {
-            progress = Math.min(1.0, (double) elapsedTime / (mouseData & 0xFFFF));
+        while (elapsedTime < (mouseData & 0xFFFFFFFFL)) {
+            progress = Math.min(1.0, (double) elapsedTime / (mouseData & 0xFFFFFFFFL));
             nextX = (currentPosition.getX() + (progress * deltaX));
             nextY = (currentPosition.getY() + (progress * deltaY));
 

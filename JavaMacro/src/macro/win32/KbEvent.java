@@ -1,5 +1,7 @@
 package macro.win32;
 
+import macro.win32.inferfaces.KbInterface;
+
 /**
  * A class for sending virtual keys to the active window.
  * A virtual key, also known as a virtual keycode or VK code,
