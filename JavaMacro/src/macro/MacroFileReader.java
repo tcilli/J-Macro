@@ -115,7 +115,7 @@ public class MacroFileReader {
 					try {
 						long wait_for = Long.parseLong(line.substring(5).trim());
 						if (wait_for > 0 && wait_for < Long.MAX_VALUE) {
-							instruction = new Instruction(CommandHandler.COMMAND_SLEEP, new Data<Long>(wait_for));
+							instruction = new Instruction(CommandHandler.COMMAND_SLEEP, new Data<>(wait_for));
 
 							//set the threaded flag
 							instructionSet.bFlags |= 0x01;
@@ -125,44 +125,44 @@ public class MacroFileReader {
 						return;
 					}
 				} else if (command.equalsIgnoreCase("send")) {
-					instruction = new Instruction(CommandHandler.COMMAND_SEND_STRING, new Data<String>(line.substring(5)));
+					instruction = new Instruction(CommandHandler.COMMAND_SEND_STRING, new Data<>(line.substring(5)));
 
 				} else if (line.equalsIgnoreCase("click")) {
 					short mouseData = MouseEvent.mouseClickPacker( 1, 1, 1);
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("rightclick") || line.equalsIgnoreCase("clickright")) {
 					short mouseData = MouseEvent.mouseClickPacker( 2, 1, 1);
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("middleclick") || line.equalsIgnoreCase("clickmiddle")) {
 					short mouseData = MouseEvent.mouseClickPacker( 3, 1, 1);
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse1down")) {
 					short mouseData = MouseEvent.mouseClickPacker( 1, 1, 0);
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse1up")) {
 					short mouseData = MouseEvent.mouseClickPacker( 1, 0, 1);
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse2down")) {
 
 					short mouseData = MouseEvent.mouseClickPacker( 2, 1, 0);
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse2up")) {
 					short mouseData = MouseEvent.mouseClickPacker( 2, 0, 1);
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse3down")) {
 					short mouseData = MouseEvent.mouseClickPacker( 3, 1, 0);
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse3up")) {
 					short mouseData = MouseEvent.mouseClickPacker( 3, 0, 1);
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("reload")) {
 					instruction = new Instruction(CommandHandler.COMMAND_READ_MACRO_FILE, null);
@@ -197,7 +197,7 @@ public class MacroFileReader {
 						}
 						if (x > 0 && y > 0) {
 							long mouseData = MouseEvent.mouseMovementPacker(x, y, delay, abs);
-							instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE, new Data<Long>(mouseData));
+							instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE, new Data<>(mouseData));
 						}
 					} catch (NumberFormatException e) {
 						appendInvalidInstruction(consoleBuffer, file, cur_line, e.toString());
@@ -243,7 +243,7 @@ public class MacroFileReader {
 
 				//if the loop flag was set but the waitTime was not met, the file is rejected
 				if ((instructionSet.bFlags & 0x04) != 0 && waitTime < 100) {
-					appendInvalidInstruction(consoleBuffer, file, cur_line, line);
+					appendInvalidInstruction(consoleBuffer, file, cur_line, null);
 					return;
 				}
 
@@ -254,7 +254,7 @@ public class MacroFileReader {
 				}
 
 				//the instruction set passed message is printed to the console-
-				Main.getConsoleBuffer().append("File: ").append(file).append(" has been accepted. key bind:").append(key).append(" loop:").append((instructionSet.bFlags & 0x04) != 0).append(" window:").append(instructionSet.windowTitle);
+				Main.getConsoleBuffer().append("File: ").append(file).append(" has been accepted").append(" loop:").append((instructionSet.bFlags & 0x04) != 0).append(" window:").append(instructionSet.windowTitle);
 				Main.pushConsoleMessage();
 
 				//finally the instruction set is inserted into the script container
@@ -266,7 +266,7 @@ public class MacroFileReader {
 	}
 
 	private void appendInvalidInstruction(StringBuffer consoleBuffer, File file, byte cur_line, String line) {
-		consoleBuffer.append("File: ").append(file).append(" line(").append(cur_line).append(") is an invalid instruction: ").append(line);
+		consoleBuffer.append("WARNING: File: ").append(file).append(" Rejected, line(").append(cur_line).append(") is an invalid instruction: ").append(line);
 		Main.pushConsoleMessage();
 	}
 }

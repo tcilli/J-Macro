@@ -12,7 +12,7 @@ public class MouseEvent {
     public static void mouseMove(long mouseMoveData) {
         short x = (short) ((mouseMoveData >> 48) & 0xFFFF);
         short y = (short) ((mouseMoveData >> 32) & 0xFFFF);
-        int delay = (int) mouseMoveData >> 1;
+        int delay = (int) ((mouseMoveData >> 1) & 0x7FFFFFFF);
         boolean abs = (mouseMoveData & 1) == 1;
 
         if (delay > SLEEP_TIME && delay < 10000) {
@@ -138,7 +138,7 @@ public class MouseEvent {
         long mouseData = 0;
         mouseData |= ((long) x & 0xFFFFL) << 48;
         mouseData |= ((long) y & 0xFFFFL) << 32;
-        mouseData |= ((long) delay & 0xFFFFFFFFL) << 1;
+        mouseData |= ((long) delay & 0x7FFFFFFFL) << 1;
         mouseData |= abs ? 1 : 0;
         return mouseData;
     }
