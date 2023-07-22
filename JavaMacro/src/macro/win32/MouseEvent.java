@@ -1,6 +1,7 @@
 package macro.win32;
 
 import com.sun.jna.platform.win32.User32;
+import macro.Main;
 import macro.win32.inferfaces.MouseInterface;
 
 import java.awt.*;
@@ -78,7 +79,7 @@ public class MouseEvent {
 
             progress = Math.min(1.0, (float) elapsedTime / delay);
             double nextX = (currentPosition.getX() + (progress * deltaX));
-            double nextY = (currentPosition.getY() + (progress * deltaY));;
+            double nextY = (currentPosition.getY() + (progress * deltaY));
             mouse_move_abs((int) nextX, (int) nextY);
 
             try {
@@ -141,4 +142,10 @@ public class MouseEvent {
 
     private static final int SCREEN_SCALE_FACTOR_X = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CXSCREEN));
     private static final int SCREEN_SCALE_FACTOR_Y = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CYSCREEN));
+
+    public static void getMousePosition() {
+        PointerInfo info = MouseInfo.getPointerInfo();
+        Main.getConsoleBuffer().append("mousePosX: ").append(info.getLocation().getX()).append(" mousePosY: ").append(info.getLocation().getY());
+        Main.pushConsoleMessage();
+    }
 }

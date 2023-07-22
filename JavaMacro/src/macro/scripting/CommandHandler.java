@@ -4,7 +4,6 @@ import macro.*;
 import macro.instruction.Data;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
-import macro.jnative.NativeInput;
 import macro.win32.KbEvent;
 import macro.win32.MouseEvent;
 
@@ -79,13 +78,6 @@ public class CommandHandler {
 			MouseEvent.move_mouse(data.get(0).toLong());
 		});
 
-		commandMap.put(COMMAND_MOVE_MOUSE_RETURN, (data, set) -> {
-			if (failedWindowCheck(set)) {
-				return;
-			}
-			//NativeInput.moveMouseReturn(data.get(0).toLong(), true);
-		});
-
 		/*
 		 * Reloads the macro file
 		 */
@@ -102,7 +94,7 @@ public class CommandHandler {
 		 * Prints the current mouse position
 		 */
 		commandMap.put(COMMAND_GET_MOUSE_POSITION,
-			(data, set) -> NativeInput.getMousePosition());
+			(data, set) -> MouseEvent.getMousePosition());
 
 		/*
 		 * Prints the active window title
@@ -148,5 +140,4 @@ public class CommandHandler {
 	public static final int COMMAND_GET_MOUSE_POSITION = 10;
 	public static final int COMMAND_PRINT_ACTIVE_WINDOW = 11;
 	public static final int COMMAND_END = 12;
-	public static final int COMMAND_MOVE_MOUSE_RETURN = 13;
 }

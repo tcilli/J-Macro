@@ -4,7 +4,6 @@ import com.sun.jna.platform.win32.User32;
 import macro.win32.inferfaces.KbInterface;
 
 import java.awt.event.KeyEvent;
-import java.sql.SQLOutput;
 
 /**
  * A class for sending virtual keys to the active window.

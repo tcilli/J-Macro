@@ -2,7 +2,6 @@ package macro;
 
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
-import macro.jnative.NativeInput;
 import macro.scripting.CommandHandler;
 
 import java.io.BufferedReader;
@@ -220,7 +219,7 @@ public class MacroFileReader {
 							mouseData |= ((long) delay & 0xFFFFFFFFL) << 1; // delay takes up the next 32 bits
 							mouseData |= abs ? 1 : 0; // abs takes up the last bit
 
-							instruction = new Instruction(line.contains("movereturn") ? CommandHandler.COMMAND_MOVE_MOUSE_RETURN : CommandHandler.COMMAND_MOUSE_MOVE);
+							instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE);
 							instruction.insert(mouseData);
 						}
 					} catch (NumberFormatException e) {
