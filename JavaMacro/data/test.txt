@@ -1,4 +1,4 @@
-macro ondown-T
+macro ondown-4
 consume
-rightclick
-move 500,500,0
+mouse3down
+mouse3up

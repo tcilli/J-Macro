@@ -8,14 +8,11 @@ import macro.win32.KbEvent;
 import macro.win32.MouseEvent;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * The {@link CommandHandler} class is responsible for
- * linking of the {@link Instruction#getFlag()} to {@link Command} interface.
- * The {@link Command} interface is used to execute the stored action of an {@link Instruction}.
- * <p>See {@link Command#execute(List, InstructionSet)}</p>
+ * linking of the {@link Instruction#flag()} to {@link Command} interface.
  */
 public class CommandHandler {
 
@@ -28,7 +25,7 @@ public class CommandHandler {
 	 * Populates the {@link #commandMap} Each {@link Command} is an interface.
 	 * Note: only some commands require a window check, such as mouse clicks and sending strings.
 	 * This prevents an {@link Instruction} from executing in the wrong window (if the user has specified a window).
-	 * Each {@link Instruction} consists of {@link Instruction#getFlag()} used as the Key for the {@link #commandMap}
+	 * Each {@link Instruction} consists of {@link Instruction#flag()} used as the Key for the {@link #commandMap}
 	 * and a list of {@link Data} {@link Record}s. The {@link #commandMap} stores the action of a specific {@link Instruction}.
 	 */
 	public CommandHandler() {
@@ -37,7 +34,7 @@ public class CommandHandler {
 		 */
 		commandMap.put(COMMAND_SLEEP,  (data, set) -> {
 			try {
-				Thread.sleep(data.get(0).toLong());
+				Thread.sleep(data.toLong());
 			} catch(InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
@@ -50,7 +47,7 @@ public class CommandHandler {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			KbEvent.send_characters(data.get(0).toCharArray());
+			KbEvent.send_characters(data.toCharArray());
 		});
 
 		/*
@@ -60,7 +57,7 @@ public class CommandHandler {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			MouseEvent.mouseClick(data.get(0).toShort());
+			MouseEvent.mouseClick(data.toShort());
 		});
 
 		/*
@@ -75,7 +72,7 @@ public class CommandHandler {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			MouseEvent.mouseMove(data.get(0).toLong());
+			MouseEvent.mouseMove(data.toLong());
 		});
 
 		/*

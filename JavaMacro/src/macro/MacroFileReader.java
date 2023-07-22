@@ -1,8 +1,10 @@
 package macro;
 
+import macro.instruction.Data;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 import macro.scripting.CommandHandler;
+import macro.win32.MouseEvent;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -113,8 +115,7 @@ public class MacroFileReader {
 					try {
 						long wait_for = Long.parseLong(line.substring(5).trim());
 						if (wait_for > 0 && wait_for < Long.MAX_VALUE) {
-							instruction = new Instruction(CommandHandler.COMMAND_SLEEP);
-							instruction.insert(wait_for);
+							instruction = new Instruction(CommandHandler.COMMAND_SLEEP, new Data<Long>(wait_for));
 
 							//set the threaded flag
 							instructionSet.bFlags |= 0x01;
@@ -124,74 +125,56 @@ public class MacroFileReader {
 						return;
 					}
 				} else if (command.equalsIgnoreCase("send")) {
-					instruction = new Instruction(CommandHandler.COMMAND_SEND_STRING);
-					instruction.insert(line.substring(5));
+					instruction = new Instruction(CommandHandler.COMMAND_SEND_STRING, new Data<String>(line.substring(5)));
 
 				} else if (line.equalsIgnoreCase("click")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
-					short mouseData = 0;
-					mouseData |= (short) 1 << 8 | 0x3;
-					instruction.insert(mouseData);
+					short mouseData = MouseEvent.mouseClickPacker( 1, 1, 1);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
 
 				} else if (line.equalsIgnoreCase("rightclick") || line.equalsIgnoreCase("clickright")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
-					short mouseData = 0;
-					mouseData |= (short) 2 << 8 | 0x3;
-					instruction.insert(mouseData);
+					short mouseData = MouseEvent.mouseClickPacker( 2, 1, 1);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
 
 				} else if (line.equalsIgnoreCase("middleclick") || line.equalsIgnoreCase("clickmiddle")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
-					short mouseData = 0;
-					mouseData |= (short) 3 << 8 | 0x3;
-					instruction.insert(mouseData);
+					short mouseData = MouseEvent.mouseClickPacker( 3, 1, 1);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse1down")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
-					short mouseData = 0;
-					mouseData |= (short) 1 << 8 | 0x1;
-					instruction.insert(mouseData);
+					short mouseData = MouseEvent.mouseClickPacker( 1, 1, 0);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse1up")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
-					short mouseData = 0;
-					mouseData |= (short) 1 << 8 | 0x2;
-					instruction.insert(mouseData);
+					short mouseData = MouseEvent.mouseClickPacker( 1, 0, 1);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse2down")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
-					short mouseData = 0;
-					mouseData |= (short) 2 << 8 | 0x1;
-					instruction.insert(mouseData);
+
+					short mouseData = MouseEvent.mouseClickPacker( 2, 1, 0);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse2up")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
-					short mouseData = 0;
-					mouseData |= (short) 2 << 8 | 0x2;
-					instruction.insert(mouseData);
+					short mouseData = MouseEvent.mouseClickPacker( 2, 0, 1);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse3down")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
-					short mouseData = 0;
-					mouseData |= (short) 3 << 8 | 0x1;
-					instruction.insert(mouseData);
+					short mouseData = MouseEvent.mouseClickPacker( 3, 1, 0);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse3up")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
-					short mouseData = 0;
-					mouseData |= (short) 3 << 8 | 0x2;
-					instruction.insert(mouseData);
+					short mouseData = MouseEvent.mouseClickPacker( 3, 0, 1);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<Short>(mouseData));
 
 				} else if (line.equalsIgnoreCase("reload")) {
-					instruction = new Instruction(CommandHandler.COMMAND_READ_MACRO_FILE);
+					instruction = new Instruction(CommandHandler.COMMAND_READ_MACRO_FILE, null);
 
 				} else if (line.equalsIgnoreCase("get mousepos")) {
-					instruction = new Instruction(CommandHandler.COMMAND_GET_MOUSE_POSITION);
+					instruction = new Instruction(CommandHandler.COMMAND_GET_MOUSE_POSITION, null);
 
 				} else if (line.equalsIgnoreCase("get window")) {
-					instruction = new Instruction(CommandHandler.COMMAND_PRINT_ACTIVE_WINDOW);
+					instruction = new Instruction(CommandHandler.COMMAND_PRINT_ACTIVE_WINDOW, null);
 
 				} else if (line.equalsIgnoreCase("get memory")) {
-					instruction = new Instruction(CommandHandler.COMMAND_PRINT_MEMORY);
+					instruction = new Instruction(CommandHandler.COMMAND_PRINT_MEMORY, null);
 
 				} else if (command.equalsIgnoreCase("move")) {
 
@@ -213,14 +196,8 @@ public class MacroFileReader {
 							instructionSet.bFlags |= 0x01; //set the threaded flag
 						}
 						if (x > 0 && y > 0) {
-							long mouseData = 0;
-							mouseData |= ((long) x & 0xFFFFL) << 48; // x takes up the highest 16 bits
-							mouseData |= ((long) y & 0xFFFFL) << 32; // y takes up the next 16 bits
-							mouseData |= ((long) delay & 0xFFFFFFFFL) << 1; // delay takes up the next 32 bits
-							mouseData |= abs ? 1 : 0; // abs takes up the last bit
-
-							instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE);
-							instruction.insert(mouseData);
+							long mouseData = MouseEvent.mouseMovementPacker(x, y, delay, abs);
+							instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE, new Data<Long>(mouseData));
 						}
 					} catch (NumberFormatException e) {
 						appendInvalidInstruction(consoleBuffer, file, cur_line, e.toString());
@@ -259,8 +236,8 @@ public class MacroFileReader {
 				long waitTime = 0;
 
 				for (Instruction i : instructionSet.getInstructions()) {
-					if (i.getFlag() == CommandHandler.COMMAND_SLEEP) {
-						waitTime += i.get(0).toLong();
+					if (i.flag() == CommandHandler.COMMAND_SLEEP) {
+						waitTime += i.data().toLong();
 					}
 				}
 
@@ -272,7 +249,7 @@ public class MacroFileReader {
 
 				//if the loop flag is not set, the end instruction is inserted
 				if ((instructionSet.bFlags & 0x04) == 0) {
-					Instruction end = new Instruction(CommandHandler.COMMAND_END);
+					Instruction end = new Instruction(CommandHandler.COMMAND_END, null);
 					instructionSet.insert(end);
 				}
 

@@ -9,11 +9,11 @@ import java.awt.*;
 
 public class MouseEvent {
 
-    public static void mouseMove(long mouseData) {
-        short x = (short) ((mouseData >> 48) & 0xFFFF);
-        short y = (short) ((mouseData >> 32) & 0xFFFF);
-        int delay = (int) mouseData >> 1;
-        boolean abs = (mouseData & 1) == 1;
+    public static void mouseMove(long mouseMoveData) {
+        short x = (short) ((mouseMoveData >> 48) & 0xFFFF);
+        short y = (short) ((mouseMoveData >> 32) & 0xFFFF);
+        int delay = (int) mouseMoveData >> 1;
+        boolean abs = (mouseMoveData & 1) == 1;
 
         if (delay > SLEEP_TIME && delay < 10000) {
             mouseMoveOverTimeEvent(x, y, delay, abs);
@@ -22,10 +22,9 @@ public class MouseEvent {
         }
     }
 
-    public static void mouseClick(short mouseData) {
-        byte mouseButton = (byte) (mouseData >> 8);
-        byte flags = (byte) (mouseData & 0xFF);
-
+    public static void mouseClick(short mouseClickData) {
+        byte mouseButton = (byte) (mouseClickData >> 8);
+        byte flags = (byte) (mouseClickData & 0xFF);
         int downEvent = getDownEvent(mouseButton);
         int upEvent = getUpEvent(mouseButton);
 
@@ -94,8 +93,8 @@ public class MouseEvent {
         }
         //make sure the mouse ends up at the correct position
         mouseMoveEvent(x, y, true);
+        mouseClickEvent(6);
     }
-
 
     private static void mouseMoveEvent(int x, int y, boolean abs) {
         win_input_event.input.setType("mi");
@@ -119,7 +118,7 @@ public class MouseEvent {
     private static final WinDef.DWORD nInput = new WinDef.DWORD(1);
     private static final int SCREEN_SCALE_FACTOR_X = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CXSCREEN));
     private static final int SCREEN_SCALE_FACTOR_Y = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CYSCREEN));
-    private static final int SLEEP_TIME = 10;
+    private static final int SLEEP_TIME = 5;
     private static final int MOUSEEVENTF_MOVE = 1;
     private static final int MOUSEEVENTF_LEFTDOWN = 2;
     private static final int MOUSEEVENTF_LEFTUP = 4;
@@ -133,5 +132,21 @@ public class MouseEvent {
         PointerInfo info = MouseInfo.getPointerInfo();
         Main.getConsoleBuffer().append("mousePosX: ").append(info.getLocation().getX()).append(" mousePosY: ").append(info.getLocation().getY());
         Main.pushConsoleMessage();
+    }
+
+    public static long mouseMovementPacker(short x, short y, int delay, boolean abs) {
+        long mouseData = 0;
+        mouseData |= ((long) x & 0xFFFFL) << 48;
+        mouseData |= ((long) y & 0xFFFFL) << 32;
+        mouseData |= ((long) delay & 0xFFFFFFFFL) << 1;
+        mouseData |= abs ? 1 : 0;
+        return mouseData;
+    }
+
+    public static short mouseClickPacker(int mouseButton, int mouseButtonDown, int mouseButtonUp) {
+        short mouseData = 0;
+        mouseData |= (byte) (mouseButton & 0xFF) << 8;
+        mouseData |= (byte) (mouseButtonDown | (mouseButtonUp << 1)) & 0xFF;
+        return mouseData;
     }
 }

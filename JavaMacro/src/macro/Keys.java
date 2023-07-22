@@ -28,6 +28,8 @@ public final class Keys {
     static {
         keyMap.put("shift", (short) KeyEvent.VK_SHIFT);
         keyMap.put("control", (short) KeyEvent.VK_CONTROL);
+        keyMap.put("ctrl", (short) KeyEvent.VK_CONTROL);
+        keyMap.put("capslock", (short) KeyEvent.VK_CAPS_LOCK);
         keyMap.put("alt", (short) KeyEvent.VK_ALT);
         keyMap.put("meta", (short) KeyEvent.VK_META);
         keyMap.put("tab", (short) KeyEvent.VK_TAB);

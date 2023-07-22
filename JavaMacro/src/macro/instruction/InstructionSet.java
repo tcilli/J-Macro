@@ -37,7 +37,7 @@ public class InstructionSet {
 
     public void execute() {
         for (Instruction ins : getInstructions()) {
-            Main.getCommandHandler().commandMap.get(ins.getFlag()).execute(ins.getData(), this);
+            Main.getCommandHandler().commandMap.get(ins.flag()).execute(ins.data(), this);
         }
     }
 }
