@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+
 /**
  * MacroFileReader.java.
  * <p>
@@ -55,13 +56,17 @@ public class MacroFileReader {
 			Main.pushConsoleMessage();
 			return;
 		}
+		Main.getConsoleBuffer().append("Building scripts");
+		Main.pushConsoleMessage();
 		for (File file : files) {
 			readLinesFromFile(file);
 		}
 	}
 
 	private void readLinesFromFile(File file) {
+
 		InstructionSet instructionSet = new InstructionSet();
+		StringBuffer consoleBuffer = Main.getConsoleBuffer();
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
 			String line;
@@ -77,50 +82,37 @@ public class MacroFileReader {
 					continue;
 				}
 				if (line.length() < 4) {
-					Main.getConsoleBuffer().append("File: ").append(file).append(" line(").append(cur_line).append(") is an invalid instruction: ").append(line);
-					Main.pushConsoleMessage();
+					appendInvalidInstruction(consoleBuffer, file, cur_line, line);
 					return;
 				}
 				String command = line.substring(0, 4);
 
 				Instruction instruction = null;
 
-				if (((instructionSet.bFlags >> 16) & 0xFFFF) == 0 && line.length() >= 7 && line.substring(0, 6).equalsIgnoreCase("macro ")) {
-					key = line.substring(6);
-					key = key.replaceAll("\\s+", " ") .replace("ondown-", "") .replace("onrelease-", "");
+				if (((instructionSet.bFlags >> 16) & 0xFFFF) == 0 && line.contains("macro on")) {
+					short keyCode = 0;
 
-					short keyCode = Keys.getKeyCode(key);
-
+					if (line.contains("ondown-")) {
+						keyCode = Keys.getKeyCode(line.substring(13).trim());
+					} else if (line.contains("onrelease-")) {
+						keyCode = (short) -(Keys.getKeyCode(line.substring(16).trim()));
+					}
 					if (keyCode != 0) {
-						if (line.contains("onrelease-")) {
-							keyCode = (short) -keyCode;
-						}
 						instructionSet.bFlags |= ((keyCode & 0xFFFF) << 16);
-						//key has been set. goto next line
-						continue;
-
+						continue; //key has been set. goto next line
 					} else {
-						Main.getConsoleBuffer().append("Invalid macro key: ").append(key).append(" , Example 1 (triggered on pressing f1): macro ondown-f1").append("\n");
-						Main.getConsoleBuffer().append("Invalid macro key: ").append(key).append(" , Example 2 (triggered on the release of f1): macro onrelease-f1").append("\n");
-						Main.getConsoleBuffer().append("Invalid macro key: ").append(key).append(" , Example 3 (triggered on the pressing home key): macro onrelease-home").append("\n");
-						Main.getConsoleBuffer().append("Invalid macro key: ").append(key).append(" , Example 4 (triggered on the release of captial J): macro onrelease-J").append("\n");
-						Main.pushConsoleMessage();
+						appendInvalidInstruction(consoleBuffer, file, cur_line, line);
 						return;
 					}
 				}
 
 				if (((instructionSet.bFlags >> 16) & 0xFFFF) == 0) {
-					//no key was found go to next line
-					continue;
+					continue; //no key was found go to next line
 				}
 
 				if (command.equalsIgnoreCase("wait")) {
-					String wait_command = line.substring(4);
-					wait_command = wait_command.replaceAll("\\D", "");
-
 					try {
-						long wait_for = Long.parseLong(wait_command);
-
+						long wait_for = Long.parseLong(line.substring(5).trim());
 						if (wait_for > 0 && wait_for < Long.MAX_VALUE) {
 							instruction = new Instruction(CommandHandler.COMMAND_SLEEP);
 							instruction.insert(wait_for);
@@ -129,8 +121,7 @@ public class MacroFileReader {
 							instructionSet.bFlags |= 0x01;
 						}
 					} catch (NumberFormatException e) {
-						Main.getConsoleBuffer().append("Invalid number format for ").append(line).append("\n").append("Syntax: wait 1000 \n").append(e);
-						Main.pushConsoleMessage();
+						appendInvalidInstruction(consoleBuffer, file, cur_line, line);
 						return;
 					}
 				} else if (command.equalsIgnoreCase("send")) {
@@ -139,39 +130,57 @@ public class MacroFileReader {
 
 				} else if (line.equalsIgnoreCase("click")) {
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
-					instruction.insert(NativeInput.MOUSE_BUTTON_LEFT);
+					short mouseData = 0;
+					mouseData |= (short) 1 << 8 | 0x3;
+					instruction.insert(mouseData);
 
-				} else if (line.equalsIgnoreCase("rightclick")) {
+				} else if (line.equalsIgnoreCase("rightclick") || line.equalsIgnoreCase("clickright")) {
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
-					instruction.insert(NativeInput.MOUSE_BUTTON_RIGHT);
+					short mouseData = 0;
+					mouseData |= (short) 2 << 8 | 0x3;
+					instruction.insert(mouseData);
 
-				} else if (line.equalsIgnoreCase("middleclick")) {
+				} else if (line.equalsIgnoreCase("middleclick") || line.equalsIgnoreCase("clickmiddle")) {
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
-					instruction.insert(NativeInput.MOUSE_BUTTON_MIDDLE);
+					short mouseData = 0;
+					mouseData |= (short) 3 << 8 | 0x3;
+					instruction.insert(mouseData);
 
 				} else if (line.equalsIgnoreCase("mouse1down")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK_DOWN);
-					instruction.insert(NativeInput.MOUSE_BUTTON_LEFT);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
+					short mouseData = 0;
+					mouseData |= (short) 1 << 8 | 0x1;
+					instruction.insert(mouseData);
 
 				} else if (line.equalsIgnoreCase("mouse1up")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK_UP);
-					instruction.insert(NativeInput.MOUSE_BUTTON_LEFT);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
+					short mouseData = 0;
+					mouseData |= (short) 1 << 8 | 0x2;
+					instruction.insert(mouseData);
 
 				} else if (line.equalsIgnoreCase("mouse2down")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK_DOWN);
-					instruction.insert(NativeInput.MOUSE_BUTTON_RIGHT);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
+					short mouseData = 0;
+					mouseData |= (short) 2 << 8 | 0x1;
+					instruction.insert(mouseData);
 
 				} else if (line.equalsIgnoreCase("mouse2up")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK_UP);
-					instruction.insert(NativeInput.MOUSE_BUTTON_RIGHT);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
+					short mouseData = 0;
+					mouseData |= (short) 2 << 8 | 0x2;
+					instruction.insert(mouseData);
 
 				} else if (line.equalsIgnoreCase("mouse3down")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK_DOWN);
-					instruction.insert(NativeInput.MOUSE_BUTTON_MIDDLE);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
+					short mouseData = 0;
+					mouseData |= (short) 3 << 8 | 0x1;
+					instruction.insert(mouseData);
 
 				} else if (line.equalsIgnoreCase("mouse3up")) {
-					instruction = new Instruction(CommandHandler.COMMAND_CLICK_UP);
-					instruction.insert(NativeInput.MOUSE_BUTTON_MIDDLE);
+					instruction = new Instruction(CommandHandler.COMMAND_CLICK);
+					short mouseData = 0;
+					mouseData |= (short) 3 << 8 | 0x2;
+					instruction.insert(mouseData);
 
 				} else if (line.equalsIgnoreCase("reload")) {
 					instruction = new Instruction(CommandHandler.COMMAND_READ_MACRO_FILE);
@@ -186,44 +195,37 @@ public class MacroFileReader {
 					instruction = new Instruction(CommandHandler.COMMAND_PRINT_MEMORY);
 
 				} else if (command.equalsIgnoreCase("move")) {
-					int offset = 4;
 
-					if (line.contains("movereturn")) {
-						offset = 10;
+					boolean abs = !line.contains("moverel");
+
+					String[] parts = line.replaceAll("[^0-9,]", "").split(",");
+					if (parts.length < 2) {
+						appendInvalidInstruction(consoleBuffer, file, cur_line, line);
+						return;
 					}
-					String move_command = line.substring(offset);
+					try {
+						short x = Short.parseShort(parts[0].trim());
+						short y = Short.parseShort(parts[1].trim());
 
-					move_command = move_command.replaceAll("[a-zA-Z]", "");
-					String[] coordinates = move_command.split(",");
+						int delay = 0;
 
-					if (coordinates.length >= 2) {
-						for (int i = 0; i < coordinates.length; i++) {
-							coordinates[i] = coordinates[i].replaceAll("\\D", "");
+						if (parts.length == 3) {
+							delay = Short.parseShort(parts[2].trim());
+							instructionSet.bFlags |= 0x01; //set the threaded flag
 						}
-						try {
-							int pos = (Short.parseShort(coordinates[0]) << 16) | (Short.parseShort(coordinates[1]) & 0xFFFF);
-							int delay = 0;
+						if (x > 0 && y > 0) {
+							long mouseData = 0;
+							mouseData |= ((long) x & 0xFFFFL) << 48; // x takes up the highest 16 bits
+							mouseData |= ((long) y & 0xFFFFL) << 32; // y takes up the next 16 bits
+							mouseData |= ((long) delay & 0xFFFFFFFFL) << 1; // delay takes up the next 32 bits
+							mouseData |= abs ? 1 : 0; // abs takes up the last bit
 
-							if (coordinates.length == 3) {
-								delay = Short.parseShort(coordinates[2]);
-								instructionSet.bFlags |= 0x01; //set the threaded flag
-							}
-
-							if (((pos >> 16) & 0xFFFF) > 0 && (pos & 0xFFFF) > 0) {
-								if (offset == 4) {
-									instruction = new Instruction(CommandHandler.COMMAND_MOUSE_MOVE);
-									instruction.insert(((long) pos << 32) | delay);
-
-								} else {
-									instruction = new Instruction(CommandHandler.COMMAND_MOVE_MOUSE_RETURN);
-									instruction.insert(((long) pos << 32) | delay);
-								}
-							}
-						} catch (NumberFormatException e) {
-							Main.getConsoleBuffer().append("Invalid number format for ").append(line).append("\n").append("Syntax: move 500,500 \n").append(e);
-							Main.pushConsoleMessage();
-							return;
+							instruction = new Instruction(line.contains("movereturn") ? CommandHandler.COMMAND_MOVE_MOUSE_RETURN : CommandHandler.COMMAND_MOUSE_MOVE);
+							instruction.insert(mouseData);
 						}
+					} catch (NumberFormatException e) {
+						appendInvalidInstruction(consoleBuffer, file, cur_line, e.toString());
+						return;
 					}
 				} else if (command.equalsIgnoreCase("loop")) {
 					//set the loop flag and set the threaded flag
@@ -246,8 +248,7 @@ public class MacroFileReader {
 						instructionSet.windowTitle = title.toLowerCase();
 					}
 				} else {
-					Main.getConsoleBuffer().append("File: ").append(file).append(" line:").append(cur_line).append(" is an invalid instruction: ").append(line);
-					Main.pushConsoleMessage();
+					appendInvalidInstruction(consoleBuffer, file, cur_line, line);
 					return;
 				}
 				if (instruction != null) {
@@ -266,8 +267,7 @@ public class MacroFileReader {
 
 				//if the loop flag was set but the waitTime was not met, the file is rejected
 				if ((instructionSet.bFlags & 0x04) != 0 && waitTime < 100) {
-					Main.getConsoleBuffer().append("File: ").append(file).append(" Rejected, Requires a wait command if using the loop instruction, \n").append("Or did not meet the required minimum wait time of 100ms. Detected delay time: ").append(waitTime).append("ms");
-					Main.pushConsoleMessage();
+					appendInvalidInstruction(consoleBuffer, file, cur_line, line);
 					return;
 				}
 
@@ -287,5 +287,10 @@ public class MacroFileReader {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void appendInvalidInstruction(StringBuffer consoleBuffer, File file, byte cur_line, String line) {
+		consoleBuffer.append("File: ").append(file).append(" line(").append(cur_line).append(") is an invalid instruction: ").append(line);
+		Main.pushConsoleMessage();
 	}
 }

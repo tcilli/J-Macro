@@ -9,7 +9,7 @@ public record Data<T>(T value) {
             throw new ClassCastException("Cannot cast " + value.getClass().getSimpleName() + " to Integer");
         }
     }
-    public int toShort() {
+    public short toShort() {
         if (value instanceof Short) {
             return (Short) value;
         } else {

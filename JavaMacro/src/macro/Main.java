@@ -2,7 +2,7 @@ package macro;
 
 import macro.instruction.ScriptContainer;
 import macro.scripting.CommandHandler;
-import macro.win32.KbHook;
+import macro.win32.hooks.KbHook;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

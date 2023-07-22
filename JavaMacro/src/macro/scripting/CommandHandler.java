@@ -6,6 +6,7 @@ import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 import macro.jnative.NativeInput;
 import macro.win32.KbEvent;
+import macro.win32.MouseEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,27 +61,7 @@ public class CommandHandler {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			NativeInput.click(data.get(0).toInt());
-		});
-
-		/*
-		 * The mouse click down command requires 1 data argument: (Integer) mouseButton
-		 */
-		commandMap.put(COMMAND_CLICK_DOWN, (data, set) -> {
-			if (failedWindowCheck(set)) {
-				return;
-			}
-			NativeInput.clickDown(data.get(0).toInt());
-		});
-
-		/*
-		 * The mouse click up command requires 1 data argument: (Integer) mouseButton
-		 */
-		commandMap.put(COMMAND_CLICK_UP, (data, set) -> {
-			if (failedWindowCheck(set)) {
-				return;
-			}
-			NativeInput.clickUp(data.get(0).toInt());
+			MouseEvent.click_mouse(data.get(0).toShort());
 		});
 
 		/*
@@ -95,14 +76,14 @@ public class CommandHandler {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			NativeInput.mouseMove(data.get(0).toLong(), true);
+			MouseEvent.move_mouse(data.get(0).toLong());
 		});
 
 		commandMap.put(COMMAND_MOVE_MOUSE_RETURN, (data, set) -> {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			NativeInput.moveMouseReturn(data.get(0).toLong(), true);
+			//NativeInput.moveMouseReturn(data.get(0).toLong(), true);
 		});
 
 		/*
@@ -161,8 +142,6 @@ public class CommandHandler {
 	public static final int COMMAND_SLEEP = 1;
 	public static final int COMMAND_SEND_STRING = 2;
 	public static final int COMMAND_CLICK = 3;
-	public static final int COMMAND_CLICK_DOWN = 4;
-	public static final int COMMAND_CLICK_UP = 5;
 	public static final int COMMAND_MOUSE_MOVE = 6;
 	public static final int COMMAND_READ_MACRO_FILE = 7;
 	public static final int COMMAND_PRINT_MEMORY = 8;

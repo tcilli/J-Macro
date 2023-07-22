@@ -1,3 +1,4 @@
-macro ondown-A
+macro ondown-a
 consume
-send HELLO WORLD!
+move 500,500,22
+clickright

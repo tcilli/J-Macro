@@ -60,10 +60,10 @@ public class KbEvent {
      */
     public static void send_characters(char[] charArray) {
 
-        for (char c : charArray) {
+        //need to check if shift is already active
+        boolean shiftActive = (User32.INSTANCE.GetAsyncKeyState(KeyEvent.VK_SHIFT) & 0x8000) != 0;
 
-            //need to check if shift is already active
-            boolean shiftActive = (User32.INSTANCE.GetAsyncKeyState(KeyEvent.VK_SHIFT) & 0x8000) != 0;
+        for (char c : charArray) {
 
             //if shift is active we need to deactivate it
             if (shiftActive) {
