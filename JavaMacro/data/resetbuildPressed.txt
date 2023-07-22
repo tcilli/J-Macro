@@ -1,0 +1,3 @@
+macro ondown-k
+consume
+send g

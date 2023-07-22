@@ -1,0 +1,6 @@
+macro ondown-u
+consume
+send g
+wait 15
+mouse1down
+

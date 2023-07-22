@@ -43,100 +43,12 @@ public class KbHook implements Runnable {
     @Override
     public void run() {
 
-        hook();
-
-        /*
-          MSG creates a new MSG structure that will receive
-          the details of the next message retrieved by the GetMessage function.
-
-          GetMessage calls the Windows API function GetMessage,
-          which retrieves a message from the calling thread's message queue.
-          The function waits for the arrival of a message, then places the message details in the MSG structure.
-
-          If GetMessage returns 0, the loop ends. A return value of 0 indicates that a WM_QUIT message was received,
-          signifying that the application should terminate.
-
-          TranslateMessage translates virtual-key messages into character messages.
-          This is used for keyboard input handling - essentially it takes key-down events and,
-          where appropriate, adds corresponding character translation messages to the message queue.
-
-          DispatchMessage dispatches the message to the window procedure that it was intended for, to be handled.
-          The message is dispatched based on the window handle and message ID within the MSG structure
-         */
-        WinUser.MSG msg = new WinUser.MSG();
-        while (true) {
-            if (User32.INSTANCE.GetMessage(msg, null, 0, 0) != 0) {
-                User32.INSTANCE.TranslateMessage(msg);
-                User32.INSTANCE.DispatchMessage(msg);
-            } else {
-                break;
-            }
-        }
-    }
-
-    /**
-     * Handles the event of a key press by executing the associated {@link InstructionSet}.
-     * If the key pressed is ESCAPE, it clears all locks. If there's no {@link InstructionSet}
-     * associated with the key, the method simply returns.
-     *
-     * <p>The method retrieves the {@link InstructionSet} associated with the provided
-     * virtualKeyCode. If the {@link InstructionSet} isn't already locked, it locks it
-     * and proceeds to execution. If the {@link InstructionSet} is marked as 'threadless',
-     * the method runs it directly; otherwise, it passes the {@link InstructionSet}
-     * to an {@link ExecutorService} for execution in a new thread.</p>
-     *
-     * <p>For the {@link InstructionSet} passed to the {@link ExecutorService},
-     * it is executed repeatedly as long as the lock remains true.</p>
-     *
-     * @param virtualKeyCode The keycode of the pressed key. If the key has been released,
-     *                       its unary negation is applied to the keycode.
-     */
-    public void handleKey(final short virtualKeyCode) {
-
-        if (virtualKeyCode == KeyEvent.VK_ESCAPE) {
-            Main.getScriptContainer().clearLocks();
-            return;
-        }
-        InstructionSet instructionSet = Main.getScriptContainer().getInstructionSetMap().getOrDefault(virtualKeyCode, null);
-
-        if (instructionSet == null) {
-            return;
-        }
-
-        //if the instructionSet lock flag 0x08 is not set
-        if ((instructionSet.bFlags & 0x08) == 0) {
-
-            //set the instructionSet lock flag 0x08
-            instructionSet.bFlags |= 0x08;
-
-            //if threaded flag 0x01 wasn't set
-            if ((instructionSet.bFlags & 0x01) == 0) {
-
-                //execute the instructionSet directly in the current thread 1 time
-                instructionSet.execute();
-
-            } else {
-
-                //execute the instructionSet in a new thread
-                executorService.execute(() -> {
-
-                    //loop while the lock flag 0x08 is set
-                    while((instructionSet.bFlags & 0x08) != 0) {
-                        instructionSet.execute();
-                    }
-                });
-            }
-        }
-    }
-
-    public void hook() {
-
         /**
-          This class implements the HOOKPROC interface, providing a callback
-          method that is triggered when a keyboard event is captured by the hook procedure set up
-          using the SetWindowsHookEx function.
+         This class implements the HOOKPROC interface, providing a callback
+         method that is triggered when a keyboard event is captured by the hook procedure set up
+         using the SetWindowsHookEx function.
 
-          @see WinUser.HOOKPROC
+         @see WinUser.HOOKPROC
          */
         WinUser.HOOKPROC keyboardHook = new WinUser.HOOKPROC() {
 
@@ -157,10 +69,9 @@ public class KbHook implements Runnable {
              * @return If nCode is less than zero, the hook procedure must return the value returned by CallNextHookEx.
              *         If the key event was processed, a LRESULT is returned based on whether the key was consumed or not.
              */
-             public WinDef.LRESULT callback(int nCode, WinDef.WPARAM wParam, WinUser.KBDLLHOOKSTRUCT lParam) {
+            public WinDef.LRESULT callback(int nCode, WinDef.WPARAM wParam, WinUser.KBDLLHOOKSTRUCT lParam) {
 
                 if (nCode >= 0 && lParam.vkCode > 0) {
-
                     // create a byte array for storing the state of keyboard
                     byte[] keyboardState = new byte[256];
 
@@ -273,6 +184,90 @@ public class KbHook implements Runnable {
         } else {
             Main.getConsoleBuffer().append("Keyboard successfully hooked");
             Main.pushConsoleMessage();
+        }
+
+        /*
+          MSG creates a new MSG structure that will receive
+          the details of the next message retrieved by the GetMessage function.
+
+          GetMessage calls the Windows API function GetMessage,
+          which retrieves a message from the calling thread's message queue.
+          The function waits for the arrival of a message, then places the message details in the MSG structure.
+
+          If GetMessage returns 0, the loop ends. A return value of 0 indicates that a WM_QUIT message was received,
+          signifying that the application should terminate.
+
+          TranslateMessage translates virtual-key messages into character messages.
+          This is used for keyboard input handling - essentially it takes key-down events and,
+          where appropriate, adds corresponding character translation messages to the message queue.
+
+          DispatchMessage dispatches the message to the window procedure that it was intended for, to be handled.
+          The message is dispatched based on the window handle and message ID within the MSG structure
+         */
+        WinUser.MSG msg = new WinUser.MSG();
+        while (true) {
+            if (User32.INSTANCE.GetMessage(msg, null, 0, 0) != 0) {
+                User32.INSTANCE.TranslateMessage(msg);
+                User32.INSTANCE.DispatchMessage(msg);
+            } else {
+                System.out.println("Exiting");
+                break;
+            }
+        }
+    }
+
+    /**
+     * Handles the event of a key press by executing the associated {@link InstructionSet}.
+     * If the key pressed is ESCAPE, it clears all locks. If there's no {@link InstructionSet}
+     * associated with the key, the method simply returns.
+     *
+     * <p>The method retrieves the {@link InstructionSet} associated with the provided
+     * virtualKeyCode. If the {@link InstructionSet} isn't already locked, it locks it
+     * and proceeds to execution. If the {@link InstructionSet} is marked as 'threadless',
+     * the method runs it directly; otherwise, it passes the {@link InstructionSet}
+     * to an {@link ExecutorService} for execution in a new thread.</p>
+     *
+     * <p>For the {@link InstructionSet} passed to the {@link ExecutorService},
+     * it is executed repeatedly as long as the lock remains true.</p>
+     *
+     * @param virtualKeyCode The keycode of the pressed key. If the key has been released,
+     *                       its unary negation is applied to the keycode.
+     */
+    public void handleKey(final short virtualKeyCode) {
+
+        if (virtualKeyCode == KeyEvent.VK_ESCAPE) {
+            Main.getScriptContainer().clearLocks();
+            return;
+        }
+        InstructionSet instructionSet = Main.getScriptContainer().getInstructionSetMap().getOrDefault(virtualKeyCode, null);
+
+        if (instructionSet == null) {
+            return;
+        }
+
+        //if the instructionSet lock flag 0x08 is not set
+        if ((instructionSet.bFlags & 0x08) == 0) {
+
+            //set the instructionSet lock flag 0x08
+            instructionSet.bFlags |= 0x08;
+
+            //if threaded flag 0x01 wasn't set
+            if ((instructionSet.bFlags & 0x01) == 0) {
+
+                //execute the instructionSet directly in the current thread 1 time
+                instructionSet.execute();
+
+            } else {
+
+                //execute the instructionSet in a new thread
+                executorService.execute(() -> {
+
+                    //loop while the lock flag 0x08 is set
+                    while((instructionSet.bFlags & 0x08) != 0) {
+                        instructionSet.execute();
+                    }
+                });
+            }
         }
     }
 

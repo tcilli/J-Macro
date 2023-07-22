@@ -1,4 +1,0 @@
-macro ondown-a
-consume
-move 500,500,22
-clickright

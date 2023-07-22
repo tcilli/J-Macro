@@ -60,7 +60,7 @@ public class CommandHandler {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			MouseEvent.click_mouse(data.get(0).toShort());
+			MouseEvent.mouseClick(data.get(0).toShort());
 		});
 
 		/*
@@ -75,7 +75,7 @@ public class CommandHandler {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			MouseEvent.move_mouse(data.get(0).toLong());
+			MouseEvent.mouseMove(data.get(0).toLong());
 		});
 
 		/*

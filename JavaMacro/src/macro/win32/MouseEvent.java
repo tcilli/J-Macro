@@ -1,53 +1,61 @@
 package macro.win32;
 
 import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinDef;
 import macro.Main;
-import macro.win32.inferfaces.MouseInterface;
+import com.sun.jna.platform.win32.WinUser;
 
 import java.awt.*;
 
 public class MouseEvent {
 
-    public static void move_mouse(long mouseData) {
+    public static void mouseMove(long mouseData) {
         short x = (short) ((mouseData >> 48) & 0xFFFF);
         short y = (short) ((mouseData >> 32) & 0xFFFF);
         int delay = (int) mouseData >> 1;
         boolean abs = (mouseData & 1) == 1;
 
         if (delay > SLEEP_TIME && delay < 10000) {
-            mouse_move_over_time(x, y, delay, abs);
+            mouseMoveOverTimeEvent(x, y, delay, abs);
         } else {
-            if (abs) {
-                mouse_move_abs(x, y);
-            } else {
-                mouse_move_rel(x, y);
-            }
+            mouseMoveEvent(x, y, abs);
         }
     }
 
-    public static void click_mouse(short mouseData) {
+    public static void mouseClick(short mouseData) {
         byte mouseButton = (byte) (mouseData >> 8);
         byte flags = (byte) (mouseData & 0xFF);
 
-        if ((flags & 0x03) != 0) {
-            if (mouseButton == 1) mouse_click_left();
-            else if (mouseButton == 2) mouse_click_right();
-            else if (mouseButton == 3) mouse_click_middle();
-        } else {
-            if ((flags & 0x01) != 0) {
-                if (mouseButton == 1) mouse_click_leftdown();
-                else if (mouseButton == 2) mouse_click_rightdown();
-                else if (mouseButton == 3) mouse_click_middledown();
-            }
-            if ((flags & 0x02) != 0) {
-                if (mouseButton == 1) mouse_click_leftup();
-                else if (mouseButton == 2) mouse_click_rightup();
-                else if (mouseButton == 3) mouse_click_middleup();
-            }
+        int downEvent = getDownEvent(mouseButton);
+        int upEvent = getUpEvent(mouseButton);
+
+        switch (flags) {
+            case 1 -> mouseClickEvent(downEvent);
+            case 2 -> mouseClickEvent(upEvent);
+            case 3 -> mouseClickEvent(downEvent | upEvent);
+            default -> throw new IllegalArgumentException("Invalid flags value");
         }
     }
 
-    public static void mouse_move_over_time(int x, int y, int delay, boolean abs) {
+    private static int getDownEvent(byte mouseButton) {
+        return switch (mouseButton) {
+            case 1 -> MOUSEEVENTF_LEFTDOWN;
+            case 2 -> MOUSEEVENTF_RIGHTDOWN;
+            case 3 -> MOUSEEVENTF_MIDDLEDOWN;
+            default -> throw new IllegalArgumentException("Invalid mouseButton value");
+        };
+    }
+
+    private static int getUpEvent(byte mouseButton) {
+        return switch (mouseButton) {
+            case 1 -> MOUSEEVENTF_LEFTUP;
+            case 2 -> MOUSEEVENTF_RIGHTUP;
+            case 3 -> MOUSEEVENTF_MIDDLEUP;
+            default -> throw new IllegalArgumentException("Invalid mouseButton value");
+        };
+    }
+
+    private static void mouseMoveOverTimeEvent(int x, int y, int delay, boolean abs) {
 
         PointerInfo pointerInfo = MouseInfo.getPointerInfo();
         Point currentPosition = pointerInfo.getLocation();
@@ -57,11 +65,7 @@ public class MouseEvent {
         if (Math.abs(currentPosition.getX() - x) <= 10 && Math.abs(currentPosition.getY() - y) <= 10  || delay < 10 || !abs) {
             try {
                 Thread.sleep(delay);
-                if (abs) {
-                    mouse_move_abs(x, y);
-                } else {
-                    mouse_move_rel(x, y);
-                }
+                mouseMoveEvent(x, y, abs);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -80,8 +84,7 @@ public class MouseEvent {
             progress = Math.min(1.0, (float) elapsedTime / delay);
             double nextX = (currentPosition.getX() + (progress * deltaX));
             double nextY = (currentPosition.getY() + (progress * deltaY));
-            mouse_move_abs((int) nextX, (int) nextY);
-
+            mouseMoveEvent((int) nextX, (int) nextY, true);
             try {
                 Thread.sleep(SLEEP_TIME);
             } catch (InterruptedException e) {
@@ -90,46 +93,32 @@ public class MouseEvent {
             elapsedTime = System.currentTimeMillis() - startTime;
         }
         //make sure the mouse ends up at the correct position
-        mouse_move_abs(x, y);
+        mouseMoveEvent(x, y, true);
     }
 
-    public static void mouse_move_abs(int x, int y) {
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_ABS | MOUSEEVENTF_MOVE, (x * SCREEN_SCALE_FACTOR_X), (y * SCREEN_SCALE_FACTOR_Y), 0, 0);
-    }
-    public static void mouse_move_rel(int x, int y) {
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_MOVE, x, y, 0, 0);
-    }
-    public static void mouse_click_left() {
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-    }
-    public static void mouse_click_leftdown() {
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-    }
-    public static void mouse_click_leftup() {
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-    }
-    public static void mouse_click_right() {
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-    }
-    public static void mouse_click_rightdown() {
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-    }
-    public static void mouse_click_rightup() {
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-    }
-    public static void mouse_click_middle() {
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, 0);
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_MIDDLEUP, 0, 0, 0, 0);
-    }
-    public static void mouse_click_middledown() {
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_MIDDLEDOWN, 0, 0, 0, 0);
-    }
-    public static void mouse_click_middleup() {
-        MouseInterface.INSTANCE.mouse_event(MOUSEEVENTF_MIDDLEUP, 0, 0, 0, 0);
+
+    private static void mouseMoveEvent(int x, int y, boolean abs) {
+        win_input_event.input.setType("mi");
+        win_input_event.type.setValue(WinUser.INPUT.INPUT_MOUSE);
+        win_input_event.input.mi.dx.setValue((long) x * SCREEN_SCALE_FACTOR_X);
+        win_input_event.input.mi.dy.setValue((long) y * SCREEN_SCALE_FACTOR_Y);
+        win_input_event.input.mi.dwFlags.setValue(abs ? MOUSEEVENTF_ABS | MOUSEEVENTF_MOVE : MOUSEEVENTF_MOVE);
+        WinUser.INPUT[] inputs = {win_input_event};
+        User32.INSTANCE.SendInput(nInput, inputs, win_input_event.size());
     }
 
+    private static void mouseClickEvent(int flags) {
+        win_input_event.input.setType("mi");
+        win_input_event.type.setValue(WinUser.INPUT.INPUT_MOUSE);
+        win_input_event.input.mi.dwFlags.setValue(flags);
+        WinUser.INPUT[] inputs = {win_input_event};
+        User32.INSTANCE.SendInput(nInput, inputs, win_input_event.size());
+    }
+
+    private static final WinUser.INPUT win_input_event = new WinUser.INPUT();
+    private static final WinDef.DWORD nInput = new WinDef.DWORD(1);
+    private static final int SCREEN_SCALE_FACTOR_X = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CXSCREEN));
+    private static final int SCREEN_SCALE_FACTOR_Y = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CYSCREEN));
     private static final int SLEEP_TIME = 10;
     private static final int MOUSEEVENTF_MOVE = 1;
     private static final int MOUSEEVENTF_LEFTDOWN = 2;
@@ -139,9 +128,6 @@ public class MouseEvent {
     private static final int MOUSEEVENTF_MIDDLEDOWN = 32;
     private static final int MOUSEEVENTF_MIDDLEUP = 64;
     private static final int MOUSEEVENTF_ABS = 0x8000;
-
-    private static final int SCREEN_SCALE_FACTOR_X = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CXSCREEN));
-    private static final int SCREEN_SCALE_FACTOR_Y = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CYSCREEN));
 
     public static void getMousePosition() {
         PointerInfo info = MouseInfo.getPointerInfo();

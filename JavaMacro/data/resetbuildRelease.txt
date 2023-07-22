@@ -1,0 +1,2 @@
+macro onrelease-k
+rightclick

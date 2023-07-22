@@ -1,0 +1,4 @@
+macro ondown-T
+consume
+rightclick
+move 500,500,0
