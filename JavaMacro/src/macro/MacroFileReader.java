@@ -73,9 +73,7 @@ public class MacroFileReader {
 			String line;
 
 			byte cur_line = 0;
-
-			String key = "";
-
+			
 			while ((line = reader.readLine()) != null) {
 				cur_line++;
 

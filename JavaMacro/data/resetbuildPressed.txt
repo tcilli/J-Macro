@@ -1,3 +1,4 @@
 macro ondown-k
+window fortnite
 consume
 send g

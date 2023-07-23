@@ -6,7 +6,12 @@ import macro.Main;
 import com.sun.jna.platform.win32.WinUser;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 
+/**
+ * Utility class for mouse events
+ * Uses the {@link User32} library to send mouse events to the OS
+ */
 public class MouseEvent {
 
     public static void mouseMove(long mouseMoveData) {
@@ -59,9 +64,14 @@ public class MouseEvent {
         PointerInfo pointerInfo = MouseInfo.getPointerInfo();
         Point currentPosition = pointerInfo.getLocation();
 
-        delay = SLEEP_TIME * (Math.round((float) delay / SLEEP_TIME));
+        int currentX = (int) currentPosition.getX();
+        int currentY = (int) currentPosition.getY();
 
-        if (Math.abs(currentPosition.getX() - x) <= 10 && Math.abs(currentPosition.getY() - y) <= 10  || delay < 10 || !abs) {
+        if (delay < SLEEP_TIME) {
+            mouseMoveEvent(x, y, abs);
+            return;
+        }
+        if (Math.abs(currentX - x) <= 10 && Math.abs(currentY - y) <= 10) {
             try {
                 Thread.sleep(delay);
                 mouseMoveEvent(x, y, abs);
@@ -70,37 +80,36 @@ public class MouseEvent {
             }
             return;
         }
-        int deltaX = (int) (x - currentPosition.getX());
-        int deltaY = (int) (y - currentPosition.getY());
-        long startTime = System.currentTimeMillis();
-        long elapsedTime = 0;
-        double progress;
-        double iterations = (double) delay / SLEEP_TIME;
+        int targetX = abs ? x : currentX + x;
+        int targetY = abs ? y : currentY + y;
 
-        while (iterations > 0) {
-            iterations--;
+        try {
+            Robot robot = new Robot();
 
-            progress = Math.min(1.0, (float) elapsedTime / delay);
-            double nextX = (currentPosition.getX() + (progress * deltaX));
-            double nextY = (currentPosition.getY() + (progress * deltaY));
-            mouseMoveEvent((int) nextX, (int) nextY, true);
-            try {
+
+            long startTime = System.currentTimeMillis();
+            long elapsedTime = 0;
+
+            while (elapsedTime < delay) {
+                double progress = (double) elapsedTime / delay;
+                int nextX = currentX + (int) (progress * (targetX - currentX));
+                int nextY = currentY + (int) (progress * (targetY - currentY));
+                robot.mouseMove(nextX, nextY);
                 Thread.sleep(SLEEP_TIME);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                elapsedTime = System.currentTimeMillis() - startTime;
             }
-            elapsedTime = System.currentTimeMillis() - startTime;
+            // Make sure the mouse ends up at the correct position
+            robot.mouseMove(targetX, targetY);
+        } catch (AWTException | InterruptedException e) {
+            e.printStackTrace();
         }
-        //make sure the mouse ends up at the correct position
-        mouseMoveEvent(x, y, true);
-        mouseClickEvent(6);
     }
 
     private static void mouseMoveEvent(int x, int y, boolean abs) {
         win_input_event.input.setType("mi");
         win_input_event.type.setValue(WinUser.INPUT.INPUT_MOUSE);
-        win_input_event.input.mi.dx.setValue((long) x * SCREEN_SCALE_FACTOR_X);
-        win_input_event.input.mi.dy.setValue((long) y * SCREEN_SCALE_FACTOR_Y);
+        win_input_event.input.mi.dx.setValue(abs ? (long) x * SCREEN_SCALE_FACTOR_X : x);
+        win_input_event.input.mi.dy.setValue(abs ? (long) y * SCREEN_SCALE_FACTOR_Y : y);
         win_input_event.input.mi.dwFlags.setValue(abs ? MOUSEEVENTF_ABS | MOUSEEVENTF_MOVE : MOUSEEVENTF_MOVE);
         WinUser.INPUT[] inputs = {win_input_event};
         User32.INSTANCE.SendInput(nInput, inputs, win_input_event.size());

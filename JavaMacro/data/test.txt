@@ -1,4 +1,3 @@
-macro ondown-4
+macro ondown-A
 consume
-mouse3down
-mouse3up
+send Hello world!

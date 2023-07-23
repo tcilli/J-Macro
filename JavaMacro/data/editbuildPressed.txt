@@ -1,4 +1,5 @@
 macro ondown-u
+window fortnite
 consume
 send g
 wait 15

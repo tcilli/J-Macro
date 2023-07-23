@@ -3,8 +3,6 @@ package macro.win32;
 import com.sun.jna.platform.win32.User32;
 import macro.win32.inferfaces.KbInterface;
 
-import java.awt.event.KeyEvent;
-
 /**
  * A class for sending virtual keys to the active window.
  * A virtual key, also known as a virtual keycode or VK code,
@@ -53,14 +51,15 @@ public class KbEvent {
     /**
      * Simulates keystrokes by sending virtual keycode to the active window.
      * <p>Refer to <a href="https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct">
-     *     winuser-kbdllhookstruct </a> for more information
+     * winuser-kbdllhookstruct </a> for more information
      * </p>
+     *
      * @param charArray The array of characters to send.
      */
     public static void send_characters(char[] charArray) {
 
         //need to check if shift is already active
-        boolean shiftActive = (User32.INSTANCE.GetAsyncKeyState(KeyEvent.VK_SHIFT) & 0x8000) != 0;
+        boolean shiftActive = (User32.INSTANCE.GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
 
         for (char c : charArray) {
 
