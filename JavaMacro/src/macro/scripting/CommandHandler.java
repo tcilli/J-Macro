@@ -4,8 +4,11 @@ import macro.*;
 import macro.instruction.Data;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
-import macro.win32.KbEvent;
-import macro.win32.MouseEvent;
+import macro.util.MacroFileReader;
+import macro.util.MemoryUtil;
+import macro.util.Window;
+import macro.win32.events.KeyboardEvent;
+import macro.win32.events.MouseEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +50,7 @@ public class CommandHandler {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			KbEvent.send_characters(data.toCharArray());
+			KeyboardEvent.sendKeyboardEvent(data.toCharArray());
 		});
 
 		/*
@@ -105,6 +108,10 @@ public class CommandHandler {
 		commandMap.put(COMMAND_END,
 			(data, set) -> set.bFlags &= ~0x08);
 
+
+		commandMap.put(COMMAND_STOP_ALL_SCRIPTS,
+			(data, set) -> Main.getScriptContainer().clearLocks());
+
 	}
 
 	/**
@@ -115,11 +122,14 @@ public class CommandHandler {
 	 * @param set The {@link InstructionSet} being checked
 	 * @return True if the window title is not found and was specified.
 	 */
-	private boolean failedWindowCheck(final InstructionSet set) {
+	public boolean failedWindowCheck(final InstructionSet set) {
 
 		//check if the window title was specified
 		//this flag is only set when the title passed a regex check
 		//and the window title was considered valid
+		if (set == null) {
+			return false;
+		}
 		if ((set.bFlags & 0x10) == 0) {
 			return false;
 		}
@@ -131,6 +141,7 @@ public class CommandHandler {
 	public static final int COMMAND_SLEEP = 1;
 	public static final int COMMAND_SEND_STRING = 2;
 	public static final int COMMAND_CLICK = 3;
+	public static final int COMMAND_STOP_ALL_SCRIPTS = 4;
 	public static final int COMMAND_MOUSE_MOVE = 6;
 	public static final int COMMAND_READ_MACRO_FILE = 7;
 	public static final int COMMAND_PRINT_MEMORY = 8;

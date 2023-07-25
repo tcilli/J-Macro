@@ -1,0 +1,6 @@
+#you can link any system folder in here
+.\data\
+.\data\system\
+.\data\fortnite\
+.\data\consume\
+.\data\tests\

@@ -2,7 +2,11 @@ package macro;
 
 import macro.instruction.ScriptContainer;
 import macro.scripting.CommandHandler;
-import macro.win32.hooks.KbHook;
+import macro.util.MacroFileReader;
+import macro.win32.callbacks.KeyboardCallback;
+import macro.win32.callbacks.MouseCallback;
+import macro.win32.hooks.KeyboardHook;
+import macro.win32.hooks.MouseHook;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,9 +20,12 @@ import java.util.concurrent.Executors;
  * </p>
  */
 public class Main  {
+
 	private static final StringBuffer console = new StringBuffer();
+
 	private static ScriptContainer scriptContainer;
 	private static CommandHandler commandHandler;
+	private static ExecutorService executor;
 
 	public static void main(String[] args) {
 
@@ -27,13 +34,20 @@ public class Main  {
 
 		new MacroFileReader();
 
-		final ExecutorService executor = Executors.newCachedThreadPool();
-		final KbHook KBHook = new KbHook(executor);
+		executor = Executors.newCachedThreadPool();
 
-		executor.submit(KBHook);
+		final KeyboardCallback KeyboardCallback = new KeyboardCallback();
+		final MouseCallback mouseCallback = new MouseCallback();
+
+		final KeyboardHook KeyboardHook = new KeyboardHook(KeyboardCallback);
+		final MouseHook mouseHook = new MouseHook(mouseCallback);
+
+		executor.submit(KeyboardHook);
+		executor.submit(mouseHook);
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			KBHook.unhook();
+			KeyboardHook.unhook();
+			mouseHook.unhook();
 			executor.shutdown();
 		}));
 	}
@@ -56,5 +70,9 @@ public class Main  {
 			commandHandler = new CommandHandler();
 		}
 		return commandHandler;
+	}
+
+	public static ExecutorService getExecutor() {
+		return executor;
 	}
 }

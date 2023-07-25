@@ -1,7 +1,8 @@
-package macro;
+package macro.util;
 
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.User32;
+import macro.Main;
 
 import java.util.Arrays;
 

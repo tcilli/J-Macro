@@ -1,3 +1,5 @@
 macro ondown-A
 consume
-send Hello world!
+wait 1000
+send hi
+loop

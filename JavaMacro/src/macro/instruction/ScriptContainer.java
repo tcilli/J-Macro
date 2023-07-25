@@ -1,5 +1,7 @@
 package macro.instruction;
 
+import macro.Main;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +30,34 @@ public class ScriptContainer {
 		for (Map.Entry<Short, InstructionSet> entry : instructionSetMap.entrySet()) {
 			InstructionSet set = entry.getValue();
 			set.bFlags &= ~0x08;
+		}
+	}
+
+	public void handleKey(final short virtualKeyCode) {
+
+		InstructionSet instructionSet = instructionSetMap.getOrDefault(virtualKeyCode, null);
+
+		if (instructionSet == null) {
+			return;
+		}
+
+		if ((instructionSet.bFlags & 0x08) == 0) {
+
+			instructionSet.bFlags |= 0x08;
+
+			if ((instructionSet.bFlags & 0x01) == 0) {
+
+				instructionSet.execute();
+
+			} else {
+
+				Main.getExecutor().execute(() -> {
+
+					while((instructionSet.bFlags & 0x08) != 0) {
+						instructionSet.execute();
+					}
+				});
+			}
 		}
 	}
 }

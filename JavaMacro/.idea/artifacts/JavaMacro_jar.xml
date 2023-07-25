@@ -2,6 +2,9 @@
   <artifact type="jar" build-on-make="true" name="JavaMacro:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/JavaMacro_jar</output-path>
     <root id="archive" name="JavaMacro.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
+      </element>
       <element id="module-output" name="JavaMacro" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jna-5.13.0.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/lib/jna-platform-5.13.0.jar" path-in-jar="/" />

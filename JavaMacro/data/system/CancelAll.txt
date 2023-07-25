@@ -1,0 +1,2 @@
+macro ondown-escape
+stop all scripts

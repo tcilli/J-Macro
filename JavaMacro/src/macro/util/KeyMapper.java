@@ -5,21 +5,13 @@
  * </p>
  *
  */
-package macro;
+package macro.util;
 
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class Keys {
-
-    /**
-     * If a user has added the flag "consume" in the macro file,
-     * Then the triggering key for that macro will be added to this list.
-     * This list is checked before sending a key event to the OS.
-     * If the key is in this list, then the key event will not be sent.
-     */
-    private static final Map<Short, Short> consumableKeys = new HashMap<>();
+public final class KeyMapper {
 
     private static final Map<String, Short> keyMap = new HashMap<>();
 
@@ -70,15 +62,5 @@ public final class Keys {
             throw new IllegalArgumentException("Unknown key: " + s);
         }
         return keyCode;
-    }
-
-    public static void addKeyToConsumableMap(final short keyCode) {
-        consumableKeys.put(keyCode, keyCode);
-    }
-    public static void clearConsumableKeys() {
-        consumableKeys.clear();
-    }
-    public static boolean containsConsumableKey(final short keyCode) {
-        return consumableKeys.containsKey(keyCode);
     }
 }

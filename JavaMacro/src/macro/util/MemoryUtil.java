@@ -1,4 +1,6 @@
-package macro;
+package macro.util;
+
+import macro.Main;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryUsage;

@@ -1,15 +1,15 @@
-package macro;
+package macro.util;
 
+import macro.Main;
 import macro.instruction.Data;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
 import macro.scripting.CommandHandler;
-import macro.win32.MouseEvent;
+import macro.win32.events.MouseEvent;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -22,24 +22,69 @@ import java.io.IOException;
 
 public class MacroFileReader {
 
-	public static final String DIR1 = "./data/";
-	public static final String DIR2 = "./data/predefined";
-
 	public MacroFileReader() {
+
 		Main.getScriptContainer().clearInstructions();
-		Keys.clearConsumableKeys();
-		try {
-			readFiles(DIR2);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+		ConsumableKeyMap.clear();
+
+		List<String> directories = readDirectories();
+
+		if (directories.size() == 0) {
+			try {
+				readFiles(DIR);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			for (String dir : directories) {
+				try {
+					readFiles(dir);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
 		}
-		try {
-			readFiles(DIR1);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		Main.getConsoleBuffer().append("Scripts can be stopped by pressing Esc");
+		System.gc();
+		Main.getConsoleBuffer().append("**********************************").append("\n");
 		Main.pushConsoleMessage();
+	}
+
+	/**
+	 * Default directories.
+	 * Can be overwritten
+	 */
+	public static final String DIR = "./data/";
+
+	public List<String> readDirectories() {
+
+		List<String> directories = new LinkedList<>();
+		File directoryFile;
+
+		try {
+			directoryFile = new File("./data/directories.txt");
+		} catch (Exception ignored) {
+			return directories;
+		}
+
+		try (BufferedReader reader = new BufferedReader(new FileReader(directoryFile))) {
+			Main.getConsoleBuffer().append("**********************************").append("\n")
+				.append("Listing selected macro folders").append("\n")
+				.append("**********************************").append("\n");
+			Main.pushConsoleMessage();
+			String line;
+			while ((line = reader.readLine()) != null) {
+				if (line.startsWith("#")) {
+					continue;
+				}
+				directories.add(line);
+				Main.getConsoleBuffer().append(line);
+				Main.pushConsoleMessage();
+			}
+		} catch (IOException e) {
+			Main.getConsoleBuffer().append("Could not locate ./data/directories.txt");
+			Main.pushConsoleMessage();
+		}
+		return directories;
 	}
 
 	public void readFiles(final String DIR) throws IOException {
@@ -57,7 +102,11 @@ public class MacroFileReader {
 			Main.pushConsoleMessage();
 			return;
 		}
-		Main.getConsoleBuffer().append("Building scripts");
+		Main.getConsoleBuffer().append("**********************************");
+		Main.pushConsoleMessage();
+		Main.getConsoleBuffer().append("Parsing files in ").append(DIR);
+		Main.pushConsoleMessage();
+		Main.getConsoleBuffer().append("**********************************").append("\n");
 		Main.pushConsoleMessage();
 		for (File file : files) {
 			readLinesFromFile(file);
@@ -73,10 +122,17 @@ public class MacroFileReader {
 			String line;
 
 			byte cur_line = 0;
-			
+			String consumeKey = "";
 			while ((line = reader.readLine()) != null) {
 				cur_line++;
 
+				if (cur_line > 126) {
+					appendInvalidInstruction(consoleBuffer, file, cur_line, "Too many lines in file");
+					return;
+				}
+				if (line.startsWith("#")) {
+					continue;
+				}
 				if (line.isEmpty()) {
 					continue;
 				}
@@ -92,12 +148,15 @@ public class MacroFileReader {
 					short keyCode = 0;
 
 					if (line.contains("ondown-")) {
-						keyCode = Keys.getKeyCode(line.substring(13).trim());
+						consumeKey = "ondown-"+line.substring(13).trim();
+						keyCode = KeyMapper.getKeyCode(line.substring(13).trim());
 					} else if (line.contains("onrelease-")) {
-						keyCode = (short) -(Keys.getKeyCode(line.substring(16).trim()));
+						keyCode = (short) -(KeyMapper.getKeyCode(line.substring(16).trim()));
 					}
 					if (keyCode != 0) {
 						instructionSet.bFlags |= ((keyCode & 0xFFFF) << 16);
+						Main.getConsoleBuffer().append("Macro ").append(file.getName()).append(" key set: ").append(line.substring(6).trim());
+						Main.pushConsoleMessage();
 						continue; //key has been set. goto next line
 					} else {
 						appendInvalidInstruction(consoleBuffer, file, cur_line, line);
@@ -174,6 +233,9 @@ public class MacroFileReader {
 				} else if (line.equalsIgnoreCase("get memory")) {
 					instruction = new Instruction(CommandHandler.COMMAND_PRINT_MEMORY, null);
 
+				} else if (line.equalsIgnoreCase("stop all scripts")) {
+					instruction = new Instruction(CommandHandler.COMMAND_STOP_ALL_SCRIPTS, null);
+
 				} else if (command.equalsIgnoreCase("move")) {
 
 					boolean abs = !line.contains("moverel");
@@ -206,9 +268,17 @@ public class MacroFileReader {
 					instructionSet.bFlags |= 0x04 | 0x01;
 
 				} else if (line.equalsIgnoreCase("consume")) {
-					//set the consume flag
-					instructionSet.bFlags |= 0x02;
-					Keys.addKeyToConsumableMap((short) ((instructionSet.bFlags >> 16) & 0xFFFF));
+
+					if (consumeKey.contains("ondown")) {
+						//set the consume flag
+						instructionSet.bFlags |= 0x02;
+						consoleBuffer.append("consume key ondown: ").append(consumeKey.substring(7));
+						ConsumableKeyMap.addKey((short) ((instructionSet.bFlags >> 16) & 0xFFFF));
+						Main.pushConsoleMessage();
+					} else {
+						appendInvalidInstruction(consoleBuffer, file, cur_line, "consume is only valid for ondown operations");
+						return;
+					}
 
 				} else if (command.equalsIgnoreCase("wind")) {
 					String title = line.substring(6);
@@ -252,7 +322,7 @@ public class MacroFileReader {
 				}
 
 				//the instruction set passed message is printed to the console-
-				Main.getConsoleBuffer().append("File: ").append(file).append(" has been accepted").append(" loop:").append((instructionSet.bFlags & 0x04) != 0).append(" window:").append(instructionSet.windowTitle);
+				Main.getConsoleBuffer().append("Macro ").append(file.getName()).append(" OK! ").append("\n");//.append(" loops:").append((instructionSet.bFlags & 0x04) != 0).append(" window:").append(instructionSet.windowTitle);
 				Main.pushConsoleMessage();
 
 				//finally the instruction set is inserted into the script container
@@ -264,7 +334,7 @@ public class MacroFileReader {
 	}
 
 	private void appendInvalidInstruction(StringBuffer consoleBuffer, File file, byte cur_line, String line) {
-		consoleBuffer.append("WARNING: File: ").append(file).append(" Rejected, line(").append(cur_line).append(") is an invalid instruction: ").append(line);
+		consoleBuffer.append("WARNING! ").append(file).append(" Rejected, line(").append(cur_line).append(") is an invalid instruction: ").append(line).append("\n");
 		Main.pushConsoleMessage();
 	}
 }

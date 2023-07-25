@@ -1,4 +1,4 @@
-package macro.win32;
+package macro.win32.events;
 
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
