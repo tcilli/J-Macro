@@ -1,5 +1,0 @@
-macro ondown-A
-consume
-wait 1000
-send hi
-loop

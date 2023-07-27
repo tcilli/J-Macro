@@ -39,6 +39,12 @@ public final class KeyMapper {
         keyMap.put("left", (short) (KeyEvent.VK_LEFT + SPECIAL_KEY_OFFSET));
         keyMap.put("right", (short) (KeyEvent.VK_RIGHT + SPECIAL_KEY_OFFSET));
 
+        keyMap.put("mouse1", (short) 2000);
+        keyMap.put("mouse2", (short) 2001);
+        keyMap.put("mouse3", (short) 2002);
+        keyMap.put("mousex1", (short) 2003);
+        keyMap.put("mousex2", (short) 2004);
+
         // F Keys
         for (int i = 1; i < 25; i++) {
             if (i < 13) {
