@@ -21,15 +21,12 @@ public class KeyboardHook implements Runnable {
     @Override
     public void run() {
         try {
-            WinUser.HOOKPROC keyboardHook = new WinUser.HOOKPROC() {
-                public WinDef.LRESULT callback(int nCode, WinDef.WPARAM wParam, WinUser.KBDLLHOOKSTRUCT lParam) {
-                    return keyboardCallback.callback(nCode, wParam, lParam);
-                }
-            };
 
-            this.hHookKb = User32.INSTANCE.SetWindowsHookEx(WinUser.WH_KEYBOARD_LL, keyboardHook, hModule, 0);
+            WinUser.LowLevelKeyboardProc keyboardProc = keyboardCallback::callback;
 
-            if (this.hHookKb == null) {
+            hHookKb = User32.INSTANCE.SetWindowsHookEx(WinUser.WH_KEYBOARD_LL, keyboardProc, hModule, 0);
+
+            if (hHookKb == null) {
                 int errorCode = Kernel32.INSTANCE.GetLastError();
                 Main.getConsoleBuffer().append("Failed to set up keyboard hook. Error code: ").append(errorCode);
                 Main.pushConsoleMessage();

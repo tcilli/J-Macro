@@ -1,46 +1,42 @@
 package macro.win32.events;
 
 import com.sun.jna.platform.win32.User32;
-import macro.win32.inferfaces.KeyboardInterface;
+import macro.Main;
+
+import java.awt.event.KeyEvent;
 
 public class KeyboardEvent {
 
     public static void sendKeyboardEvent(char[] charArray) {
 
-        boolean shiftActive = (User32.INSTANCE.GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+        boolean userHoldingShiftKey = (User32.INSTANCE.GetAsyncKeyState(KeyEvent.VK_SHIFT) & 0x8000) != 0;
+
+        if (userHoldingShiftKey) {
+            Main.getRobot().keyRelease(KeyEvent.VK_SHIFT);
+        }
 
         for (char c : charArray) {
+            short result = User32.INSTANCE.VkKeyScanExW(c, null);
 
-            if (shiftActive) {
-                KeyboardInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEY_UP, 0);
-            }
-
-            short result = KeyboardInterface.winUser32.VkKeyScan(c);
             byte virtualKeyCode = (byte) (result & 0xFF);
             byte shiftState = (byte) (result >> 8);
+
             boolean shiftKey = (shiftState & 0x01) != 0;
 
-            int dwFlags = 0;
-
             if (shiftKey) {
-                dwFlags |= SHIFT_DOWN;
-                KeyboardInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEY_DOWN, 0);
+                Main.getRobot().keyPress(KeyEvent.VK_SHIFT);
             }
 
-            KeyboardInterface.winUser32.keybd_event(virtualKeyCode, (byte) 0, dwFlags, 0);
-            KeyboardInterface.winUser32.keybd_event(virtualKeyCode, (byte) 0, dwFlags | KEY_UP, 0);
+            Main.getRobot().keyPress(virtualKeyCode);
+            Main.getRobot().keyRelease(virtualKeyCode);
 
             if (shiftKey) {
-                KeyboardInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEY_UP, 0);
-            }
-            if (shiftActive) {
-                KeyboardInterface.winUser32.keybd_event(VK_SHIFT, (byte) 0, KEY_DOWN, 0);
+                Main.getRobot().keyRelease(KeyEvent.VK_SHIFT);
             }
         }
-    }
 
-    private static final int KEY_DOWN = 0x0000;
-    private static final int SHIFT_DOWN = 0x0001;
-    private static final int KEY_UP = 0x0002;
-    private static final byte VK_SHIFT = 0x10;
+        if (userHoldingShiftKey) { 
+            Main.getRobot().keyPress(KeyEvent.VK_SHIFT);
+        }
+    }
 }

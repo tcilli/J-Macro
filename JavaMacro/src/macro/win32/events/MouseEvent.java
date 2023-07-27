@@ -1,17 +1,15 @@
 package macro.win32.events;
 
+import macro.Main;
+
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
-import macro.Main;
 import com.sun.jna.platform.win32.WinUser;
 
-import java.awt.*;
-import java.awt.event.KeyEvent;
+import java.awt.PointerInfo;
+import java.awt.MouseInfo;
+import java.awt.Point;
 
-/**
- * Utility class for mouse events
- * Uses the {@link User32} library to send mouse events to the OS
- */
 public class MouseEvent {
 
     public static void mouseMove(long mouseMoveData) {
@@ -84,9 +82,6 @@ public class MouseEvent {
         int targetY = abs ? y : currentY + y;
 
         try {
-            Robot robot = new Robot();
-
-
             long startTime = System.currentTimeMillis();
             long elapsedTime = 0;
 
@@ -94,13 +89,13 @@ public class MouseEvent {
                 double progress = (double) elapsedTime / delay;
                 int nextX = currentX + (int) (progress * (targetX - currentX));
                 int nextY = currentY + (int) (progress * (targetY - currentY));
-                robot.mouseMove(nextX, nextY);
+                Main.getRobot().mouseMove(nextX, nextY);
                 Thread.sleep(SLEEP_TIME);
                 elapsedTime = System.currentTimeMillis() - startTime;
             }
-            // Make sure the mouse ends up at the correct position
-            robot.mouseMove(targetX, targetY);
-        } catch (AWTException | InterruptedException e) {
+            Main.getRobot().mouseMove(targetX, targetY);
+
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

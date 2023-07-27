@@ -11,6 +11,9 @@ import macro.win32.hooks.MouseHook;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import java.awt.Robot;
+import java.awt.AWTException;
+
 /**
  * Main.java.
  * <p>
@@ -22,6 +25,7 @@ import java.util.concurrent.Executors;
 public class Main  {
 
 	private static final StringBuffer console = new StringBuffer();
+	private static final Robot robot;
 
 	private static ScriptContainer scriptContainer;
 	private static CommandHandler commandHandler;
@@ -74,5 +78,17 @@ public class Main  {
 
 	public static ExecutorService getExecutor() {
 		return executor;
+	}
+
+	public static Robot getRobot() {
+		return robot;
+	}
+
+	static {
+		try {
+			robot = new Robot();
+		} catch (AWTException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
