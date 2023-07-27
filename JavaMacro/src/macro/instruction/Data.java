@@ -43,4 +43,11 @@ public record Data<T>(T value) {
         }
     }
 
+    public byte toByte() {
+        if (value instanceof Byte) {
+            return (Byte) value;
+        } else {
+            throw new ClassCastException("Cannot cast " + value.getClass().getSimpleName() + " to Byte");
+        }
+    }
 }

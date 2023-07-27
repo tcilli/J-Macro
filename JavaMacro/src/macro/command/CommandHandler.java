@@ -1,4 +1,4 @@
-package macro.scripting;
+package macro.command;
 
 import macro.*;
 import macro.instruction.Data;
@@ -60,7 +60,7 @@ public class CommandHandler {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			MouseEvent.mouseClick(data.toShort());
+			MouseEvent.mouseClick(data.toByte());
 		});
 
 		/*

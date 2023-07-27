@@ -10,7 +10,7 @@ import java.util.Map;
  * that are created when parsing a macro file. Everytime the macro parser
  * is run the script container is cleared and new instructions are built.
  */
-public class ScriptContainer {
+public class InstructionSetContainer {
 
 	private final Map<Short, InstructionSet> instructionSetMap = new HashMap<>();
 
@@ -34,25 +34,17 @@ public class ScriptContainer {
 	}
 
 	public void handleKey(final short virtualKeyCode) {
-
 		InstructionSet instructionSet = instructionSetMap.getOrDefault(virtualKeyCode, null);
-
 		if (instructionSet == null) {
 			return;
 		}
-
 		if ((instructionSet.bFlags & 0x08) == 0) {
-
 			instructionSet.bFlags |= 0x08;
-
 			if ((instructionSet.bFlags & 0x01) == 0) {
-
 				instructionSet.execute();
-
-			} else {
-
+			}
+			else {
 				Main.getExecutor().execute(() -> {
-
 					while((instructionSet.bFlags & 0x08) != 0) {
 						instructionSet.execute();
 					}

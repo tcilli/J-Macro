@@ -1,4 +1,4 @@
-package macro.scripting;
+package macro.command;
 
 import macro.instruction.Data;
 import macro.instruction.Instruction;

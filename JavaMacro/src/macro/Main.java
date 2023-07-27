@@ -1,7 +1,7 @@
 package macro;
 
-import macro.instruction.ScriptContainer;
-import macro.scripting.CommandHandler;
+import macro.instruction.InstructionSetContainer;
+import macro.command.CommandHandler;
 import macro.util.MacroFileReader;
 import macro.win32.callbacks.KeyboardCallback;
 import macro.win32.callbacks.MouseCallback;
@@ -27,13 +27,13 @@ public class Main  {
 	private static final StringBuffer console = new StringBuffer();
 	private static final Robot robot;
 
-	private static ScriptContainer scriptContainer;
+	private static InstructionSetContainer instructionSetContainer;
 	private static CommandHandler commandHandler;
 	private static ExecutorService executor;
 
 	public static void main(String[] args) {
 
-		scriptContainer = new ScriptContainer();
+		instructionSetContainer = new InstructionSetContainer();
 		commandHandler = new CommandHandler();
 
 		new MacroFileReader();
@@ -65,8 +65,8 @@ public class Main  {
 		console.setLength(0);
 	}
 
-	public static ScriptContainer getScriptContainer() {
-		return scriptContainer;
+	public static InstructionSetContainer getScriptContainer() {
+		return instructionSetContainer;
 	}
 
 	public static CommandHandler getCommandHandler() {

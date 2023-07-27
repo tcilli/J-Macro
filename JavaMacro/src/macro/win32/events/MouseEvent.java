@@ -12,6 +12,22 @@ import java.awt.Point;
 
 public class MouseEvent {
 
+    public static long mouseMovementPacker(short x, short y, int delay, boolean abs) {
+        long mouseData = 0;
+        mouseData |= ((long) x & 0xFFFFL) << 48;
+        mouseData |= ((long) y & 0xFFFFL) << 32;
+        mouseData |= ((long) delay & 0x7FFFFFFFL) << 1;
+        mouseData |= abs ? 1 : 0;
+        return mouseData;
+    }
+
+    public static byte mouseClickPacker(int mouseButton, int mouseButtonDown, int mouseButtonUp) {
+        byte mouseData = 0;
+        mouseData |= (byte) (mouseButton & 0xF) << 4; // mouseButton stored in upper 4 bits
+        mouseData |= (byte) (mouseButtonDown | (mouseButtonUp << 1)) & 0xF; //click flags stored in lower 4 bits
+        return mouseData;
+    }
+
     public static void mouseMove(long mouseMoveData) {
         short x = (short) ((mouseMoveData >> 48) & 0xFFFF);
         short y = (short) ((mouseMoveData >> 32) & 0xFFFF);
@@ -25,9 +41,9 @@ public class MouseEvent {
         }
     }
 
-    public static void mouseClick(short mouseClickData) {
-        byte mouseButton = (byte) (mouseClickData >> 8);
-        byte flags = (byte) (mouseClickData & 0xFF);
+    public static void mouseClick(byte mouseClickData) {
+        byte mouseButton = (byte) (mouseClickData >> 4);
+        byte flags = (byte) (mouseClickData & 0xF);
         int downEvent = getDownEvent(mouseButton);
         int upEvent = getUpEvent(mouseButton);
 
@@ -35,7 +51,7 @@ public class MouseEvent {
             case 1 -> mouseClickEvent(downEvent);
             case 2 -> mouseClickEvent(upEvent);
             case 3 -> mouseClickEvent(downEvent | upEvent);
-            default -> throw new IllegalArgumentException("Invalid flags value");
+            default -> throw new IllegalArgumentException("Invalid flags value: "+ flags);
         }
     }
 
@@ -44,7 +60,7 @@ public class MouseEvent {
             case 1 -> MOUSEEVENTF_LEFTDOWN;
             case 2 -> MOUSEEVENTF_RIGHTDOWN;
             case 3 -> MOUSEEVENTF_MIDDLEDOWN;
-            default -> throw new IllegalArgumentException("Invalid mouseButton value");
+            default -> throw new IllegalArgumentException("Invalid mouseButton value: "+ mouseButton);
         };
     }
 
@@ -53,7 +69,7 @@ public class MouseEvent {
             case 1 -> MOUSEEVENTF_LEFTUP;
             case 2 -> MOUSEEVENTF_RIGHTUP;
             case 3 -> MOUSEEVENTF_MIDDLEUP;
-            default -> throw new IllegalArgumentException("Invalid mouseButton value");
+            default -> throw new IllegalArgumentException("Invalid mouseButton value: "+ mouseButton);
         };
     }
 
@@ -65,10 +81,6 @@ public class MouseEvent {
         int currentX = (int) currentPosition.getX();
         int currentY = (int) currentPosition.getY();
 
-        if (delay < SLEEP_TIME) {
-            mouseMoveEvent(x, y, abs);
-            return;
-        }
         if (Math.abs(currentX - x) <= 10 && Math.abs(currentY - y) <= 10) {
             try {
                 Thread.sleep(delay);
@@ -123,34 +135,18 @@ public class MouseEvent {
     private static final int SCREEN_SCALE_FACTOR_X = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CXSCREEN));
     private static final int SCREEN_SCALE_FACTOR_Y = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CYSCREEN));
     private static final int SLEEP_TIME = 5;
-    private static final int MOUSEEVENTF_MOVE = 1;
-    private static final int MOUSEEVENTF_LEFTDOWN = 2;
-    private static final int MOUSEEVENTF_LEFTUP = 4;
-    private static final int MOUSEEVENTF_RIGHTDOWN = 8;
-    private static final int MOUSEEVENTF_RIGHTUP = 16;
-    private static final int MOUSEEVENTF_MIDDLEDOWN = 32;
-    private static final int MOUSEEVENTF_MIDDLEUP = 64;
+    private static final int MOUSEEVENTF_MOVE = 0x0001;
+    private static final int MOUSEEVENTF_LEFTDOWN = 0x0002;
+    private static final int MOUSEEVENTF_LEFTUP = 0x0004;
+    private static final int MOUSEEVENTF_RIGHTDOWN = 0x0008;
+    private static final int MOUSEEVENTF_RIGHTUP = 0x0010;
+    private static final int MOUSEEVENTF_MIDDLEDOWN = 0x0020;
+    private static final int MOUSEEVENTF_MIDDLEUP = 0x0040;
     private static final int MOUSEEVENTF_ABS = 0x8000;
 
     public static void getMousePosition() {
         PointerInfo info = MouseInfo.getPointerInfo();
         Main.getConsoleBuffer().append("mousePosX: ").append(info.getLocation().getX()).append(" mousePosY: ").append(info.getLocation().getY());
         Main.pushConsoleMessage();
-    }
-
-    public static long mouseMovementPacker(short x, short y, int delay, boolean abs) {
-        long mouseData = 0;
-        mouseData |= ((long) x & 0xFFFFL) << 48;
-        mouseData |= ((long) y & 0xFFFFL) << 32;
-        mouseData |= ((long) delay & 0x7FFFFFFFL) << 1;
-        mouseData |= abs ? 1 : 0;
-        return mouseData;
-    }
-
-    public static short mouseClickPacker(int mouseButton, int mouseButtonDown, int mouseButtonUp) {
-        short mouseData = 0;
-        mouseData |= (byte) (mouseButton & 0xFF) << 8;
-        mouseData |= (byte) (mouseButtonDown | (mouseButtonUp << 1)) & 0xFF;
-        return mouseData;
     }
 }

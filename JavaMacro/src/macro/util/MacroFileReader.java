@@ -4,7 +4,7 @@ import macro.Main;
 import macro.instruction.Data;
 import macro.instruction.Instruction;
 import macro.instruction.InstructionSet;
-import macro.scripting.CommandHandler;
+import macro.command.CommandHandler;
 import macro.win32.events.MouseEvent;
 
 import java.io.*;
@@ -185,40 +185,40 @@ public class MacroFileReader {
 					instruction = new Instruction(CommandHandler.COMMAND_SEND_STRING, new Data<>(line.substring(5)));
 
 				} else if (line.equalsIgnoreCase("click")) {
-					short mouseData = MouseEvent.mouseClickPacker( 1, 1, 1);
+					byte mouseData = MouseEvent.mouseClickPacker( 1, 1, 1);
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("rightclick") || line.equalsIgnoreCase("clickright")) {
-					short mouseData = MouseEvent.mouseClickPacker( 2, 1, 1);
+					byte mouseData = MouseEvent.mouseClickPacker( 2, 1, 1);
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("middleclick") || line.equalsIgnoreCase("clickmiddle")) {
-					short mouseData = MouseEvent.mouseClickPacker( 3, 1, 1);
+					byte mouseData = MouseEvent.mouseClickPacker( 3, 1, 1);
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse1down")) {
-					short mouseData = MouseEvent.mouseClickPacker( 1, 1, 0);
+					byte mouseData = MouseEvent.mouseClickPacker( 1, 1, 0);
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse1up")) {
-					short mouseData = MouseEvent.mouseClickPacker( 1, 0, 1);
+					byte mouseData = MouseEvent.mouseClickPacker( 1, 0, 1);
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse2down")) {
 
-					short mouseData = MouseEvent.mouseClickPacker( 2, 1, 0);
+					byte mouseData = MouseEvent.mouseClickPacker( 2, 1, 0);
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse2up")) {
-					short mouseData = MouseEvent.mouseClickPacker( 2, 0, 1);
+					byte mouseData = MouseEvent.mouseClickPacker( 2, 0, 1);
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse3down")) {
-					short mouseData = MouseEvent.mouseClickPacker( 3, 1, 0);
+					byte mouseData = MouseEvent.mouseClickPacker( 3, 1, 0);
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("mouse3up")) {
-					short mouseData = MouseEvent.mouseClickPacker( 3, 0, 1);
+					byte mouseData = MouseEvent.mouseClickPacker( 3, 0, 1);
 					instruction = new Instruction(CommandHandler.COMMAND_CLICK, new Data<>(mouseData));
 
 				} else if (line.equalsIgnoreCase("reload")) {
