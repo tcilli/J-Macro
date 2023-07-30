@@ -6,12 +6,12 @@ import java.util.Set;
 public class KeyListener {
 
     public static keyListenerInterface newKeyListener() {
-        keyListenerInterface listener = new KeyboardListenerImpl();
+        keyListenerInterface listener = new KeyListenerImpl();
         addListener(listener);
         return listener;
     }
 
-    public static class KeyboardListenerImpl implements keyListenerInterface {
+    public static class KeyListenerImpl implements keyListenerInterface {
         private int pressed = 0;
         private int released = 0;
 
