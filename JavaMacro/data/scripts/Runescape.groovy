@@ -1,10 +1,14 @@
+import com.phukka.macro.Main
 import com.phukka.macro.devices.keyboard.KeyListener
 import KeyConsumer
+import com.phukka.macro.devices.mouse.MouseCallback
+import com.phukka.macro.devices.mouse.MouseEvent
+import com.phukka.macro.devices.screen.ImageSearch
 
 /**
  * Start of the Script
  */
-println "Runescape.groovy started"
+println "--------< Runescape started >--------"
 
 /**
  * Connects this script to the built in keylistener
@@ -16,23 +20,28 @@ println "Runescape.groovy started"
 keyListener = KeyListener.newKeyListener()
 
 /**
- * Connect to the ConsumableKeyMap
+ * Create an instance of the KeyConsumer class
  */
 KeyConsumer keyConsumer = new KeyConsumer()
 
-
-
+/**
+ * Create an instance of the AutoKalg class
+ */
+AutoKalg kalg = new AutoKalg()
 
 /**
  * Some key code to key name assignments
  * for ease of use
  */
 int tab = 9
+int f = 102
+int fullstop = 46
+int comma = 44
 
 /**
  * Put some keys to the consume map, Mentioned above.
  */
-keyConsumer.add(tab)
+keyConsumer.add(f)
 
 /**
  * Holds the key code of the last key pressed/released
@@ -46,8 +55,7 @@ int released = 0
 /**
  * Controls printouts to the console
  */
-boolean debug = true
-
+boolean debug = false
 
 
 /**
@@ -60,16 +68,31 @@ while (running) {
     try {
 
         /**
-         * read the keyListener for key presses
+         * read the keyListener for key pressesf
          */
         pressed = keyListener.getPressed()
 
         if (pressed != 0) {
 
             switch (pressed) {
-                case tab:
-                    //KeyboardEvent.send("/")
+                case f:
+
+                    int x = MouseCallback.x
+                    int y = MouseCallback.y
+                    println "x: " + x + " y: " + y
+
+                    MouseEvent.move(486, 269);
+                    MouseEvent.rightClick();
+                    MouseEvent.move(x, y);
+                    MouseCallback.disableUserMovement = false
                     break
+
+                case fullstop:
+                    kalg.start()
+                    break
+                case comma:
+                    break
+
                 default:
                     if (debug) {
                         println "pressed: " + pressed
@@ -108,6 +131,13 @@ while (running) {
 
 
 /**
+ * Stop the AutoKalg class, If it is running
+ */
+if (kalg.keepAlive) {
+    kalg.stop()
+}
+
+/**
  * remove the keys that were added to the consume map
  */
 keyConsumer.clear()
@@ -115,5 +145,4 @@ keyConsumer.clear()
 /**
  * End of Script
  */
-println "Runescape.groovy finished"
-
+println "--------< Runescape ended >--------"

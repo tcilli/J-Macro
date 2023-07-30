@@ -9,7 +9,6 @@ import com.sun.jna.platform.win32.WinUser;
 import java.awt.PointerInfo;
 import java.awt.MouseInfo;
 import java.awt.Point;
-import java.awt.image.BufferedImage;
 
 public class MouseEvent {
 
@@ -104,7 +103,7 @@ public class MouseEvent {
                 double progress = (double) elapsedTime / delay;
                 int nextX = currentX + (int) (progress * (targetX - currentX));
                 int nextY = currentY + (int) (progress * (targetY - currentY));
-                Main.getRobot().mouseMove(nextX, nextY);
+                mouseMoveEvent(nextX, nextY, true);
                 Thread.sleep(SLEEP_TIME);
                 elapsedTime = System.currentTimeMillis() - startTime;
             }
@@ -115,7 +114,7 @@ public class MouseEvent {
         }
     }
 
-    private static void mouseMoveEvent(int x, int y, boolean abs) {
+    private static void mouseMoveEvent2(int x, int y, boolean abs) {
         if (abs) {
             Main.getRobot().mouseMove(x, y);
         } else {
@@ -137,8 +136,8 @@ public class MouseEvent {
 
     private static final WinUser.INPUT win_input_event = new WinUser.INPUT();
     private static final WinDef.DWORD nInput = new WinDef.DWORD(1);
-    private static final int SCREEN_SCALE_FACTOR_X = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CXSCREEN));
-    private static final int SCREEN_SCALE_FACTOR_Y = (65535 / User32.INSTANCE.GetSystemMetrics(User32.SM_CYSCREEN));
+    private static final double SCREEN_SCALE_FACTOR_X = (65535.0 / User32.INSTANCE.GetSystemMetrics(User32.SM_CXSCREEN));
+    private static final double SCREEN_SCALE_FACTOR_Y = (65535.0 / User32.INSTANCE.GetSystemMetrics(User32.SM_CYSCREEN));
     private static final int SLEEP_TIME = 5;
     private static final int MOUSEEVENTF_MOVE = 0x0001;
     private static final int MOUSEEVENTF_LEFTDOWN = 0x0002;
@@ -181,10 +180,14 @@ public class MouseEvent {
         mouseClickEvent(MOUSEEVENTF_LEFTDOWN);
         mouseClickEvent(MOUSEEVENTF_LEFTUP);
     }
+
+    private static final Object lock = new Object();
+
     public static int[] position() {
         PointerInfo info = MouseInfo.getPointerInfo();
         return new int[]{(int) info.getLocation().getX(), (int) info.getLocation().getY()};
     }
+
     public static void move(int x, int y, boolean abs) {
         mouseMoveEvent(x, y, abs);
     }
@@ -196,5 +199,33 @@ public class MouseEvent {
     }
     public static void move(int x, int y, int delay) {
         mouseMoveOverTimeEvent(x, y, delay, true);
+    }
+
+    public static void mouseMoveEvent(int x, int y, boolean abs) {
+        try {
+            MouseCallback.disableUserMovement = true;
+            win_input_event.input.setType("mi");
+            win_input_event.type.setValue(WinUser.INPUT.INPUT_MOUSE);
+
+            if (abs) {
+                // Calculate the absolute screen coordinates based on the given x and y values
+                int absX = (int) Math.ceil(x * SCREEN_SCALE_FACTOR_X) + 1;
+                int absY = (int) Math.ceil(y * SCREEN_SCALE_FACTOR_Y) + 1;
+                win_input_event.input.mi.dx.setValue(absX);
+                win_input_event.input.mi.dy.setValue(absY);
+                win_input_event.input.mi.dwFlags.setValue(MOUSEEVENTF_ABS | MOUSEEVENTF_MOVE);
+            } else {
+                // Use the given x and y as relative offsets
+                win_input_event.input.mi.dx.setValue(x);
+                win_input_event.input.mi.dy.setValue(y);
+                win_input_event.input.mi.dwFlags.setValue(MOUSEEVENTF_MOVE);
+            }
+
+            win_input_event.input.mi.dwExtraInfo.setValue(1);
+            WinUser.INPUT[] inputs = {win_input_event};
+            User32.INSTANCE.SendInput(new WinDef.DWORD(1), inputs, win_input_event.size());
+        } finally {
+            MouseCallback.disableUserMovement = false;
+        }
     }
 }
