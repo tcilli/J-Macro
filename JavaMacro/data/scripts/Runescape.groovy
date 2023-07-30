@@ -21,7 +21,7 @@ while (running) {
 
             switch(pressed) {
                 case tab:
-                    KeyboardEvent.send("/");
+                    KeyboardEvent.send("/")
                     break
                 default:
                     println "pressed: " + pressed

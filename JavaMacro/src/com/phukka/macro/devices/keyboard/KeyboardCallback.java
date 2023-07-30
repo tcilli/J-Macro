@@ -1,6 +1,5 @@
 package com.phukka.macro.devices.keyboard;
 
-import com.phukka.macro.scripting.Scripts;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
