@@ -39,6 +39,8 @@ public class Main  {
 
 	private static final Scripts scripts = new Scripts();
 
+	private static final KeyboardCallback KeyboardCallback = new KeyboardCallback();
+
 	public static void main(String[] args) {
 
 		instructionSetContainer = new InstructionSetContainer();
@@ -48,7 +50,6 @@ public class Main  {
 
 		executor = Executors.newCachedThreadPool();
 
-		final KeyboardCallback KeyboardCallback = new KeyboardCallback();
 		final MouseCallback mouseCallback = new MouseCallback();
 
 		final KeyboardHook KeyboardHook = new KeyboardHook(KeyboardCallback);
@@ -90,6 +91,9 @@ public class Main  {
 
 	public static ImageRepository getImageRepository() {
 		return imageRepository;
+	}
+	public static KeyboardCallback getKeyboardCallback() {
+		return KeyboardCallback;
 	}
 
 	public static Scripts getScript() {

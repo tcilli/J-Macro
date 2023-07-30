@@ -27,10 +27,12 @@ public class InstructionSetContainer {
 	}
 
 	public void clearLocks() {
+		Main.getScript().stop();
 		for (Map.Entry<Short, InstructionSet> entry : instructionSetMap.entrySet()) {
 			InstructionSet set = entry.getValue();
 			set.bFlags &= ~0x08;
 		}
+
 	}
 
 	public void handleKey(final short virtualKeyCode) {

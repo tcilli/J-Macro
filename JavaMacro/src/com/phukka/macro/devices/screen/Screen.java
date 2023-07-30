@@ -11,7 +11,7 @@ public class Screen {
     Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
 
     public ImagePosition capture() {
-        System.out.println("Screen capturing is expensive, try to avoid it use captureArea to reduce complexity.");
+        //System.out.println("Screen capturing is expensive, try to avoid it use captureArea to reduce complexity.");
         return new ImagePosition(Main.getRobot().createScreenCapture(screenRect), 0 ,0);
     }
 
@@ -76,11 +76,4 @@ public class Screen {
 
     private final JFrame frame;
 
-    public int getPixel(int x, int y) {
-        // Capture the screen
-        ImagePosition screen = capture();
-
-        // Get the pixel at the specified location
-        return screen.image().getRGB(x, y);
-    }
 }

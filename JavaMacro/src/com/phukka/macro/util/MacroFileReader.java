@@ -26,8 +26,15 @@ public class MacroFileReader {
 
 		Main.getScriptContainer().clearInstructions();
 		ConsumableKeyMap.clear();
+
+		/*
+		 * handle the scripts
+		 */
+		Main.getScript().stop();
 		Main.getScript().clear();
 		Main.getScript().compile();
+
+
 		List<String> directories = readDirectories();
 
 		if (directories.size() == 0) {
@@ -234,7 +241,7 @@ public class MacroFileReader {
 				} else if (line.equalsIgnoreCase("get memory")) {
 					instruction = new Instruction(CommandHandler.COMMAND_PRINT_MEMORY, null);
 
-				} else if (line.contains("script")) {
+				} else if (line.startsWith("script")) {
 					instruction = new Instruction(CommandHandler.COMMAND_SCRIPT, new Data<>(line.substring(7)));
 					instructionSet.bFlags |= 0x01; //set the threaded flag
 					Main.getConsoleBuffer().append("Script attachment: ").append(line.substring(7));

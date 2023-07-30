@@ -1,5 +1,6 @@
 package com.phukka.macro.devices.keyboard;
 
+import com.phukka.macro.scripting.Scripts;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinDef;
@@ -58,7 +59,10 @@ public class KeyboardCallback {
 
             if (wParam.intValue() == WinUser.WM_KEYDOWN || wParam.intValue() == WinUser.WM_SYSKEYDOWN) {
 
+
                 if (pressedKeys.add(lParam.vkCode)) {
+
+                    KeyListener.notifyListenersKeyPressed(characterCode);
 
                     Main.getScriptContainer().handleKey(characterCode);
 
@@ -74,7 +78,10 @@ public class KeyboardCallback {
             }
             else if (wParam.intValue() == WinUser.WM_KEYUP || wParam.intValue() == WinUser.WM_SYSKEYUP) {
 
+                KeyListener.notifyListenersKeyReleased(characterCode);
+
                 pressedKeys.remove(lParam.vkCode);
+
 
                 characterCode = (short) -characterCode;
 

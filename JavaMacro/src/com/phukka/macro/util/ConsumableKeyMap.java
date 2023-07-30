@@ -16,6 +16,9 @@ public class ConsumableKeyMap {
     public static void addKey(final short keyCode) {
         map.put(keyCode, keyCode);
     }
+    public static void addKey(final int keyCode) {
+       addKey((short)keyCode);
+    }
 
     public static void clear() {
         map.clear();
@@ -25,4 +28,10 @@ public class ConsumableKeyMap {
         return map.containsKey(keyCode);
     }
 
+    public static void removeKey(final short keyCode) {
+        map.remove(keyCode);
+    }
+    public static void removeKey(final int keyCode) {
+       removeKey((short)keyCode);
+    }
 }

@@ -32,6 +32,7 @@ public class ImageSearch {
                 maskRGB[y][x] = new RGB(imageToFind.getRGB(x, y));
             }
         }
+
         // get the pixel data for baseImage
         int[] basePixels = getPixelData(baseImage);
 
@@ -114,7 +115,6 @@ public class ImageSearch {
         int numThreads = Runtime.getRuntime().availableProcessors();
         int minSliceWidth = (int) Math.ceil(imageToFindWidth * 2.0);
 
-
         // Calculate the number of slices based on the number of threads and the minimum slice width
         int numSlices = Math.max(1, baseImageWidth / minSliceWidth);
         // Adjust the number of slices if it's greater than the number of threads
@@ -133,7 +133,7 @@ public class ImageSearch {
         if (numThreads > numSlices) {
             numThreads = numSlices;
         }
-        System.out.println("slices: " + numSlices + " slice width: " + sliceWidth + " imageToFindWidth: " + imageToFindWidth + " baseImageWidth: " + baseImageWidth + " baseImageHeight: " + baseImageHeight + " numThreads: " + numThreads + " minSliceWidth: " + minSliceWidth);
+        //System.out.println("slices: " + numSlices + " slice width: " + sliceWidth + " imageToFindWidth: " + imageToFindWidth + " baseImageWidth: " + baseImageWidth + " baseImageHeight: " + baseImageHeight + " numThreads: " + numThreads + " minSliceWidth: " + minSliceWidth);
         List<Future<int[]>> futures = new ArrayList<>();
 
         for (int i = 0; i < numSlices; i++) {
@@ -147,8 +147,13 @@ public class ImageSearch {
             int finalStartX = startX;
             int finalEndX = endX;
 
-            Future<int[]> future = Main.getExecutor().submit(() -> searchImage(imageToSearchIn.image(), imageToFind, finalStartX, finalEndX, baseImageHeight));
-            futures.add(future);
+            try {
+                Future<int[]> future = Main.getExecutor().submit(() -> searchImage(imageToSearchIn.image(), imageToFind, finalStartX, finalEndX, baseImageHeight));
+                futures.add(future);
+            } catch (RejectedExecutionException ignored) {
+                //if we close the program before these finish, we get this exception
+                //So we just ignore it
+            }
         }
 
         for (Future<int[]> future : futures) {
@@ -162,10 +167,25 @@ public class ImageSearch {
 
                     return result;
                 }
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (ExecutionException e) {
                 e.printStackTrace();
+            } catch (InterruptedException ignored) {
+
             }
         }
         return new int[]{-1, -1, -1, -1};
+    }
+
+    public static int getPixel(int x, int y) {
+        // Capture the screen
+        ImagePosition area = Main.getScreen().captureArea(x, y, x+1, y+1);
+        return getPixelData(area.image())[0];
+    }
+
+    public static int[] getPixelRGB(int x, int y) {
+        // Capture the screen
+        ImagePosition area = Main.getScreen().captureArea(x, y, x+1, y+1);
+        RGB rgb = new RGB(getPixelData(area.image())[0]);
+        return new int[] {rgb.red, rgb.green, rgb.blue};
     }
 }

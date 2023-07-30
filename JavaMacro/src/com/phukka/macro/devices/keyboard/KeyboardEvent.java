@@ -61,10 +61,10 @@ public class KeyboardEvent {
 
         //need to check if shift is already active
         boolean shiftActive = (User32.INSTANCE.GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+
         //need to check if caps lock is already active
         boolean capslockActive = (User32.INSTANCE.GetAsyncKeyState(VK_CAPS_LOCK) & 0x8000) != 0;
-        System.out.println("Shift key is active: " + shiftActive);
-        System.out.println("Caps Lock key is active: " + capslockActive);
+
         //if shift is active we need to deactivate it
         if (shiftActive) {
             KeyboardInterface.INSTANCE.keybd_event(VK_SHIFT, NULL, KEY_UP, 0);
