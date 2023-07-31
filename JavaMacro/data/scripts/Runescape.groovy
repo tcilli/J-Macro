@@ -1,133 +1,73 @@
 import com.phukka.macro.devices.keyboard.KeyListener
-import com.phukka.macro.devices.keyboard.KeyboardEvent
-import com.phukka.macro.scripting.Scripts;
+import com.phukka.macro.scripting.Scripts
 
-/**
- * Start of the Script
- */
-println "--------< Runescape started >--------"
+println "--------< RuneScript started >--------"
 
-/**
- * Connects this script to the built in keylistener
- * Calling newKeyListener() will automatically setup a listener
- * This ignores system messages and will only trigger for a user input
- */
-keyListener = KeyListener.newKeyListener()
+RuneScript runeScript = new RuneScript(this)
 
-println "keyListener: " + keyListener
+try {
+    runeScript.start()
+} catch (Exception e) {
+    println("Exception: " + e)
+}
 
-/**
- * Create an instance of the AutoKalg class
- */
-GroovyShell shell = new GroovyShell()
-def autoKalg = shell.parse(new File('./data/scripts/AutoKalg.groovy'))
-println "autoKalg: " + autoKalg
+println "--------< RuneScript ended >--------"
 
-/**
- * Some key code to key name assignments
- * for ease of use
- */
-int tab = 9
-int f = 102
-int fullstop = 46
-int comma = 44
+class RuneScript {
 
-int capitalD = 68
-keyConsumer.add(capitalD)
+    def script
 
-/**
- * Put some keys to the consume map, Mentioned above.
- */
-//keyConsumer.add(capitalD)
+    RuneScript(def script) {
+        this.script = script
+    }
 
-/**
- * Holds the key code of the last key pressed/released
- * when checking keyListener.getPressed() or keyListener.getReleased()
- * the value is erased as its called, So if you want to use it
- * you need to store it in a variable...
- */
-int pressed = 0
-int released = 0
+    def keyListener = KeyListener.newKeyListener()
 
-/**
- * Controls printouts to the console
- */
-boolean debug = true
+    def autoKalg = Scripts.get("AutoKalg").newInstance()
+    def keyConsumer = Scripts.get("KeyConsumer").newInstance()
 
+    void start() {
 
-/**
- * Main loop
- * 'running' is automatically set to true as any Script is started.
- * it is a hidden variable that is used to stop the script
- */
-while (running) {
+        boolean debug = false
 
-    try {
+        autoKalg.start()
 
-        /**
-         * read the keyListener for key pressesf
-         */
-        pressed = keyListener.getPressed()
+        int pressed = 0
+        int released = 0
 
-        if (pressed != 0) {
+        while (script.running) {
 
-            switch (pressed) {
-                case capitalD:
-                    KeyboardEvent.send("Hello you just pressed shift + d")
-                    break
-                case fullstop:
-                    KeyboardEvent.send("hello")
-                    kalg.start()
-                    break
+            try {
 
-               default:
-                    if (debug) {
-                        println "pressed: " + pressed
+                pressed = keyListener.getPressed()
+
+                if (pressed != 0) {
+
+                    switch (pressed) {
+                        default:
+                            if (debug) {
+                                println "pressed: " + pressed
+                            }
+
                     }
-                    break
+                }
+
+                released = keyListener.getReleased()
+
+                if (released != 0) {
+                    switch (released) {
+                        default:
+                            if (debug) {
+                                println "released: " + released
+                            }
+                    }
+                }
+                Thread.sleep(10)
+
+            } catch (Exception e) {
+                println("Exception: " + e)
             }
         }
-
-        /**
-         * read the keyListener for key releases
-         */
-        released = keyListener.getReleased()
-
-        if (released != 0) {
-            switch (released) {
-               default:
-                    if (debug) {
-                        println "released: " + released
-                    }
-                    break
-            }
-        }
-
-        /**
-         * Sleeping allows time for the OS to process any information.
-         * 10 milliseconds is a good amount of time to sleep for.
-         */
-        Thread.sleep(10)
-    } catch (Exception e) {
-        println("Exception: " + e)
-        break
+        keyConsumer.clear()
     }
 }
-
-
-/**
- * Stop the AutoKalg class, If it is running
- */
-if (kalg.keepAlive) {
-    kalg.stop()
-}
-
-/**
- * remove the keys that were added to the consume map
- */
-keyConsumer.clear()
-
-/**
- * End of Script
- */
-println "--------< Runescape ended >--------"

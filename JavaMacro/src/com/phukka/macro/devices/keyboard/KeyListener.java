@@ -8,6 +8,7 @@ public class KeyListener {
     public static keyListenerInterface newKeyListener() {
         keyListenerInterface listener = new KeyListenerImpl();
         addListener(listener);
+        System.out.println(listeners.size() +" total listeners active.");
         return listener;
     }
 
