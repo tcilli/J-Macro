@@ -1,9 +1,6 @@
-import com.phukka.macro.Main
 import com.phukka.macro.devices.keyboard.KeyListener
-import KeyConsumer
-import com.phukka.macro.devices.mouse.MouseCallback
-import com.phukka.macro.devices.mouse.MouseEvent
-import com.phukka.macro.devices.screen.ImageSearch
+import com.phukka.macro.devices.keyboard.KeyboardEvent
+import com.phukka.macro.scripting.Scripts;
 
 /**
  * Start of the Script
@@ -12,22 +9,19 @@ println "--------< Runescape started >--------"
 
 /**
  * Connects this script to the built in keylistener
- * 'keyListener' is a hidden variable that is pre-defined
- * in the Script class. It is used to listen for key presses
  * Calling newKeyListener() will automatically setup a listener
- * When this script ends. The listener will be removed automatically.
+ * This ignores system messages and will only trigger for a user input
  */
 keyListener = KeyListener.newKeyListener()
 
-/**
- * Create an instance of the KeyConsumer class
- */
-KeyConsumer keyConsumer = new KeyConsumer()
+println "keyListener: " + keyListener
 
 /**
  * Create an instance of the AutoKalg class
  */
-AutoKalg kalg = new AutoKalg()
+GroovyShell shell = new GroovyShell()
+def autoKalg = shell.parse(new File('./data/scripts/AutoKalg.groovy'))
+println "autoKalg: " + autoKalg
 
 /**
  * Some key code to key name assignments
@@ -38,10 +32,13 @@ int f = 102
 int fullstop = 46
 int comma = 44
 
+int capitalD = 68
+keyConsumer.add(capitalD)
+
 /**
  * Put some keys to the consume map, Mentioned above.
  */
-keyConsumer.add(f)
+//keyConsumer.add(capitalD)
 
 /**
  * Holds the key code of the last key pressed/released
@@ -55,7 +52,7 @@ int released = 0
 /**
  * Controls printouts to the console
  */
-boolean debug = false
+boolean debug = true
 
 
 /**
@@ -75,25 +72,15 @@ while (running) {
         if (pressed != 0) {
 
             switch (pressed) {
-                case f:
-
-                    int x = MouseCallback.x
-                    int y = MouseCallback.y
-                    println "x: " + x + " y: " + y
-
-                    MouseEvent.move(486, 269);
-                    MouseEvent.rightClick();
-                    MouseEvent.move(x, y);
-                    MouseCallback.disableUserMovement = false
+                case capitalD:
+                    KeyboardEvent.send("Hello you just pressed shift + d")
                     break
-
                 case fullstop:
+                    KeyboardEvent.send("hello")
                     kalg.start()
                     break
-                case comma:
-                    break
 
-                default:
+               default:
                     if (debug) {
                         println "pressed: " + pressed
                     }
@@ -108,9 +95,7 @@ while (running) {
 
         if (released != 0) {
             switch (released) {
-                case tab:
-                    break
-                default:
+               default:
                     if (debug) {
                         println "released: " + released
                     }

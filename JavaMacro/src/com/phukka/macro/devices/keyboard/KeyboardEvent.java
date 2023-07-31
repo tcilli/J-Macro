@@ -57,6 +57,13 @@ public class KeyboardEvent {
         send(message.toCharArray());
     }
 
+    public static void keydown(int keycode) {
+        KeyboardInterface.INSTANCE.keybd_event((byte) keycode, (byte) 0, KEY_DOWN, 1);
+    }
+    public static void keyUp(int keycode) {
+        KeyboardInterface.INSTANCE.keybd_event((byte) keycode, (byte) 0, KEY_UP, 1);
+    }
+
     public static void send(char[] charArray) {
 
         //need to check if shift is already active
@@ -67,11 +74,11 @@ public class KeyboardEvent {
 
         //if shift is active we need to deactivate it
         if (shiftActive) {
-            KeyboardInterface.INSTANCE.keybd_event(VK_SHIFT, NULL, KEY_UP, 0);
+            KeyboardInterface.INSTANCE.keybd_event(VK_SHIFT, NULL, KEY_UP, 1);
         }
         //if caps lock is active we need to deactivate it
         if (capslockActive) {
-            KeyboardInterface.INSTANCE.keybd_event(VK_CAPS_LOCK, NULL, KEY_UP, 0);
+            KeyboardInterface.INSTANCE.keybd_event(VK_CAPS_LOCK, NULL, KEY_UP, 1);
         }
 
         for (char c : charArray) {
@@ -97,29 +104,29 @@ public class KeyboardEvent {
             // virtualKeyCode requires shift key to be pressed
             if (shiftKey) {
                 dwFlags |= SHIFT_DOWN;
-                KeyboardInterface.INSTANCE.keybd_event(VK_SHIFT, NULL, KEY_DOWN, 0);
+                KeyboardInterface.INSTANCE.keybd_event(VK_SHIFT, NULL, KEY_DOWN, 1);
             }
 
             //send the key down
-            KeyboardInterface.INSTANCE.keybd_event(virtualKeyCode, NULL, dwFlags, 0);
+            KeyboardInterface.INSTANCE.keybd_event(virtualKeyCode, NULL, dwFlags, 1);
 
             //release the key
-            KeyboardInterface.INSTANCE.keybd_event(virtualKeyCode, NULL, dwFlags | KEY_UP, 0);
+            KeyboardInterface.INSTANCE.keybd_event(virtualKeyCode, NULL, dwFlags | KEY_UP, 1);
 
             //if the virtual key required shift key to be pressed
             //we need to release the shift key
             if (shiftKey) {
-                KeyboardInterface.INSTANCE.keybd_event(VK_SHIFT, NULL, KEY_UP, 0);
+                KeyboardInterface.INSTANCE.keybd_event(VK_SHIFT, NULL, KEY_UP, 1);
             }
         }
 
         //if shift was active before we need to reactivate it
         if (shiftActive) {
-            KeyboardInterface.INSTANCE.keybd_event(VK_SHIFT, NULL, KEY_DOWN, 0);
+            KeyboardInterface.INSTANCE.keybd_event(VK_SHIFT, NULL, KEY_DOWN, 1);
         }
         //if caps lock was active before we need to reactivate it
         if (capslockActive) {
-            KeyboardInterface.INSTANCE.keybd_event(VK_CAPS_LOCK, NULL, KEY_DOWN, 0);
+            KeyboardInterface.INSTANCE.keybd_event(VK_CAPS_LOCK, NULL, KEY_DOWN, 1);
         }
     }
 }

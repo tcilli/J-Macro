@@ -1,3 +1,0 @@
-macro onrelease-u
-window fortnite
-mouse1up

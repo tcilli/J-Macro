@@ -166,12 +166,30 @@ public class MouseEvent {
         mouseClickEvent(MOUSEEVENTF_LEFTDOWN);
         mouseClickEvent(MOUSEEVENTF_LEFTUP);
     }
+    public static void leftClickDown() {
+        mouseClickEvent(MOUSEEVENTF_LEFTDOWN);
+    }
+    public static void leftClickUp() {
+        mouseClickEvent(MOUSEEVENTF_LEFTUP);
+    }
     public static void rightClick() {
         mouseClickEvent(MOUSEEVENTF_RIGHTDOWN);
         mouseClickEvent(MOUSEEVENTF_RIGHTUP);
     }
+    public static void rightClickDown() {
+        mouseClickEvent(MOUSEEVENTF_RIGHTDOWN);
+    }
+    public static void rightClickUp() {
+        mouseClickEvent(MOUSEEVENTF_RIGHTUP);
+    }
     public static void middleClick() {
         mouseClickEvent(MOUSEEVENTF_MIDDLEDOWN);
+        mouseClickEvent(MOUSEEVENTF_MIDDLEUP);
+    }
+    public static void middleClickDown() {
+        mouseClickEvent(MOUSEEVENTF_MIDDLEDOWN);
+    }
+    public static void middleClickUp() {
         mouseClickEvent(MOUSEEVENTF_MIDDLEUP);
     }
     public static void doubleClick() {
@@ -180,8 +198,6 @@ public class MouseEvent {
         mouseClickEvent(MOUSEEVENTF_LEFTDOWN);
         mouseClickEvent(MOUSEEVENTF_LEFTUP);
     }
-
-    private static final Object lock = new Object();
 
     public static int[] position() {
         PointerInfo info = MouseInfo.getPointerInfo();
@@ -201,31 +217,46 @@ public class MouseEvent {
         mouseMoveOverTimeEvent(x, y, delay, true);
     }
 
+    public static void ghostClick(int x, int y, int button) {
+        int startX = MouseCallback.getX();
+        int startY = MouseCallback.getY();
+        mouseMoveEvent(x, y, true);
+        if (button == 1) {
+            leftClick();
+        }
+        if (button == 2) {
+            rightClick();
+        }
+        if (button == 3) {
+            middleClick();
+        }
+        mouseMoveEvent(startX, startY, true);
+    }
+
     public static void mouseMoveEvent(int x, int y, boolean abs) {
         try {
-            MouseCallback.disableUserMovement = true;
-            win_input_event.input.setType("mi");
-            win_input_event.type.setValue(WinUser.INPUT.INPUT_MOUSE);
+            MouseCallback.disableUserMovement();
 
-            if (abs) {
-                // Calculate the absolute screen coordinates based on the given x and y values
-                int absX = (int) Math.ceil(x * SCREEN_SCALE_FACTOR_X) + 1;
-                int absY = (int) Math.ceil(y * SCREEN_SCALE_FACTOR_Y) + 1;
-                win_input_event.input.mi.dx.setValue(absX);
-                win_input_event.input.mi.dy.setValue(absY);
-                win_input_event.input.mi.dwFlags.setValue(MOUSEEVENTF_ABS | MOUSEEVENTF_MOVE);
-            } else {
-                // Use the given x and y as relative offsets
-                win_input_event.input.mi.dx.setValue(x);
-                win_input_event.input.mi.dy.setValue(y);
-                win_input_event.input.mi.dwFlags.setValue(MOUSEEVENTF_MOVE);
+            if (!abs) {
+                x += MouseCallback.getX();
+                y += MouseCallback.getY();
             }
 
+            x = (int) Math.ceil(x * SCREEN_SCALE_FACTOR_X) + 1;
+            y = (int) Math.ceil(y * SCREEN_SCALE_FACTOR_Y) + 1;
+
+            win_input_event.input.setType("mi");
+            win_input_event.type.setValue(WinUser.INPUT.INPUT_MOUSE);
+            win_input_event.input.mi.dx.setValue(x);
+            win_input_event.input.mi.dy.setValue(y);
+            win_input_event.input.mi.dwFlags.setValue(MOUSEEVENTF_MOVE | MOUSEEVENTF_ABS); //we convert all event into absolute event
             win_input_event.input.mi.dwExtraInfo.setValue(1);
             WinUser.INPUT[] inputs = {win_input_event};
             User32.INSTANCE.SendInput(new WinDef.DWORD(1), inputs, win_input_event.size());
+
         } finally {
-            MouseCallback.disableUserMovement = false;
+
+            MouseCallback.enableUserMovement();
         }
     }
 }

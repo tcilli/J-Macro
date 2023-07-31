@@ -3,14 +3,18 @@ package com.phukka.macro.scripting;
 import com.phukka.macro.Main;
 import com.phukka.macro.devices.keyboard.KeyListener;
 import com.phukka.macro.devices.keyboard.keyListenerInterface;
+import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Constructor;
 import java.util.*;
 
 public class Scripts {
+
+    private static final String PATH = "./data/scripts";
 
     private final Map<String, Script> scripts = new HashMap<>();
 
@@ -20,18 +24,20 @@ public class Scripts {
 
     public void compile() {
         try {
-            File scriptsDir = new File("./data/scripts");
-            String SCRIPTS_DIR = "./data/scripts";
+            File scriptsDir = new File(PATH);
             if (!scriptsDir.exists()) {
-                throw new FileNotFoundException("Scripts directory not found: " + SCRIPTS_DIR);
+                throw new FileNotFoundException("Scripts directory not found: " + PATH);
             }
             File[] scriptFiles = scriptsDir.listFiles();
             if (scriptFiles == null) {
-                throw new FileNotFoundException("No scripts found in directory: " + SCRIPTS_DIR);
+                throw new FileNotFoundException("No scripts found in directory: " + PATH);
             }
             GroovyShell shell = new GroovyShell();
 
             for (File scriptFile : scriptFiles) {
+                if (scriptFile.isDirectory()) {
+                    continue;
+                }
                 System.out.println("Compiling script: " + scriptFile.getName());
                 Script script = shell.parse(scriptFile);
                 onCompile(script);
@@ -102,5 +108,25 @@ public class Scripts {
             KeyListener.removeListener((keyListenerInterface) script.getProperty("keyListener"));
             script.setProperty("keyListener", null);
         }
+    }
+
+    public static Constructor<?> get(String name) {
+        Constructor<?> classConstructor = null;
+
+        try (GroovyClassLoader gcl = new GroovyClassLoader()) {
+            File file = new File(PATH + name + ".groovy");
+
+            try {
+                Class<?> newClass = gcl.parseClass(file);
+                classConstructor = newClass.getDeclaredConstructor();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return classConstructor;
     }
 }

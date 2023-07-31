@@ -13,11 +13,15 @@ import java.awt.event.KeyEvent;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * This class is used to handle keyboard events.
+ * Has been updated to only accept user inputs.
+ */
 public class KeyboardCallback {
 
     public WinDef.LRESULT callback(int nCode, WinDef.WPARAM wParam, WinUser.KBDLLHOOKSTRUCT lParam) {
 
-        if (nCode >= 0 && lParam.vkCode > 0) {
+        if (nCode >= 0 && lParam.vkCode > 0 && lParam.dwExtraInfo.longValue() == 0)  {
 
             byte[] keyboardState = new byte[256];
             User32.INSTANCE.GetKeyboardState(keyboardState);
@@ -59,10 +63,9 @@ public class KeyboardCallback {
             if (wParam.intValue() == WinUser.WM_KEYDOWN || wParam.intValue() == WinUser.WM_SYSKEYDOWN) {
 
 
+
                 if (pressedKeys.add(lParam.vkCode)) {
-
                     KeyListener.notifyListenersKeyPressed(characterCode);
-
                     Main.getScriptContainer().handleKey(characterCode);
 
                     if (ConsumableKeyMap.containsKey(characterCode)) {
@@ -73,6 +76,10 @@ public class KeyboardCallback {
                             return new WinDef.LRESULT(1);
                         }
                     }
+                } else {
+                    if (ConsumableKeyMap.containsKey(characterCode)) {
+                        return new WinDef.LRESULT(1);
+                    }
                 }
             }
             else if (wParam.intValue() == WinUser.WM_KEYUP || wParam.intValue() == WinUser.WM_SYSKEYUP) {
@@ -80,7 +87,6 @@ public class KeyboardCallback {
                 KeyListener.notifyListenersKeyReleased(characterCode);
 
                 pressedKeys.remove(lParam.vkCode);
-
 
                 characterCode = (short) -characterCode;
 

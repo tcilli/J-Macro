@@ -1,3 +1,2 @@
 macro ondown-1
-consume
-script Runescape
+script Fortnite
