@@ -1,6 +1,7 @@
 package com.phukka.macro.instruction;
 
 import com.phukka.macro.Main;
+import com.phukka.macro.devices.keyboard.KeyListener;
 
 import java.util.HashMap;
 import java.util.Map;

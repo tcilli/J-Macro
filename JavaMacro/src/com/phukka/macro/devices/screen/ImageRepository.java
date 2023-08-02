@@ -9,12 +9,12 @@ import java.util.Map;
 
 public class ImageRepository {
 
-    public final Map<String, BufferedImage> imageMap = new HashMap<>();
+    public static final Map<String, BufferedImage> imageMap = new HashMap<>();
 
     public ImageRepository() {
     }
 
-    public BufferedImage get(String imageName) {
+    public static BufferedImage get(String imageName) {
         try {
             if (imageMap.containsKey(imageName)) {
                 return imageMap.get(imageName);

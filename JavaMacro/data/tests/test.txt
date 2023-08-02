@@ -1,2 +1,2 @@
-macro ondown-1
-script Fortnite
+macro ondown-f11
+script Runescape

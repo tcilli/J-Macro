@@ -1,6 +1,7 @@
 package com.phukka.macro.devices.screen;
 
 import com.phukka.macro.Main;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -20,7 +21,18 @@ public class ImageSearch {
         }
     }
 
+    /**
+     * colors should be nearly identical
+     * however this is overridable by passing in a defined colour variance
+     */
+    private static final int COLOR_VARIANCE = 60;
+
+
     private static int[] searchImage(BufferedImage baseImage, BufferedImage imageToFind, int startX, int endX, int endY) {
+        return searchImage(baseImage, imageToFind, startX, endX, endY, COLOR_VARIANCE);
+    }
+
+    private static int[] searchImage(BufferedImage baseImage, BufferedImage imageToFind, int startX, int endX, int endY, int definedColourVariance) {
         int widthToFind = imageToFind.getWidth();
         int heightToFind = imageToFind.getHeight();
 
@@ -38,7 +50,7 @@ public class ImageSearch {
 
         for (int y = 0; y <= endY - heightToFind + 1; y++) {
             for (int x = startX; x <= endX - widthToFind + 1; x++) {
-                if (matchMask(x, y, basePixels, baseImage.getWidth(), maskRGB)) {
+                if (matchMask(x, y, basePixels, baseImage.getWidth(), maskRGB, definedColourVariance)) {
                     return new int[]{x, y, x + widthToFind, y + heightToFind};
                 }
             }
@@ -47,7 +59,7 @@ public class ImageSearch {
     }
 
     // modify matchMask method to accept basePixels and baseImageWidth instead of baseImage
-    private static boolean matchMask(int startX, int startY, int[] basePixels, int baseImageWidth, RGB[][] maskRGB) {
+    private static boolean matchMask(int startX, int startY, int[] basePixels, int baseImageWidth, RGB[][] maskRGB, int definedColourVariance) {
         int heightToFind = maskRGB.length;
         int widthToFind = maskRGB[0].length;
 
@@ -72,8 +84,8 @@ public class ImageSearch {
                 int greenDiff = Math.abs(pixel.green - maskRGB[y][x].green);
                 int blueDiff = Math.abs(pixel.blue - maskRGB[y][x].blue);
 
-                int colorDifferenceSquared = redDiff * redDiff + greenDiff * greenDiff + blueDiff * blueDiff;
-                if (colorDifferenceSquared > COLOR_VARIANCE * COLOR_VARIANCE) {
+                double difference = Math.sqrt((redDiff * redDiff) + (greenDiff * greenDiff) + (blueDiff * blueDiff));
+                if (difference > definedColourVariance) {
                     return false;
                 }
             }
@@ -92,8 +104,6 @@ public class ImageSearch {
         return center;
     }
 
-    private static final int COLOR_VARIANCE = 60;
-
     public static int[] findCenter(ImagePosition imageToSearchIn, BufferedImage imageToFind) {
         int[] bounds = find(imageToSearchIn, imageToFind);
         if (bounds[0] == -1) {
@@ -106,7 +116,21 @@ public class ImageSearch {
         return getCenter(bounds);
     }
 
+
+    /**
+     * Searches for the imageToFind in the imageToSearchIn
+     * @param imageToSearchIn the image to search in
+     * @param imageToFind the image to find
+     * @return the bounds of the imageToFind in the imageToSearchIn
+     */
+
+    @NotNull
     public static int[] find(ImagePosition imageToSearchIn, BufferedImage imageToFind) {
+        return find(imageToSearchIn, imageToFind, COLOR_VARIANCE);
+    }
+
+    @NotNull
+    public static int[] find(ImagePosition imageToSearchIn, BufferedImage imageToFind, int definedColourVariance) {
 
         int baseImageWidth = imageToSearchIn.image().getWidth();
         int baseImageHeight = imageToSearchIn.image().getHeight();
@@ -148,7 +172,7 @@ public class ImageSearch {
             int finalEndX = endX;
 
             try {
-                Future<int[]> future = Main.getExecutor().submit(() -> searchImage(imageToSearchIn.image(), imageToFind, finalStartX, finalEndX, baseImageHeight));
+                Future<int[]> future = Main.getExecutor().submit(() -> searchImage(imageToSearchIn.image(), imageToFind, finalStartX, finalEndX, baseImageHeight, definedColourVariance));
                 futures.add(future);
             } catch (RejectedExecutionException ignored) {
                 //if we close the program before these finish, we get this exception
@@ -174,18 +198,5 @@ public class ImageSearch {
             }
         }
         return new int[]{-1, -1, -1, -1};
-    }
-
-    public static int getPixel(int x, int y) {
-        // Capture the screen
-        ImagePosition area = Main.getScreen().captureArea(x, y, x+1, y+1);
-        return getPixelData(area.image())[0];
-    }
-
-    public static int[] getPixelRGB(int x, int y) {
-        // Capture the screen
-        ImagePosition area = Main.getScreen().captureArea(x, y, x+1, y+1);
-        RGB rgb = new RGB(getPixelData(area.image())[0]);
-        return new int[] {rgb.red, rgb.green, rgb.blue};
     }
 }

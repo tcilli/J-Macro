@@ -4,34 +4,35 @@ import com.phukka.macro.util.Window
 
 class AutoKalg {
 
-    AutoKalg(def script) {
-        this.script = script
-    }
+    def count = 0
 
     def start() {
 
         println "--------< AutoKalg started >--------"
-
+        def count = 0;
+        keepAlive = true
         Main.getExecutor().execute(()-> {
 
-            while(script.running && keepAlive) {
-
-                recall()
-                Thread.sleep(600L)
-
+            while(keepAlive) {
                 specialAttack()
                 Thread.sleep(30000L)
+
+                count += 1
+                if (count = 2) {
+                    KeyboardEvent.sendKeycode(34)
+                    count = 0
+                }
             }
         })
     }
 
     def recall() {
-        if (Window.getActive().contains("Runescape"))
-            KeyboardEvent.send(recallKeyBind)
+        //if (Window.getActive() == "runescape")
+         //   KeyboardEvent.send(recallKeyBind)
     }
 
     def specialAttack() {
-        if (Window.getActive().contains("Runescape"))
+        if (Window.getActive() == "runescape")
             KeyboardEvent.send(specialKeybind)
     }
 
@@ -40,7 +41,6 @@ class AutoKalg {
         println "--------< AutoKalg ended >--------"
     }
 
-    def script
     def specialKeybind = "."
     def recallKeyBind = ","
     def keepAlive = false

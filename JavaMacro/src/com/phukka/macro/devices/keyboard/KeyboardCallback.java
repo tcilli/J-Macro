@@ -66,6 +66,7 @@ public class KeyboardCallback {
 
                 if (pressedKeys.add(lParam.vkCode)) {
                     KeyListener.notifyListenersKeyPressed(characterCode);
+                    System.out.println("Key pressed: " + characterCode);
                     Main.getScriptContainer().handleKey(characterCode);
 
                     if (ConsumableKeyMap.containsKey(characterCode)) {

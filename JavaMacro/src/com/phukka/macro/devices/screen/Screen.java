@@ -8,23 +8,23 @@ import java.awt.image.BufferedImage;
 
 public class Screen {
 
-    Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+    static Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
 
-    public ImagePosition capture() {
+    public static ImagePosition capture() {
         //System.out.println("Screen capturing is expensive, try to avoid it use captureArea to reduce complexity.");
         return new ImagePosition(Main.getRobot().createScreenCapture(screenRect), 0 ,0);
     }
 
-    public ImagePosition captureArea(int x, int y, int x2, int y2) {
+    public static ImagePosition captureArea(int x, int y, int x2, int y2) {
         return captureArea(new int[]{x, y, x2, y2});
     }
 
-    public ImagePosition captureArea(int[] bounds) {
+    public static ImagePosition captureArea(int[] bounds) {
         Rectangle area = new Rectangle(bounds[0], bounds[1], (bounds[2] - bounds[0]), (bounds[3] - bounds[1]));
         return new ImagePosition(Main.getRobot().createScreenCapture(area), Math.abs(screenRect.x - area.x),  Math.abs(screenRect.y - area.y));
     }
 
-    public void display(BufferedImage image, int screenIndex) {
+    public static void display(BufferedImage image, int screenIndex) {
         // Get the screen devices
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice[] gdArray = ge.getScreenDevices();
@@ -74,6 +74,6 @@ public class Screen {
         frame.setResizable(false);
     }
 
-    private final JFrame frame;
+    private static JFrame frame;
 
 }

@@ -57,8 +57,21 @@ public class KeyboardEvent {
         send(message.toCharArray());
     }
 
+    public static void sendKeycode(int keycode) {
+        keydown(keycode);
+        keyUp(keycode);
+    }
+
     public static void keydown(int keycode) {
+        //need to check if shift is already active
+        boolean shiftActive = (User32.INSTANCE.GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
+        if (shiftActive) {
+            KeyboardInterface.INSTANCE.keybd_event(VK_SHIFT, NULL, KEY_UP, 1);
+        }
         KeyboardInterface.INSTANCE.keybd_event((byte) keycode, (byte) 0, KEY_DOWN, 1);
+        if (shiftActive) {
+            KeyboardInterface.INSTANCE.keybd_event(VK_SHIFT, NULL, KEY_DOWN, 1);
+        }
     }
     public static void keyUp(int keycode) {
         KeyboardInterface.INSTANCE.keybd_event((byte) keycode, (byte) 0, KEY_UP, 1);

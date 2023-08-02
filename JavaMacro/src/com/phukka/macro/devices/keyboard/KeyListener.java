@@ -60,5 +60,9 @@ public class KeyListener {
             listener.onKeyReleased(characterCode);
         }
     }
+
+    public static void clear() {
+        listeners.clear();
+    }
 }
 

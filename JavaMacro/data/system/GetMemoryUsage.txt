@@ -1,2 +1,0 @@
-macro ondown-F7
-get memory

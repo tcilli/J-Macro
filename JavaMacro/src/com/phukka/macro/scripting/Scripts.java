@@ -14,7 +14,7 @@ import java.util.*;
 
 public class Scripts {
 
-    private static final String PATH = "./data/scripts";
+    private static final String PATH = "./data/scripts/";
 
     private final Map<String, Script> scripts = new HashMap<>();
 
@@ -75,6 +75,7 @@ public class Scripts {
         for (Script script : scripts.values()) {
             end(script);
         }
+        KeyListener.clear();
     }
 
     /**

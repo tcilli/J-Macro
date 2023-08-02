@@ -1,4 +1,0 @@
-macro ondown-F10
-get window
-wait 100
-loop
