@@ -6,14 +6,19 @@ class MagicGear {
     def item = Scripts.get("Item").newInstance()
 
     def weaponCycle() {
-        if (item.isEquipped("fractured_staff_of_armadyl_ice")) {
-            wearDualWield()
-        } else {
+
+        if (item.isEquipped("wand_of_the_praesul_ice") && item.isEquipped("imperium_core_ice")) {
             wearMagic2H()
+        } else {
+            wearDualWield()
         }
         if (!item.isEquipped("affliction_prayer")) {
             KeyboardEvent.send("k")
         }
+    }
+
+    def usingMagicWeapon() {
+        return item.isEquipped("wand_of_the_praesul_ice") || item.isEquipped("imperium_core_ice") || item.isEquipped("fractured_staff_of_armadyl_ice")
     }
 
     def wearDualWield() {
@@ -26,27 +31,17 @@ class MagicGear {
     }
 
     def wearMagic2H() {
-        if (!item.isEquipped("fractured_staff_of_armadyl_ice")) {
+       // if (!item.isEquipped("fractured_staff_of_armadyl_ice")) {
             KeyboardEvent.send("'")
-        }
+       // }
     }
 
     def wearTectonic() {
-        if (!item.isEquipped("elite_tectonic_mask_shadow", 100)) {
-            KeyboardEvent.sendKeycode(insert)
-        }
-        if (!item.isEquipped("elite_tectonic_robe_top_shadow", 100)) {
-            KeyboardEvent.sendKeycode(home)
-        }
-        if (!item.isEquipped("elite_tectonic_robe_bottoms_shadow", 100)) {
-            KeyboardEvent.sendKeycode(page_up)
-        }
-        if (!item.isEquipped("enhanced_blast_diffusion_boots")) {
-            KeyboardEvent.sendKeycode(del)
-        }
-        if (!item.isEquipped("eof_armadyl_battle_staff")) {
-            KeyboardEvent.send("9")
-        }
+        KeyboardEvent.sendKeycode(insert)
+        KeyboardEvent.sendKeycode(home)
+        KeyboardEvent.sendKeycode(page_up)
+        KeyboardEvent.sendKeycode(del)
+        KeyboardEvent.send("9")
     }
 
     /**

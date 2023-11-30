@@ -3,18 +3,6 @@ import com.phukka.macro.devices.keyboard.KeyListener
 import com.phukka.macro.devices.keyboard.KeyboardEvent
 import com.phukka.macro.devices.mouse.MouseEvent
 
-FortniteScript fortnite = new FortniteScript(this)
-
-println "--------< FortniteScript starting >--------"
-
-try {
-    fortnite.start()
-} catch (Exception e) {
-    println("Exception: " + e)
-}
-
-println "--------< FortniteScript ended >--------"
-
 class FortniteScript {
 
     def script
@@ -99,4 +87,15 @@ class FortniteScript {
     }
 }
 
+println "--------< FortniteScript starting >--------"
+
+FortniteScript fortnite = new FortniteScript(this)
+
+try {
+    fortnite.start()
+} catch (Exception e) {
+    println("Exception: " + e)
+}
+
+println "--------< FortniteScript ended >--------"
 

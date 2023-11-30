@@ -17,6 +17,7 @@ class RangeGear {
     }
 
     def wearRange2H() {
+
         if (!item.isEquipped("bow_of_the_last_guardian_ice")) {
             KeyboardEvent.send("p")
         }
@@ -25,21 +26,21 @@ class RangeGear {
         }
     }
 
+    def usingRangeWeapon() {
+        if (item.isEquipped("bow_of_the_last_guardian_ice")) {
+            return true
+        }
+        if (item.isEquipped("ecb_ice")) {
+            return true
+        }
+    }
+
     def wearSirenic() {
-        if (!item.isEquipped("elite_sirenic_mask_ice")) {
-            KeyboardEvent.send("j")
-        }
-        if (!item.isEquipped("elite_sirenic_hauberk_ice")) {
-            KeyboardEvent.send("[")
-        }
-        if (!item.isEquipped("elite_sirenic_legs_ice")) {
-            KeyboardEvent.send("]")
-        }
-        if (!item.isEquipped("eof_seren_god_bow")) {
-            KeyboardEvent.send(";")
-        }
-        if (!item.isEquipped("enhanced_fleeting_boots")) {
-            KeyboardEvent.send('\\')
-        }
+        KeyboardEvent.send("j")
+        KeyboardEvent.send("[")
+        KeyboardEvent.send("]")
+        KeyboardEvent.send(";")
+        KeyboardEvent.send("o")
+        KeyboardEvent.send('\\')
     }
 }

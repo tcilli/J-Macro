@@ -5,6 +5,9 @@ import com.phukka.macro.devices.screen.Screen;
 import com.phukka.macro.instruction.InstructionSetContainer;
 import com.phukka.macro.command.CommandHandler;
 import com.phukka.macro.scripting.Scripts;
+import com.phukka.macro.scripting.runescape.abilities.Abilties;
+import com.phukka.macro.scripting.runescape.grandexchange.GrandExchange;
+import com.phukka.macro.util.ConsoleReader;
 import com.phukka.macro.util.MacroFileReader;
 import com.phukka.macro.devices.keyboard.KeyboardCallback;
 import com.phukka.macro.devices.mouse.MouseCallback;
@@ -29,23 +32,25 @@ public class Main  {
 
 	private static final StringBuffer console = new StringBuffer();
 	private static final Robot robot;
-
 	private static InstructionSetContainer instructionSetContainer;
 	private static CommandHandler commandHandler;
 	private static ExecutorService executor;
 
 	private static final Screen SCREEN = new Screen();
 	private static final ImageRepository imageRepository = new ImageRepository();
-
 	private static final Scripts scripts = new Scripts();
-
 	private static final KeyboardCallback KeyboardCallback = new KeyboardCallback();
+	private static final Abilties abilities = new Abilties();
+	private static ConsoleReader consoleReader = new ConsoleReader();
 
 	public static void main(String[] args) {
 
+		GrandExchange.downloadGEPrices();
+		GrandExchange.downloadGETradeVolumes();
+
 		instructionSetContainer = new InstructionSetContainer();
 		commandHandler = new CommandHandler();
-
+		//abilities.simulate_ability(1);
 		new MacroFileReader();
 
 		executor = Executors.newCachedThreadPool();
@@ -62,14 +67,34 @@ public class Main  {
 			KeyboardHook.unhook();
 			mouseHook.unhook();
 			executor.shutdown();
+			consoleReader.shutdown();
+			Main.getConsoleBuffer().append("Shutdown hook triggered.");
+			Main.pushConsoleMessageAlways();
 		}));
+
+		scripts.run("Runescape");
+
+		consoleReader.setup();
+
+
+
 	}
 
 	public static StringBuffer getConsoleBuffer() {
 		return console;
 	}
 
+
+	public static boolean debug = false;
+
 	public synchronized static void pushConsoleMessage() {
+		if (debug) {
+			System.out.println(console);
+		}
+		console.setLength(0);
+	}
+
+	public synchronized static void pushConsoleMessageAlways() {
 		System.out.println(console);
 		console.setLength(0);
 	}
@@ -88,22 +113,18 @@ public class Main  {
 	public static Screen getScreen() {
 		return SCREEN;
 	}
-
 	public static ImageRepository getImageRepository() {
 		return imageRepository;
 	}
 	public static KeyboardCallback getKeyboardCallback() {
 		return KeyboardCallback;
 	}
-
 	public static Scripts getScript() {
 		return scripts;
 	}
-
 	public static ExecutorService getExecutor() {
 		return executor;
 	}
-
 	public static Robot getRobot() {
 		return robot;
 	}

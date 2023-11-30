@@ -12,12 +12,12 @@ import java.util.concurrent.*;
 public class ImageSearch {
 
     public static class RGB {
-        public int red, green, blue;
+        public byte red, green, blue;
 
         public RGB(int color) {
-            this.red = (color >> 16) & 0xFF;
-            this.green = (color >> 8) & 0xFF;
-            this.blue = color & 0xFF;
+            this.red = (byte) ((color >> 16) & 0xFF);
+            this.green = (byte) ((color >> 8) & 0xFF);
+            this.blue = (byte) (color & 0xFF);
         }
     }
 
@@ -25,7 +25,7 @@ public class ImageSearch {
      * colors should be nearly identical
      * however this is overridable by passing in a defined colour variance
      */
-    private static final int COLOR_VARIANCE = 60;
+    private static final int COLOR_VARIANCE = 100;
 
 
     private static int[] searchImage(BufferedImage baseImage, BufferedImage imageToFind, int startX, int endX, int endY) {
@@ -63,28 +63,33 @@ public class ImageSearch {
         int heightToFind = maskRGB.length;
         int widthToFind = maskRGB[0].length;
 
-        // Calculate the step size for x and y
-        int stepY = (int) Math.sqrt(heightToFind);
-        int stepX = (int) Math.sqrt(widthToFind);
+        byte redDiff = 0;
+        byte greenDiff = 0;
+        byte blueDiff = 0;
+
+        double difference =  0;
 
         // Iterate over the pixels in the image to search in
         // using the step size, to speed up the search
-        for (int y = 0; y < heightToFind; y += stepY) {
-            for (int x = 0; x < widthToFind; x += stepX) {
+        for (int y = 0; y < heightToFind; y+=2) {
+            for (int x = 0; x < widthToFind; x+=2) {
 
                 // Check if the current pixel is within the image boundaries
                 if (startX + x >= baseImageWidth || startY + y >= basePixels.length / baseImageWidth) {
                     return false;
                 }
+                if (maskRGB[y][x].red == 0 && maskRGB[y][x].green == 0 && maskRGB[y][x].blue == 0) {
+                    continue;
+                }
 
                 RGB pixel = new RGB(basePixels[(startY + y) * baseImageWidth + (startX + x)]);
 
                 // Calculate color differences for each channel
-                int redDiff = Math.abs(pixel.red - maskRGB[y][x].red);
-                int greenDiff = Math.abs(pixel.green - maskRGB[y][x].green);
-                int blueDiff = Math.abs(pixel.blue - maskRGB[y][x].blue);
+                redDiff = (byte) Math.abs(pixel.red - maskRGB[y][x].red);
+                greenDiff = (byte) Math.abs(pixel.green - maskRGB[y][x].green);
+                blueDiff = (byte) Math.abs(pixel.blue - maskRGB[y][x].blue);
 
-                double difference = Math.sqrt((redDiff * redDiff) + (greenDiff * greenDiff) + (blueDiff * blueDiff));
+                difference =  Math.sqrt((redDiff * redDiff) + (greenDiff * greenDiff) + (blueDiff * blueDiff));
                 if (difference > definedColourVariance) {
                     return false;
                 }
@@ -116,7 +121,6 @@ public class ImageSearch {
         return getCenter(bounds);
     }
 
-
     /**
      * Searches for the imageToFind in the imageToSearchIn
      * @param imageToSearchIn the image to search in
@@ -127,6 +131,11 @@ public class ImageSearch {
     @NotNull
     public static int[] find(ImagePosition imageToSearchIn, BufferedImage imageToFind) {
         return find(imageToSearchIn, imageToFind, COLOR_VARIANCE);
+    }
+
+    @NotNull
+    public static boolean foundExact(ImagePosition imageToSearchIn, BufferedImage imageToFind){
+        return find(imageToSearchIn, imageToFind, 50)[0] > -1;
     }
 
     @NotNull

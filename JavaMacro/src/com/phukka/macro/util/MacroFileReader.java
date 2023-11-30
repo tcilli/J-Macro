@@ -23,6 +23,8 @@ import java.util.List;
 
 public class MacroFileReader {
 
+	public boolean debug = false;
+
 	public MacroFileReader() {
 
 		Main.getScriptContainer().clearInstructions();
@@ -56,8 +58,10 @@ public class MacroFileReader {
 			}
 		}
 		System.gc();
-		Main.getConsoleBuffer().append("**********************************").append("\n");
-		Main.pushConsoleMessage();
+		if (debug) {
+			Main.getConsoleBuffer().append("**********************************").append("\n");
+			Main.pushConsoleMessage();
+		}
 	}
 
 	/**
@@ -78,18 +82,20 @@ public class MacroFileReader {
 		}
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(directoryFile))) {
+
 			Main.getConsoleBuffer().append("**********************************").append("\n")
 				.append("Listing selected macro folders").append("\n")
 				.append("**********************************").append("\n");
 			Main.pushConsoleMessage();
+
 			String line;
 			while ((line = reader.readLine()) != null) {
 				if (line.startsWith("#")) {
 					continue;
 				}
 				directories.add(line);
-				Main.getConsoleBuffer().append(line);
-				Main.pushConsoleMessage();
+					Main.getConsoleBuffer().append(line);
+					Main.pushConsoleMessage();
 			}
 		} catch (IOException e) {
 			Main.getConsoleBuffer().append("Could not locate ./data/directories.txt");

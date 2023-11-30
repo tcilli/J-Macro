@@ -1,2 +1,0 @@
-macro ondown-F9
-stop all scripts

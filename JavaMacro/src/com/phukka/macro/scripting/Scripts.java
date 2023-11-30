@@ -14,7 +14,12 @@ import java.util.*;
 
 public class Scripts {
 
-    private static final String PATH = "./data/scripts/";
+    public static final String PATH = "./data/scripts/";
+    public static final String SCRIPT_EXTENSION = ".groovy";
+
+    private static final String KEY_LISTENER = "keyListener";
+    private static final String SCRIPT_RUNNING = "running";
+
 
     private final Map<String, Script> scripts = new HashMap<>();
 
@@ -28,6 +33,9 @@ public class Scripts {
             if (!scriptsDir.exists()) {
                 throw new FileNotFoundException("Scripts directory not found: " + PATH);
             }
+            Main.getConsoleBuffer().append("Script directory: ").append(PATH);
+            Main.pushConsoleMessageAlways();
+
             File[] scriptFiles = scriptsDir.listFiles();
             if (scriptFiles == null) {
                 throw new FileNotFoundException("No scripts found in directory: " + PATH);
@@ -35,14 +43,18 @@ public class Scripts {
             GroovyShell shell = new GroovyShell();
 
             for (File scriptFile : scriptFiles) {
-                if (scriptFile.isDirectory()) {
-                    continue;
+                if (scriptFile.isDirectory() || !scriptFile.getName().toLowerCase().endsWith(SCRIPT_EXTENSION)) {
+                    continue; // Skips directories and files not ending with .groovy
                 }
-                System.out.println("Compiling script: " + scriptFile.getName());
+                Main.getConsoleBuffer().append("Compiling script: ").append(scriptFile.getName());
+                Main.pushConsoleMessageAlways();
+
                 Script script = shell.parse(scriptFile);
                 onCompile(script);
                 scripts.put(scriptFile.getName(), script);
             }
+            Main.getConsoleBuffer().append("Compiled ").append(scripts.size()).append(" scripts.");
+            Main.pushConsoleMessageAlways();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -50,11 +62,17 @@ public class Scripts {
 
     public void run(String scriptName) {
 
-        Script script = scripts.get(scriptName + ".groovy");
+        if (!scriptName.endsWith(SCRIPT_EXTENSION)) {
+            scriptName = scriptName + SCRIPT_EXTENSION;
+        }
+
+        Script script = scripts.get(scriptName);
 
         if (script != null) {
 
-            if ((boolean) script.getProperty("running")) {
+            if ((boolean) script.getProperty(SCRIPT_RUNNING)) {
+                Main.getConsoleBuffer().append("Script already running: ").append(scriptName);
+                Main.pushConsoleMessageAlways();
                 return;
             }
             Main.getExecutor().submit(() -> {
@@ -67,7 +85,8 @@ public class Scripts {
             });
 
         } else {
-            System.out.println("Script not found: " + scriptName);
+            Main.getConsoleBuffer().append("Script not found: ").append(scriptName);
+            Main.pushConsoleMessageAlways();
         }
     }
 
@@ -84,8 +103,8 @@ public class Scripts {
      * @param script The script that was compiled.
      */
     private void onCompile(Script script) {
-        script.setProperty("keyListener", null);
-        script.setProperty("running", false);
+        script.setProperty(KEY_LISTENER, null);
+        script.setProperty(SCRIPT_RUNNING, false);
     }
 
     /**
@@ -94,8 +113,8 @@ public class Scripts {
      * @param script The script that was run.
      */
     private void prepare(Script script) {
-        script.setProperty("keyListener", null);
-        script.setProperty("running", true);
+        script.setProperty(KEY_LISTENER, null);
+        script.setProperty(SCRIPT_RUNNING, true);
     }
 
     /**
@@ -104,10 +123,10 @@ public class Scripts {
      * @param script The script that was run.
      */
     private void end(Script script) {
-        script.setProperty("running", false);
-        if (script.getProperty("keyListener") != null) {
-            KeyListener.removeListener((keyListenerInterface) script.getProperty("keyListener"));
-            script.setProperty("keyListener", null);
+        script.setProperty(SCRIPT_RUNNING, false);
+        if (script.getProperty(KEY_LISTENER) != null) {
+            KeyListener.removeListener((keyListenerInterface) script.getProperty(KEY_LISTENER));
+            script.setProperty(KEY_LISTENER, null);
         }
     }
 
@@ -115,7 +134,7 @@ public class Scripts {
         Constructor<?> classConstructor = null;
 
         try (GroovyClassLoader gcl = new GroovyClassLoader()) {
-            File file = new File(PATH + name + ".groovy");
+            File file = new File(PATH + name + SCRIPT_EXTENSION);
 
             try {
                 Class<?> newClass = gcl.parseClass(file);

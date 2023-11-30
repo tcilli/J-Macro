@@ -13,18 +13,13 @@ import java.util.Arrays;
 public class Window {
 
 	/**
-	 * The size allocated for the window title {@link #BUFFER}
+	 * The buffer to hold the character of the windows title
 	 */
-	public static final int BUFFER_SIZE = 128;
+	public static final char[] BUFFER = new char[128];
 
 	/**
-	 * The buffer for the window title of size {@link #BUFFER_SIZE}
-	 */
-	public static final char[] BUFFER = new char[BUFFER_SIZE];
-
-	/**
-	 * Gets the active window's title
-	 * @return lowercase {@link String} of the active window.
+	 * Gets the ForegroundWindow title
+	 * @return lowercase {@link String}.
 	 */
 	public static String getActive() {
 
@@ -42,7 +37,7 @@ public class Window {
 	 * Prints the active window to the console
 	 */
 	public static void printActive() {
-		Main.getConsoleBuffer().append("Active window: ").append(Window.getActive()).append("\n");
+		Main.getConsoleBuffer().append("Active window: ").append(BUFFER).append("\n");
 		Main.pushConsoleMessage();
 	}
 }

@@ -16,12 +16,6 @@ class AutoKalg {
             while(keepAlive) {
                 specialAttack()
                 Thread.sleep(30000L)
-
-                count += 1
-                if (count = 2) {
-                    KeyboardEvent.sendKeycode(34)
-                    count = 0
-                }
             }
         })
     }

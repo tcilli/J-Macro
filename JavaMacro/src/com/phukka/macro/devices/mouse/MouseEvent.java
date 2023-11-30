@@ -249,7 +249,7 @@ public class MouseEvent {
             win_input_event.type.setValue(WinUser.INPUT.INPUT_MOUSE);
             win_input_event.input.mi.dx.setValue(x);
             win_input_event.input.mi.dy.setValue(y);
-            win_input_event.input.mi.dwFlags.setValue(MOUSEEVENTF_MOVE | MOUSEEVENTF_ABS); //we convert all event into absolute event
+            win_input_event.input.mi.dwFlags.setValue(MOUSEEVENTF_MOVE | MOUSEEVENTF_ABS); //signal: move to absolute position
             win_input_event.input.mi.dwExtraInfo.setValue(1);
             WinUser.INPUT[] inputs = {win_input_event};
             User32.INSTANCE.SendInput(new WinDef.DWORD(1), inputs, win_input_event.size());
