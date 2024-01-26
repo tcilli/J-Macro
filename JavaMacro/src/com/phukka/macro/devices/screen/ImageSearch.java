@@ -2,6 +2,7 @@ package com.phukka.macro.devices.screen;
 
 import com.phukka.macro.Main;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
@@ -36,6 +37,7 @@ public class ImageSearch {
         int widthToFind = imageToFind.getWidth();
         int heightToFind = imageToFind.getHeight();
 
+
         // Create the mask matrix using pixel values of the imageToFind
         RGB[][] maskRGB = new RGB[heightToFind][widthToFind];
 
@@ -55,13 +57,15 @@ public class ImageSearch {
                 }
             }
         }
-        return new int[]{-1, -1, -1, -1};
+        return null;
     }
+
 
     // modify matchMask method to accept basePixels and baseImageWidth instead of baseImage
     private static boolean matchMask(int startX, int startY, int[] basePixels, int baseImageWidth, RGB[][] maskRGB, int definedColourVariance) {
         int heightToFind = maskRGB.length;
         int widthToFind = maskRGB[0].length;
+
 
         byte redDiff = 0;
         byte greenDiff = 0;
@@ -128,18 +132,30 @@ public class ImageSearch {
      * @return the bounds of the imageToFind in the imageToSearchIn
      */
 
-    @NotNull
+
     public static int[] find(ImagePosition imageToSearchIn, BufferedImage imageToFind) {
         return find(imageToSearchIn, imageToFind, COLOR_VARIANCE);
     }
 
-    @NotNull
+
     public static boolean foundExact(ImagePosition imageToSearchIn, BufferedImage imageToFind){
-        return find(imageToSearchIn, imageToFind, 50)[0] > -1;
+        return find(imageToSearchIn, imageToFind, 50) != null;
     }
 
-    @NotNull
+
     public static int[] find(ImagePosition imageToSearchIn, BufferedImage imageToFind, int definedColourVariance) {
+
+        int baseImageWidth = imageToSearchIn.image().getWidth();
+        int baseImageHeight = imageToSearchIn.image().getHeight();
+
+
+        int[] result = searchImage(imageToSearchIn.image(), imageToFind, 0, baseImageWidth, baseImageHeight, definedColourVariance);
+
+        return result;
+    }
+
+
+    public static int[] find2(ImagePosition imageToSearchIn, BufferedImage imageToFind, int definedColourVariance) {
 
         int baseImageWidth = imageToSearchIn.image().getWidth();
         int baseImageHeight = imageToSearchIn.image().getHeight();
@@ -192,7 +208,7 @@ public class ImageSearch {
         for (Future<int[]> future : futures) {
             try {
                 int[] result = future.get();
-                if (result[0] != -1) {
+                if (result != null) {
 
                     futures.forEach(f ->
                         f.cancel(true)
@@ -206,6 +222,16 @@ public class ImageSearch {
 
             }
         }
-        return new int[]{-1, -1, -1, -1};
+        return null;//new int[]{-1, -1, -1, -1};
+    }
+
+
+    public static int[] findImage(ImagePosition imageToSearchIn, BufferedImage imageToFind) {
+
+        int baseImageWidth = imageToSearchIn.image().getWidth();
+        int baseImageHeight = imageToSearchIn.image().getHeight();
+
+        int[] res = searchImage(imageToSearchIn.image(), imageToFind, 0, baseImageWidth, baseImageHeight, COLOR_VARIANCE);
+        return res;
     }
 }

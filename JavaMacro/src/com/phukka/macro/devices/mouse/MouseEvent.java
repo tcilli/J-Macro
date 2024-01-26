@@ -136,6 +136,10 @@ public class MouseEvent {
 
     private static final WinUser.INPUT win_input_event = new WinUser.INPUT();
     private static final WinDef.DWORD nInput = new WinDef.DWORD(1);
+
+    public static final int screenWidth = User32.INSTANCE.GetSystemMetrics(User32.SM_CXSCREEN);
+    public static final int screenHeight = User32.INSTANCE.GetSystemMetrics(User32.SM_CYSCREEN);
+
     private static final double SCREEN_SCALE_FACTOR_X = (65535.0 / User32.INSTANCE.GetSystemMetrics(User32.SM_CXSCREEN));
     private static final double SCREEN_SCALE_FACTOR_Y = (65535.0 / User32.INSTANCE.GetSystemMetrics(User32.SM_CYSCREEN));
     private static final int SLEEP_TIME = 5;
@@ -242,6 +246,8 @@ public class MouseEvent {
                 y += MouseCallback.getY();
             }
 
+            int posX = ((x << 16) / screenWidth) + 1;
+            int posY = ((y << 16) / screenHeight) + 1;
             x = (int) Math.ceil(x * SCREEN_SCALE_FACTOR_X) + 1;
             y = (int) Math.ceil(y * SCREEN_SCALE_FACTOR_Y) + 1;
 

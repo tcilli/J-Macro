@@ -1,5 +1,5 @@
 package com.phukka.macro.scripting.runescape.metrics;
-
+/*
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -54,6 +54,9 @@ public class RuneMetrics
         JSONArray activityArray = jsonObject.getJSONArray("activities");
         JSONArray skillValuesArray = jsonObject.getJSONArray("skillvalues");
 
+        if (activityArray.length() == 0 || skillValuesArray.length() == 0) {
+            return null;
+        }
         Activity[] activity = new Activity[activityArray.length()];
         Skill[] skillValue = new Skill[skillValuesArray.length()];
 
@@ -96,3 +99,4 @@ public class RuneMetrics
         "Construction", "Summoning", "Dungeoneering", "Divination", "Invention", "Archaeology", "Necromancy"
     };
 }
+*/

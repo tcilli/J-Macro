@@ -1,8 +1,7 @@
 package com.phukka.macro.scripting;
 
 import com.phukka.macro.Main;
-import com.phukka.macro.devices.keyboard.KeyListener;
-import com.phukka.macro.devices.keyboard.keyListenerInterface;
+import com.phukka.macro.devices.Keyboard;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
@@ -10,13 +9,14 @@ import groovy.lang.Script;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Scripts {
 
     public static final String PATH = "./data/scripts/";
     public static final String SCRIPT_EXTENSION = ".groovy";
-
+    private Keyboard keyboard = Main.getKeyboard();
     private static final String KEY_LISTENER = "keyListener";
     private static final String SCRIPT_RUNNING = "running";
 
@@ -94,7 +94,7 @@ public class Scripts {
         for (Script script : scripts.values()) {
             end(script);
         }
-        KeyListener.clear();
+        //keyboard.clear();
     }
 
     /**
@@ -125,7 +125,6 @@ public class Scripts {
     private void end(Script script) {
         script.setProperty(SCRIPT_RUNNING, false);
         if (script.getProperty(KEY_LISTENER) != null) {
-            KeyListener.removeListener((keyListenerInterface) script.getProperty(KEY_LISTENER));
             script.setProperty(KEY_LISTENER, null);
         }
     }

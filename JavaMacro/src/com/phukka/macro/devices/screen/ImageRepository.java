@@ -7,17 +7,25 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Loads images from the file system and caches them in a map
+ */
 public class ImageRepository {
 
-    public static final Map<String, BufferedImage> imageMap = new HashMap<>();
+    public final Map<String, BufferedImage> imageCache = new HashMap<>();
 
     public ImageRepository() {
     }
 
-    public static BufferedImage get(String imageName) {
+    /**
+     * Gets the image from the repository, if it doesn't exist it will load it from the file system
+     * @param imageName The name of the image to load
+     * @return {@link BufferedImage} "If exists"
+     */
+    public BufferedImage get(String imageName) {
         try {
-            if (imageMap.containsKey(imageName)) {
-                return imageMap.get(imageName);
+            if (imageCache.containsKey(imageName)) {
+                return imageCache.get(imageName);
             }
 
             String path = "./data/images/";
@@ -28,7 +36,7 @@ public class ImageRepository {
                 return null;
             }
             BufferedImage image = ImageIO.read(new File(imagePath));
-            imageMap.put(imageName, image);
+            imageCache.put(imageName, image);
             return image;
 
         } catch (IOException e) {
@@ -36,5 +44,4 @@ public class ImageRepository {
             return null;
         }
     }
-
 }

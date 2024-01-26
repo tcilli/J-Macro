@@ -1,7 +1,6 @@
 package com.phukka.macro.util;
 
 import com.phukka.macro.Main;
-import com.phukka.macro.devices.keyboard.KeyListener;
 import com.phukka.macro.instruction.Data;
 import com.phukka.macro.instruction.Instruction;
 import com.phukka.macro.instruction.InstructionSet;
@@ -29,8 +28,7 @@ public class MacroFileReader {
 
 		Main.getScriptContainer().clearInstructions();
 		ConsumableKeyMap.clear();
-
-		KeyListener.clear();
+		Main.getKeyboard().clear();
 
 		/*
 		 * handle the scripts

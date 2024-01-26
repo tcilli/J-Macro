@@ -30,6 +30,7 @@ public class MouseCallback {
                     int whichButton = (wParam.intValue() >> 16) & 0xFFFF;
                     int type = (wParam.intValue() == 0x020B) ? 1 : 2;
                     int button = (whichButton == 0x0001) ? (type == 1 ? 2003 : -2003) : (type == 1 ? 2004 : -2004);
+                    System.out.println("Button: " + button +" Type: " + type + " Which: " + whichButton + " x " + x + " y " + y);
                     Main.getScriptContainer().handleKey((short) button);
                 }
             }

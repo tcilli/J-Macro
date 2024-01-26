@@ -1,7 +1,6 @@
 package com.phukka.macro.instruction;
 
 import com.phukka.macro.Main;
-import com.phukka.macro.devices.keyboard.KeyListener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +32,6 @@ public class InstructionSetContainer {
 			InstructionSet set = entry.getValue();
 			set.bFlags &= ~0x08;
 		}
-
 	}
 
 	public void handleKey(final short virtualKeyCode) {

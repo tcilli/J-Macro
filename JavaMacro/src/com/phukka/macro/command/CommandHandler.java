@@ -1,13 +1,13 @@
 package com.phukka.macro.command;
 
 import com.phukka.macro.*;
+import com.phukka.macro.devices.Keyboard;
 import com.phukka.macro.instruction.Data;
 import com.phukka.macro.instruction.Instruction;
 import com.phukka.macro.instruction.InstructionSet;
 import com.phukka.macro.util.MacroFileReader;
 import com.phukka.macro.util.MemoryUtil;
 import com.phukka.macro.util.Window;
-import com.phukka.macro.devices.keyboard.KeyboardEvent;
 import com.phukka.macro.devices.mouse.MouseEvent;
 
 import java.util.HashMap;
@@ -23,6 +23,8 @@ public class CommandHandler {
 	 * The commandMap
 	 */
 	public final Map<Integer, Command> commandMap = new HashMap<>();
+
+	private Keyboard keyboard = Main.getKeyboard();
 
 	/**
 	 * Populates the {@link #commandMap} Each {@link Command} is an interface.
@@ -50,9 +52,20 @@ public class CommandHandler {
 			if (failedWindowCheck(set)) {
 				return;
 			}
-			KeyboardEvent.send(data.toCharArray());
+
 		});
 
+		/*
+		 * The send keycode command requires 1 data argument: (Integer) scanCode
+		 */
+		commandMap.put(COMMAND_SEND_KEYCODE, (data, set) -> {
+			if (failedWindowCheck(set)) {
+				return;
+			}
+			keyboard.sendKeycode(data.toInt());
+		});
+
+		//COMMAND_SEND_KEYCODE
 		/*
 		 * The mouse click command requires 1 data argument: (Integer) mouseButton
 		 */
@@ -153,6 +166,7 @@ public class CommandHandler {
 	public static final int COMMAND_SEND_STRING = 2;
 	public static final int COMMAND_CLICK = 3;
 	public static final int COMMAND_STOP_ALL_SCRIPTS = 4;
+	public static final int COMMAND_SEND_KEYCODE = 5;
 	public static final int COMMAND_MOUSE_MOVE = 6;
 	public static final int COMMAND_READ_MACRO_FILE = 7;
 	public static final int COMMAND_PRINT_MEMORY = 8;
